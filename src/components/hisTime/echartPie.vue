@@ -1,0 +1,217 @@
+<template>
+  <div class="circel">
+    <!-- <div class="msg">
+      <div class="titles">电池使用情况</div>
+      <div class="dami"></div>
+    </div> -->
+    <div class="circelInfo">
+      <div class="pei" id="peiCharts1"></div>
+    </div>
+    <div class="msg">
+      <p class="times">{{alarmTime ||0}}</p>
+      <p>累计告警</p>
+    </div>
+    <div class="circelInfo">
+      <div class="pei" id="peiCharts2"></div>
+    </div>
+  </div>
+</template>
+
+<script>
+/* eslint-disable */
+import echarts from "echarts";
+import _ from "lodash";
+
+export default {
+  props: {
+    // peiData: {
+    //   type: Object,
+    //   default: () => {
+    //     return {
+    //       summary: {},
+    //       eventSummary: {}
+    //     };
+    //   }
+    // },
+    summary: {
+      type: Object,
+      default: {}
+    },
+    eventSummary: {
+      type: Object,
+      default: {}
+    },
+    loading: {
+      type: Boolean,
+      default: () => {
+        return false;
+      }
+    }
+  },
+  data() {
+    return {
+      pieOption: {
+        tooltip: {
+          trigger: "item",
+          formatter: "{b}: {d}%"
+        },
+        legend: {
+          right: 5,
+          top: "center",
+          orient: "vertical",
+          itemWidth: 8,
+          itemHeight: 8,
+          itemGap: 13,
+          textStyle: {
+            color: "#484848"
+          },
+          data: []
+          // data: ["直接访问", "邮件营销", "联盟广告", "视频广告", "搜索引擎"]
+        },
+        series: [
+          {
+            type: "pie",
+            radius: ["30%", "50%"],
+            center: ["50%", "60%"],
+            data: [],
+            itemStyle: {
+              emphasis: {
+                shadowBlur: 10,
+                shadowOffsetX: 0,
+                shadowColor: "rgba(0, 0, 0, 0.5)"
+              }
+            },
+            label: {
+              normal: {
+                show: true,
+                textStyle: {
+                  fontWeight: 300,
+                  fontSize: 16 // 文字的字体大小
+                },
+                formatter: "{c}"
+              }
+            }
+          }
+        ]
+      },
+      alarmTime: 0
+    };
+  },
+  watch: {
+    summary: {
+      handler: function(vals) {
+        console.log(vals);
+        this.summaryChange(vals);
+      },
+      deep: true
+    },
+    eventSummary: {
+      handler: function(vals) {
+        console.log(vals);
+        this.eventSummaryChange(vals);
+      },
+      deep: true
+    },
+    loading: {
+      handler: function(vals) {
+        this.loadingChange(vals);
+      },
+      deep: true
+    }
+  },
+  mounted() {
+    this.init();
+  },
+  methods: {
+    init() {
+      let BarDOM1 = document.getElementById("peiCharts1");
+      let BarDOM2 = document.getElementById("peiCharts2");
+
+      this.peiEcharts1 = echarts.init(BarDOM1);
+      this.peiEcharts2 = echarts.init(BarDOM2);
+      this.loadingChange(this.loading);
+      // console.log(this.peiData);
+      // this.dataChange(this.peiData);
+      this.eventSummaryChange(this.eventSummary);
+      this.summaryChange(this.summary);
+    },
+    loadingChange(loading) {
+      if (loading) {
+        this.peiEcharts1.showLoading();
+        this.peiEcharts2.showLoading();
+      } else {
+        this.peiEcharts1.hideLoading();
+        this.peiEcharts2.hideLoading();
+      }
+    },
+    summaryChange(peiData) {
+      console.log("peiData", peiData);
+      console.log("peiData", peiData.summary);
+      let voltageOptions = _.cloneDeep(this.pieOption);
+      voltageOptions.legend.data = ["充电时间", "放电时间", "空载时间"];
+      voltageOptions.tooltip.formatter = p => {
+        let item = `${p.percent}%<br />${p.data.name}: ${p.data.value}h`;
+        return item;
+      };
+      voltageOptions.series[0].data = [
+        { value: peiData.chargeDuration, name: "充电时间" },
+        { value: peiData.dischargeDuration, name: "放电时间" },
+        { value: peiData.idleDuration, name: "空载时间" }
+      ];
+      voltageOptions.series[0].label.normal.formatter = "{c}h";
+      this.peiEcharts1.setOption(voltageOptions);
+    },
+    eventSummaryChange(peiData) {
+      this.alarmTime =
+        Number(peiData.temperature) +
+        Number(peiData.fluidLevel) +
+        Number(peiData.voltage) +
+        Number(peiData.current);
+      let currentOptions = _.cloneDeep(this.pieOption);
+      currentOptions.legend.data = ["温度", "液位", "电压", "电流"];
+      currentOptions.series[0].data = [
+        { value: peiData.temperature, name: "温度" },
+        { value: peiData.fluidLevel, name: "液位" },
+        { value: peiData.voltage, name: "电压" },
+        { value: peiData.current, name: "电流" }
+      ];
+      this.peiEcharts2.setOption(currentOptions);
+    }
+  }
+};
+</script>
+
+<style scoped lang="scss">
+.circel {
+  background: #ffffff;
+  padding: 24px 0;
+  .circelInfo {
+    height: 200px;
+    display: flex;
+    padding: 0 10px;
+    .pei {
+      flex: 1;
+      height: 200px;
+    }
+    .msg {
+      text-align: center;
+    }
+  }
+}
+.titles {
+  font-size: 12px;
+  color: #484848;
+  float: left;
+}
+.dami {
+  float: left;
+  width: 8px;
+  height: 16px;
+  background: #5fb6d5;
+  border-radius: 4px;
+  position: absolute;
+  top: 30px;
+  z-index: 99;
+  left: 85px;
+}
+</style>

@@ -1,0 +1,1019 @@
+<template>
+  <div class="indexHis">
+    <div v-if="isShowMain" class="index">
+      <nav>
+        <mt-header title="运行状况" class="realTimeHead">
+          <router-link to="/index" slot="left">
+            <mt-button icon="back"></mt-button>
+          </router-link>
+          <mt-button icon="more" slot=""></mt-button>
+        </mt-header>
+        <div @click="torealTime" class="realTime demo1 left">
+          实时数据
+        </div>
+        <div class="histroyTime demo1 left">
+          历史数据
+        </div>
+        <div class="checkTime">
+          <p class="fl">从</p>
+          <div class="fl ctime" @click="openPicker">{{showStartTime}}</div>
+          <p class="fl">到</p>
+          <div class="fl ctime" @click="openPicker1">{{showEndTime}}</div>
+          <mt-button @click="getChartData" class="TimeButton fl" type="primary">确认</mt-button>
+          <div class="fl popDownBtn" @click="HandletopShow">
+            <img v-show="topShow" style="width: 20px;height: 20px;" src="../../../static/jiantoufff.svg" alt="">
+            <img v-show="!topShow" style="width: 20px;height: 20px;" src="../../../static/xiajiantoufff.svg" alt="">
+          </div>
+          </div>
+      </nav>
+      <mt-datetime-picker ref="picker" type="date" v-model="pickerValue" :endDate="endDate" @confirm="handleConfirm">
+      </mt-datetime-picker>
+      <mt-datetime-picker ref="picker1" type="date" v-model="pickerValue1" :endDate="endDate" @confirm="handleConfirm1">
+      </mt-datetime-picker>
+      <div class="smzq" v-if="!topShow">
+        <div>时间范围</div>
+        <ul>
+          <li @click="ChoiceTime(item)" :class="{timeStyle2:item.isShow}" class="fl" v-for="item in TimeTap" :key="item.item">{{item.item}}</li>
+        </ul>
+      </div>
+      <!-- <div class="mask"></div> -->
+      <div class="message" :class="{messageNo:!topShow}" v-if="topShow">
+        <ul class="dataUser">
+          <li>
+            <img src="../../../static/p1.jpg" alt="">
+            <p>{{companyInfo.companyName}}</p>
+          </li>
+          <li>
+            <img src="../../../static/p2.jpg" alt="">
+            <p>{{address}}</p>
+          </li>
+          <li>
+            <img src="../../../static/p3.jpg" alt="">
+            <p>{{companyInfo.code}}</p>
+          </li>
+          <li>
+            <img src="../../../static/p4.jpg" alt="">
+            <p>{{companyInfo.deviceCode}}</p>
+          </li>
+        </ul>
+      </div>
+      <div class="MMwrap" :class="{MMwrapNo:!topShow}"></div>
+      <div class="chartsLine">
+        <echart-map :chartData="dataObj" :loading="loading" @timeZoom="timeZoom"></echart-map>
+      </div>
+
+      <ul class="DataTop">
+        <li>
+          <div class="Data1">{{summary.cycle}}</div>
+          <div class="Data2">电池循环次数</div>
+        </li>
+        <li>
+          <div class="Data1">{{summary.chargeDuration}}h</div>
+          <div class="Data2">充电时间</div>
+        </li>
+        <li>
+          <div class="Data1">{{summary.dischargeDuration}}h</div>
+          <div class="Data2">放电时间</div>
+        </li>
+      </ul>
+      <ul class="DataDown">
+        <li>
+          <div class="Data1">{{summary.avgChargeDuration}}h</div>
+          <div class="Data2">平均充电时间</div>
+        </li>
+        <li>
+          <div class="Data1">{{summary.avgDischargeDuration}}h</div>
+          <div class="Data2">平均放电时间</div>
+        </li>
+        <li>
+          <div class="Data1">{{summary.fluidSupplementTimes}}</div>
+          <div class="Data2">补水次数</div>
+        </li>
+        <li>
+          <div class="Data1">{{summary.avgFluidSupplementDuration}}h</div>
+          <div class="Data2">平均补水时长</div>
+        </li>
+      </ul>
+
+      <chart-pie :loading="loading" :summary="summary" :eventSummary="eventSummary"></chart-pie>
+
+      <div class="list-title">
+        <div class="fl1" :class="{C484848:isA,CACACAC:!isA}" @click="getAlarmData">告警事件列表</div>
+        <div class="fl1" :class="{CACACAC:isA,C484848:!isA}" @click="getliquidData">补水列表</div>
+      </div>
+      <his-alarm v-if="alarm" :alaData="alarmData"></his-alarm>
+      <fluid-Alarm v-if="alarmFluid" :fliudData="liquidData"></fluid-Alarm>
+      <div class="page">
+        <span>当前第{{pages}}页，共{{totalPage}}页</span>
+        <mt-button @click="nextPage" size="small" class="fenyeBtn" type="primary">下一页</mt-button>
+        <mt-button @click="prevPage" size="small" class="fenyeBtn" type="primary">上一页</mt-button>
+      </div>
+      <div class="wrap-map">
+        <p>监测位置变化趋势</p>
+        <div class="dami2"></div>
+        <div id="map-container" ref="mapChoice"></div>
+      </div>
+    </div>
+  </div>
+</template>
+
+
+<script>
+import AMap from "AMap";
+import { Indicator } from "mint-ui";
+import utils from "@/utils/utils";
+import echartMap from "./historyChart";
+import lnglatTrabsofor from "@/utils/longlatTransfor";
+import chartPie from "./echartPie";
+
+let map;
+let pathSimplifierIns;
+let navg;
+let infoWindow;
+let heatmap;
+let address;
+let marker;
+export default {
+  name: "histime",
+  components: {
+    echartMap,
+    chartPie,
+    hisAlarm: () => import("./HisWarning.vue"),
+    fluidAlarm: () => import("./HisBushui.vue")
+  },
+  data() {
+    return {
+      pageSize: 4,
+      pages: 1,
+      totalPage: 0,
+      alarmFluid: false,
+      alarm: false,
+      hisOrFluid: "hisAlarm",
+      loading: false,
+      TimeTap: [
+        { item: "最近一周", isShow: false, index: 1 },
+        { item: "最近一个月", isShow: false, index: 2 },
+        { item: "最近三天个月", isShow: false, index: 3 },
+        { item: "最近六个月", isShow: false, index: 4 },
+        { item: "最近一年", isShow: false, index: 5 },
+        { item: "全生命周期", isShow: false, index: 6 }
+      ],
+      companyInfo: {},
+      markerArr: [],
+      address: "",
+      clientName: "",
+      addresss: "",
+      liquidData: [],
+      no: "",
+      deviceNo: "",
+      isShowMain: "true",
+      startTime: "",
+      endTime: "",
+      pickerValue: "",
+      pickerValue1: "",
+      dataObj: {},
+      alarmData: [],
+      liquidData: [],
+      heatData: [],
+      summary: {},
+      eventSummary: {},
+      peiObj: {},
+      endDate: new Date(),
+      positions: [],
+      fourObj: {},
+      isA: true,
+      topShow: true,
+      showStartTime: utils.sortTime2(utils.getWeek()),
+      showEndTime: utils.sortTime2(new Date())
+    };
+  },
+  mounted() {
+    this.hostObj = this.$route.query;
+    this.getChartData();
+    this.getCompanyInfo();
+    this.mapInit();
+  },
+  methods: {
+    mapInit() {
+      map = new AMap.Map("map-container", {
+        resizeEnable: true,
+        zoom: 10
+      });
+      AMap.plugin(["AMap.Heatmap"], () => {
+        // 初始化heatmap对象
+        heatmap = new AMap.Heatmap(map, {
+          radius: 12, // 给定半径
+          opacity: [0, 1] // 透明度
+        });
+      });
+    },
+    /* 确认按钮 */
+    getChartData() {
+      let startTime = utils.toUTCTime(utils.startTime(this.showStartTime));
+      let endTime = utils.toUTCTime(utils.endTime(this.showEndTime));
+      Indicator.open();
+      this.getChartDatafun(startTime, endTime);
+    },
+    /* 获取Echart相关数据 以及 地图坐标 */
+    getChartDatafun(startTime, endTime) {
+      this.loading = true;
+      console.log(this.hostObj);
+      if (!this.hostObj.hostId || !this.hostObj.deviceId) {
+        return;
+      }
+      this.$axios
+        .get(
+          `/battery_group/${this.hostObj.hostId}/${
+            this.hostObj.deviceId
+          }/data2?startTime=${startTime}&endTime=${endTime}`
+        )
+        .then(res => {
+          Indicator.close();
+          this.dataObj = {
+            timeArr: [],
+            singleVoltage: [],
+            temperature: [],
+            voltage: [],
+            current: [],
+            capacity: []
+          };
+          if (res.data && res.data.code === 0) {
+            let result = res.data.data;
+            this.exportData = result.list;
+            this.positions = []; // 轨迹点集合
+            // let positions = [];
+            this.heatData = []; // 热力图集合
+            this.resultList = result.list;
+            if (this.resultList.length < 300) {
+              this.btnTypeUp = "info";
+              this.enlargeBtn = true;
+            }
+            this.resultList.forEach((key, index) => {
+              let timeArr = utils.TimeSconds(key.time); // 时间
+              let capacity = Math.round(key.capacity * 100);
+              this.dataObj.singleVoltage.push({
+                name: timeArr,
+                value: [timeArr, key.singleVoltage]
+              });
+              this.dataObj.temperature.push({
+                name: timeArr,
+                value: [timeArr, key.temperature]
+              });
+              this.dataObj.voltage.push({
+                name: timeArr,
+                value: [timeArr, key.voltage]
+              });
+              this.dataObj.current.push({
+                name: timeArr,
+                value: [timeArr, -key.current]
+              });
+              this.dataObj.capacity.push({
+                name: timeArr,
+                value: [timeArr, capacity]
+              });
+              let gcjLongitude = Number(key.gcjLongitude);
+              let gcjLatitude = Number(key.gcjLatitude);
+              if (
+                gcjLongitude > -180 &&
+                gcjLatitude > -90 &&
+                gcjLatitude <= 90 &&
+                gcjLongitude <= 180 &&
+                Math.abs(gcjLongitude) > 1 &&
+                Math.abs(gcjLatitude) > 1
+              ) {
+                this.positions.push([
+                  key.gcjLongitude,
+                  key.gcjLatitude,
+                  timeArr
+                ]); // 坐标
+                this.heatData.push({
+                  lng: key.gcjLongitude,
+                  lat: key.gcjLatitude,
+                  count: 100
+                });
+              }
+            });
+            this.enlargeBtn = true; // 放大按钮禁止
+            this.btnTypeUp = "info"; // 修改el-button的type
+            this.loading = false;
+            let sums = result.summary;
+            this.eventSummary = result.eventSummary || {};
+            this.summary = {
+              chargeDuration: (sums.chargeDuration / 60).toFixed(2),
+              dischargeDuration: (sums.dischargeDuration / 60).toFixed(2),
+              cycle: sums.cycle,
+              avgChargeDuration: (+sums.avgChargeDuration / 60).toFixed(2),
+              avgDischargeDuration: (+sums.avgDischargeDuration / 60).toFixed(
+                2
+              ),
+              fluidSupplementTimes: sums.fluidSupplementTimes,
+              avgFluidSupplementDuration: (
+                sums.avgFluidSupplementDuration / 60
+              ).toFixed(2),
+              idleDuration: (sums.idleDuration / 60).toFixed(2)
+            };
+            this.peiObj.eventSummary = result.eventSummary || {};
+            this.peiObj.summary = this.summary || {};
+            this.heatMapFun();
+            // this.positionChange(positions);
+          }
+        });
+      this.getAlarmData();
+    },
+    openPicker() {
+      this.$refs.picker.open();
+    },
+    openPicker1() {
+      this.$refs.picker1.open();
+    },
+    handleConfirm(res) {
+      this.startTime = this.getTime(res);
+      this.showStartTime = utils.sortTime2(res);
+    },
+    handleConfirm1(res) {
+      this.endTime = this.getTime(res);
+      this.showEndTime = utils.sortTime2(res);
+    },
+    getCompanyInfo() {
+      this.$axios
+        .get(`/battery_group/${this.hostObj.hostId}/info`)
+        .then(res => {
+          console.log(res);
+          this.companyInfo = "";
+          if (res.data && res.data.code === 0 && res.data.data) {
+            if (this.markerArr.length > 0) {
+              this.markerArr.forEach(key => {
+                key.setMap(null);
+              });
+            }
+            let result = res.data.data;
+            let position = {
+              gcjLongitude: result.gcjLongitude,
+              gcjLatitude: result.gcjLatitude
+            };
+            this.companyInfo = result;
+            this.companyInfo.fluid = result.fluidLevel === 0 ? "正常" : "异常";
+            this.companyInfo.yyddmm = utils.yyyymmdd(new Date());
+            this.companyInfo.hhmmss = utils.hhmmss(new Date());
+            this.positionData(position);
+          }
+        });
+    },
+    /* 热力图 方法 */
+    heatMapFun() {
+      this.trajectory = true;
+      if (this.markerArr.length > 0) {
+        // 显示热力图的时候 删除地图上的marker点
+        map.remove(this.markerArr);
+      }
+      pathSimplifierIns && pathSimplifierIns.setData([]); // 同理 去除轨迹
+      map.setCenter([this.heatData[0].lng, this.heatData[0].lat]); // 显示热力图的时候，把热力图的第一个的 作为地图中心点
+      heatmap.setDataSet({
+        data: this.heatData
+      });
+    },
+    /* 根据经纬度 用高德查询详细地址 */
+    positionData(data) {
+      if (data && data.gcjLongitude) {
+        let position = new AMap.LngLat(data.gcjLongitude, data.gcjLatitude);
+        /* 根据经纬度 用高德查询详细地址 */
+        lnglatTrabsofor(position, res => {
+          let sendAddress = `${res.addressComponent.province}-${
+            res.addressComponent.city
+          }`;
+          if (this.address !== sendAddress) {
+            this.hasSend = false;
+            this.address = sendAddress;
+          }
+          if (!this.hasSend) {
+            this.addressCallBack(sendAddress);
+          }
+        });
+      }
+    },
+    /* 轨迹相关方法 */
+    positionChange() {
+      this.trajectory = false;
+      heatmap && heatmap.setDataSet({ data: [] });
+      if (!this.positions || this.positions.length < 1) {
+        return;
+      }
+      if (this.markerArr.length > 0) {
+        // 先删除地图上的marker点 然后在后面添加
+        map.remove(this.markerArr);
+      }
+      this.alldistance = 0; // 两个点之间的距离
+      for (let i = 0; i < this.positions.length; i++) {
+        var distance, p1, p2;
+        let key = this.positions[i];
+        if (i < this.positions.length - 1) {
+          p1 = new AMap.LngLat(key[0], key[1]);
+          p2 = new AMap.LngLat(
+            this.positions[i + 1][0],
+            this.positions[i + 1][1]
+          );
+          distance = Math.round(p1.distance(p2));
+        }
+        this.alldistance += distance;
+      }
+      AMapUI.load(["ui/misc/PathSimplifier"], PathSimplifier => {
+        if (!PathSimplifier.supportCanvas) {
+          alert("当前环境不支持 Canvas！");
+          return;
+        }
+        AMapUI.loadUI(["misc/PositionPicker"], PositionPicker => {
+          let positionPicker = new PositionPicker({
+            mode: "dragMarker",
+            map: map,
+            iconStyle: {
+              url: "../../static/img/iocna.png",
+              size: [1, 1],
+              ancher: [1, 1]
+            }
+          });
+          pathSimplifierIns = new PathSimplifier({
+            zIndex: 100,
+            map: map,
+            getHoverTitle: function(pathData, pathIndex, pointIndex) {
+              if (pointIndex >= 0) {
+                return "第" + pointIndex + "个点";
+              }
+            },
+            getPath: function(pathData, pathIndex) {
+              return pathData.path;
+            },
+            renderOptions: {
+              pathLineStyle: {
+                strokeStyle: "rgb(193,21,52)",
+                lineWidth: 6,
+                dirArrowStyle: true
+              },
+              keyPointTolerance: 10,
+              keyPointStyle: {
+                radius: 3,
+                fillStyle: "#20acff"
+              }
+            }
+          });
+          pathSimplifierIns.on("pointClick", function(e, info) {
+            let pointIndex = info.pointIndex;
+            let pathData = info.pathData;
+            let point = pathData.path[pointIndex];
+            let position = new AMap.LngLat(point[0], point[1]);
+            positionPicker.start(position);
+            positionPicker.on("success", result => {
+              var info = [];
+              info.push(`<div><div>时间：${utils.dateFomat(point[2])}</div>`);
+              info.push(
+                `<div style="font-size:14px;">地址 :${
+                  result.address
+                }</div></div>`
+              );
+              infoWindow = new AMap.InfoWindow({
+                content: info.join("<br/>")
+              });
+              infoWindow.open(map, position);
+              map.on("click", () => {
+                infoWindow.close();
+              });
+            });
+          });
+          window.pathSimplifierIns = pathSimplifierIns;
+          pathSimplifierIns.setData([
+            {
+              name: "轨迹",
+              path: this.positions
+            }
+          ]);
+          // console.log("this.lineArr", this.lineArr);
+          let distance = Number(this.alldistance) / 1000; // 米转成千米
+          let times = Number(this.timeSeconds) / 3600; // 秒转成小时
+          let speeds = Math.ceil(distance / times); // 最终得到的速度是 km/h
+          navg = pathSimplifierIns.createPathNavigator(0, {
+            loop: true,
+            speed: speeds,
+            pathNavigatorStyle: {
+              width: 12,
+              height: 18,
+              strokeStyle: null,
+              fillStyle: null,
+              // 使用图片
+              content: PathSimplifier.Render.Canvas.getImageContent(
+                "../../../../static/img/car.png"
+              )
+            }
+          });
+        });
+        let startPot = this.positions[0];
+        let endPot = this.positions[this.positions.length - 1];
+        let start = new AMap.Marker({
+          map: map,
+          position: [startPot[0], startPot[1]], // 基点位置  开始位置
+          icon: "https://webapi.amap.com/theme/v1.3/markers/n/start.png",
+          zIndex: 50
+        });
+        let end = new AMap.Marker({
+          map: map,
+          position: [endPot[0], endPot[1]], // 基点位置  结束位置
+          icon: "https://webapi.amap.com/theme/v1.3/markers/n/end.png",
+          zIndex: 10
+        });
+        this.markerArr.push(start);
+        this.markerArr.push(end);
+      });
+    },
+    addressCallBack(data) {
+      let param = {
+        id: this.hostObj.id,
+        address: data
+      };
+      this.$axios.put(`battery_group/address`, param).then(res => {
+        console.log(res);
+        if (res.data && res.data.code === 0) {
+          this.hasSend = true;
+        }
+      });
+    },
+    timeZoom() {},
+    /* 历史告警 */
+    getAlarmData() {
+      let startTime = utils.toUTCTime(utils.startTime(this.showStartTime));
+      let endTime = utils.toUTCTime(utils.endTime(this.showEndTime));
+      let pageObj = {
+        pageSize: this.pageSize,
+        pageNum: this.pages
+      };
+      this.$axios
+        .get(
+          `/battery_group_event?hostId=${
+            this.hostObj.hostId
+          }&startTime=${startTime}&endTime=${endTime}`,
+          pageObj
+        )
+        .then(res => {
+          Indicator.close();
+          if (res.data && res.data.code === 0) {
+            let result = res.data.data;
+            if (result) {
+              this.total = result.total;
+              this.totalPage = result.totalPage;
+              this.alarmData = [];
+              if (result.pageData.length > 0) {
+                // this.alarmData = result.pageData;
+                result.pageData.forEach((key, index) => {
+                  // key.alarmtime = utils.fomats(key.time);
+                  key.levels = utils.level(key.level);
+                  key.hierarchy = key.hierarchy === "Group" ? "整组" : "单体";
+                  key.items = utils.item(key.item);
+                  if (key.item === "Fluid") {
+                    key.thresholdValue = "-";
+                    key.actualValue = "异常";
+                  }
+                  key.index = index + 1;
+                  this.alarmData.push(key);
+                });
+                this.alarm = true;
+                this.alarmFluid = false;
+              }
+            }
+          }
+        });
+    },
+    getliquidData() {
+      Indicator.open();
+      this.getliquidDataFun();
+    },
+    /* 历史补水 */
+    getliquidDataFun() {
+      let startTime = utils.toUTCTime(utils.startTime(this.showStartTime));
+      let endTime = utils.toUTCTime(utils.endTime(this.showEndTime));
+      let pageObj = {
+        pageSize: this.pageSize,
+        pageNum: this.pages,
+        startTime: `${startTime}`,
+        endTime: `${endTime}`
+      };
+      this.$axios
+        .get(
+          `/battery_group/${this.hostObj.hostId}/${
+            this.hostObj.deviceId
+          }/fluid`,
+          pageObj
+        )
+        .then(res => {
+          Indicator.close();
+          console.log(res);
+          if (res.data && res.data.code === 0) {
+            let result = res.data.data;
+            if (result) {
+              this.total = result.total;
+              this.totalPage = result.totalPage;
+              this.liquidData = [];
+              let dataArr = [];
+              if (result.pageData.length > 0) {
+                result.pageData.forEach((key, index) => {
+                  let currentTime = utils.TimeSconds(key.time);
+                  key.position = new AMap.LngLat(
+                    key.gcjLongitude,
+                    key.gcjLatitude
+                  );
+                  if (index + 1 < result.pageData.length) {
+                    key.updateWater = utils.Days(
+                      currentTime -
+                        utils.TimeSconds(result.pageData[index + 1].time)
+                    );
+                  } else {
+                    key.updateWater = "-";
+                  }
+                  key.index = index + 1;
+                  key.temperature = `${key.temperature}°C`;
+                  key.Replenishing = utils.UTCTime(key.time);
+                  key.address = "查看地址";
+                  key.disabled = false;
+                  if (index < this.pageSize) {
+                    dataArr.push(key);
+                  }
+                });
+                this.liquidData = dataArr;
+                this.alarmFluid = true;
+                this.alarm = false;
+              }
+            }
+          }
+        });
+    },
+    nextPage() {
+      this.pages++;
+      if (this.pages > this.totalPage) {
+        this.pages = this.totalPage;
+        return;
+      }
+      Indicator.open();
+      if (this.alarm) {
+        this.getAlarmData();
+      } else {
+        this.getliquidData();
+      }
+    },
+    prevPage() {
+      this.pages--;
+      Indicator.open();
+      if (this.pages < 1) {
+        this.pages = 1;
+        return;
+      }
+      if (this.alarm) {
+        this.getAlarmData();
+      } else {
+        this.getliquidData();
+      }
+    },
+    torealTime() {
+      this.$router.push({
+        path: "/realTime",
+        query: {
+          hostId: this.hostObj.hostId,
+          deviceId: this.hostObj.deviceId,
+          deviceCode: this.hostObj.deviceCode,
+          id: this.hostObj.id
+        }
+      });
+    },
+
+    HandletopShow() {
+      this.topShow = !this.topShow;
+    },
+    ChoiceTime(item) {
+      for (let i = 0; i < this.TimeTap.length; i++) {
+        this.TimeTap[i].isShow = false;
+      }
+      item.isShow = !item.isShow;
+      this.topShow = !this.topShow;
+      let startTimes;
+      if (item.index == 1) {
+        startTimes = utils.getWeek();
+        this.startTime = utils.sortTime2(startTimes);
+      }
+      if (item.index == 2) {
+        startTimes = utils.getMouth();
+        this.startTime = utils.sortTime2(startTimes);
+      }
+      if (item.index == 3) {
+        startTimes = utils.getThreeMounth();
+        this.startTime = utils.sortTime2(startTimes);
+      }
+      if (item.index == 4) {
+        startTimes = utils.getSixMounth();
+        this.startTime = utils.sortTime2(startTimes);
+      }
+      if (item.index == 5) {
+        startTimes = utils.getYear();
+        this.startTime = utils.sortTime2(startTimes);
+      }
+      if (item.index == 6) {
+        this.startTime = "2017-01-01";
+      }
+      this.showStartTime = this.startTime;
+      this.showEndTime = utils.sortTime2(new Date());
+      // console.log(utils.toUTCTime(utils.startTime(startTimes)));
+      // console.log(utils.toUTCTime(utils.startTime(new Date())));
+      this.getChartData();
+    }
+  }
+};
+</script>
+
+
+<style scope lang="scss">
+.fenyeBtn {
+  font-size: 14px;
+}
+.indexHis {
+  .fl {
+    float: left;
+    margin-left: 10px;
+  }
+  .fl1 {
+    float: left;
+  }
+  .index {
+    min-height: 100%;
+    overflow: hidden;
+  }
+
+  .realTimeHead {
+    background: #484848;
+  }
+
+  .left {
+    float: left;
+  }
+
+  nav {
+    height: 120px;
+    background: #484848;
+    color: #fff;
+    position: fixed;
+    width: 100%;
+    z-index: 99999999;
+  }
+  .currentIndex {
+    color: #000;
+    background: #fff;
+  }
+  .demo1 {
+    width: 50%;
+    text-align: center;
+    height: 10%;
+    font-size: 12pt;
+  }
+
+  .realTime {
+    color: #9b9b9b;
+  }
+
+  .messageNo {
+    margin-top: 0px !important;
+  }
+  .messageNo1 {
+    margin-top: 280px !important;
+  }
+  .message {
+    width: 85%;
+    position: absolute;
+    height: 70px;
+    background: #fff;
+    left: 8%;
+    border-radius: 10px;
+    box-shadow: 1px 2px 2px #cccccc;
+
+    margin-top: 120px;
+    z-index: 99;
+    .dataUser {
+      width: 100%;
+      height: 100%;
+      padding-left: 6%;
+
+      li {
+        width: 50%;
+        height: 50%;
+        float: left;
+        line-height: 33px;
+        img {
+          height: 60%;
+          float: left;
+          margin-left: 5px;
+          margin-top: 7px;
+        }
+        p {
+          font-size: 9px;
+          color: #484848;
+          width: 80%;
+        }
+      }
+    }
+  }
+  .checkTime {
+    width: 100%;
+    height: 40px;
+    position: absolute;
+    top: 80px;
+    line-height: 40px;
+    font-size: 12px;
+    p {
+      margin-top: -3px;
+    }
+    .ctime {
+      height: 34px;
+      width: 27%;
+      background: #3f3f3f;
+      color: #fff;
+
+      line-height: 34px;
+    }
+    .TimeButton {
+      margin-top: 2px;
+      height: 29px;
+      background: #71bfdb;
+      font-size: 12px;
+    }
+    .popDownBtn {
+      font-size: 25px;
+    }
+  }
+  .charts:nth-child(7) {
+    border: none;
+  }
+  .charts {
+    margin-top: 40px;
+  }
+  .chartss {
+    margin-top: 210px;
+  }
+  .DataTop {
+    width: 84%;
+    margin-left: 7%;
+    height: 80px;
+    border-bottom: 1px #bfbfbf solid;
+    li {
+      float: left;
+      width: 33%;
+      text-align: center;
+      .Data1 {
+        font-size: 18px;
+        height: 50px;
+        line-height: 50px;
+      }
+      .Data2 {
+        font-size: 9px;
+      }
+    }
+  }
+  .DataDown {
+    width: 84%;
+    margin-left: 7%;
+    height: 80px;
+    li {
+      float: left;
+      width: 25%;
+      text-align: center;
+      .Data1 {
+        font-size: 18px;
+        height: 50px;
+        line-height: 50px;
+      }
+      .Data2 {
+        font-size: 9px;
+      }
+    }
+  }
+  .pie1 {
+    border-bottom: 1px #c0c0c0 solid;
+    width: 93%;
+    height: 180px;
+    margin-left: 7%;
+    overflow: hidden;
+    position: relative;
+    ul {
+      margin-top: 68px;
+      li {
+        margin-top: 8px;
+      }
+      li:nth-child(1) {
+        font-size: 30px;
+      }
+    }
+  }
+  .piecharts1 {
+    float: left;
+  }
+  .pietitle1 {
+    width: 25%;
+    font-size: 12px;
+    color: #484848;
+    float: left;
+    position: absolute;
+    top: 30px;
+    z-index: 99;
+  }
+  .list-title {
+    height: 18px;
+    width: 100%;
+    font-size: 12px;
+    div:nth-child(1) {
+      border-right: 1px #aaaaaa solid;
+    }
+    div {
+      width: 49%;
+    }
+  }
+  .C484848 {
+    color: #484848;
+  }
+  .CACACAC {
+    color: #acacac;
+  }
+  .MMwrap {
+    background: #484848;
+    width: 100%;
+    height: 150px;
+    position: absolute;
+  }
+  .chartsLine {
+    padding-top: 226px;
+  }
+  .MMwrapNo {
+    height: 0px;
+  }
+  .dami {
+    float: left;
+    width: 8px;
+    height: 16px;
+    background: #5fb6d5;
+    border-radius: 4px;
+    position: absolute;
+    top: 30px;
+    z-index: 99;
+    left: 85px;
+  }
+  .marBorder {
+    height: 220px;
+    border-bottom: 1px #ddd solid;
+    width: 85%;
+    margin-left: 5%;
+  }
+  .marBorder:nth-child(7) {
+    border: none;
+  }
+  .smzq {
+    width: 100%;
+    height: 130px;
+    background: #484848;
+    padding: 15px;
+    font-size: 14px;
+    color: #fff;
+    position: fixed;
+    z-index: 999;
+    top: 120px;
+    div {
+      color: #fff;
+      text-align: left;
+    }
+    li {
+      height: 25px;
+      line-height: 25px;
+      padding: 0px 10px;
+      border: 1px #fff solid;
+      margin-top: 15px;
+    }
+  }
+  .timeStyle2 {
+    color: #484848 !important;
+    background: #fff !important;
+  }
+  .wrap-map {
+    margin-top: 20px;
+    p {
+      font-size: 12px;
+      text-align: left;
+      margin-left: 20px;
+      float: left;
+    }
+    .dami2 {
+      float: left;
+      width: 8px;
+      height: 16px;
+      background: #5fb6d5;
+      border-radius: 4px;
+      margin-left: 8px;
+      margin-bottom: 15px;
+    }
+    #map-container {
+      width: 96%;
+      margin-left: 2%;
+      height: 200px;
+      margin-top: 15px;
+    }
+  }
+}
+</style>
