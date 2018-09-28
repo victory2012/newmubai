@@ -3,8 +3,8 @@
 // see http://vuejs-templates.github.io/webpack for documentation.
 
 const path = require('path')
-// const apiPath = "http://192.168.1.183:8000";
-const apiPath = "http://47.96.8.239:8000";
+const apiPath = "http://192.168.1.112:8000";
+// const apiPath = "http://47.96.8.239:8000";
 module.exports = {
   dev: {
 
@@ -53,7 +53,7 @@ module.exports = {
     // Paths
     assetsRoot: path.resolve(__dirname, '../dist'),
     assetsSubDirectory: 'static',
-    assetsPublicPath: '/wechat/',
+    assetsPublicPath: '/',
 
     /**
      * Source Maps

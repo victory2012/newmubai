@@ -18,7 +18,7 @@
       <div class="VerButton" @click="getSmsCode" type="primary">{{smsMsg}}</div>
     </div>
     <mt-button @click="login" class="Loginbutton" type="primary">登录</mt-button>
-    <mt-button @click="testlogin" class="Loginbutton" type="primary">登录</mt-button>
+    <!-- <mt-button @click="testlogin" class="Loginbutton" type="primary">登录</mt-button> -->
   </div>
 </template>
 
@@ -26,6 +26,7 @@
 import utils from "@/utils/utils";
 import { Toast } from "mint-ui";
 // import _cache from "../cache";
+const AppId = "wxee1c1e26121022f2";
 export default {
   name: "Login",
   data() {
@@ -33,6 +34,7 @@ export default {
       phone: "",
       captcha: "",
       smsMsg: "获取验证码",
+      openid: "",
       setDown: "",
       wechatCode: "",
       wechatState: "",
@@ -42,46 +44,52 @@ export default {
     };
   },
   mounted() {
-    // console.log(utils);
-    // sessionStorage.setItem("setTokenStorage", '123465789455554');
+    let codes = this.getQueryString();
+    this.$axios.post("/wechat/login", { code: codes.code }).then(res => {
+      console.log(res);
+      if (res.data && res.data !== null) {
+        if (res.data.code === 0) {
+          utils.setStorage("loginData", JSON.stringify(res.data));
+          utils.setToken(res.headers.token);
+          this.$axios
+            .get(`/user/permissions/${res.data.data.id}`)
+            .then(opts => {
+              if (opts.data && opts.data !== null) {
+                utils.setStorage("userRoles", JSON.stringify(opts.data.data));
+                this.$router.push("/index");
+              }
+            });
+        } else if (res.data.code === 2) {
+          this.openid = res.data.msg;
+          // this.$axios.
+        }
+      }
+    });
+    // console.log(codes.code);
   },
-  // activated() {
-  //   // console.log(this.cookieUserInfo, "this.cookieUserInfo");
-
-  //   // console.log(this.cookieUserInfo);
-  //   const local = window.location.href;
-  //   const AppId = "wxee1c1e26121022f2";
-  //   // console.log(local, "lacations");
-  //   // console.log(AppId, "AppIdAppIdAppIdAppIdAppId");
-  //   // console.log(window.location, "codecode");
-  //   // console.log(this.getQueryString(), "codecodecodecodecode");
-  //   let codes = this.getQueryString();
-  //   this.code = codes.code;
-  //   console.log(codes);
-  //   this.httpRequest.getcode(this.code).then(res => {
-  //     console.log(res);
-  //     if (res.id > 0) {
-  //       let auth = JSON.stringify(res.roles);
-  //       localStorage.setItem("auth", auth);
-  //       this.$router.push({ path: "/index" });
-  //     } else {
-  //       Toast({
-  //         message: "未绑定手机号，请先登录",
-  //         position: "",
-  //         duration: 3000
-  //       });
-  //     }
-  //   });
-
-  //   // initial _cache
-  //   _cache.kwds = [];
-  //   _cache.wxJsCfg = {};
-  //   _cache.dList = [];
-  //   _cache.clientList = [];
-  // },
   methods: {
+    getQueryString() {
+      var qs = location.search.substr(1), // 获取url中"?"符后的字串
+        args = {}, // 保存参数数据的对象
+        items = qs.length ? qs.split("&") : [], // 取得每一个参数项,
+        item = null,
+        len = items.length;
+
+      for (var i = 0; i < len; i++) {
+        item = items[i].split("=");
+        var name = decodeURIComponent(item[0]),
+          value = decodeURIComponent(item[1]);
+        if (name) {
+          args[name] = value;
+        }
+      }
+      return args;
+    },
     getSmsCode() {
-      if (this.hasGetSms) return;
+      if (this.hasGetSms) {
+        Toast("操作过于频繁");
+        return;
+      }
       if (/^1[3|4|5|7|8][0-9]\d{8}$/.test(this.phone)) {
         let conut = 60;
         this.$axios.post("/login/sms/send", { phone: this.phone }).then(res => {
@@ -122,21 +130,28 @@ export default {
         if (res.data && res.data.code === 0) {
           utils.setStorage("loginData", JSON.stringify(res.data));
           utils.setToken(res.headers.token);
-          this.$axios
-            .get(`/user/permissions/${res.data.data.id}`)
-            .then(opts => {
-              if (opts.data && opts.data.code === 0) {
-                utils.setStorage("userRoles", JSON.stringify(opts.data.data));
-                this.$router.push("/index");
-              }
-            });
+          this.$axios.put(`/user/${this.openid}/wx`).then(res => {
+            if (res.data && res.data.code === 0) {
+              this.$axios
+                .get(`/user/permissions/${res.data.data.id}`)
+                .then(opts => {
+                  if (opts.data && opts.data.code === 0) {
+                    utils.setStorage(
+                      "userRoles",
+                      JSON.stringify(opts.data.data)
+                    );
+                    this.$router.push("/index");
+                  }
+                });
+            }
+          });
         }
       });
     },
     testlogin() {
       let person = {
-        account: "plat",
-        password: "plat"
+        account: "demo001",
+        password: "demo001"
       };
       this.$axios.post(`/login`, person).then(res => {
         console.log(res);
@@ -162,7 +177,7 @@ export default {
 <style lang="scss">
 .login-content {
   overflow: hidden;
-
+  background: #ffffff;
   .Logintitle {
     text-align: left;
     margin-left: 35px;

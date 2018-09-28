@@ -745,7 +745,7 @@ nav {
   width: 100%;
   overflow: hidden;
   // height: 18%;
-  margin-top: 53%;
+  margin-top: 200px;
   li:nth-child(1) {
     p {
       font-size: 24px;

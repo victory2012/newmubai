@@ -48,7 +48,7 @@ function checkStatus(response) {
         status: 404,
         msg: response.data.msg
       };
-    } else if (response.data.code === 0) {
+    } else if (response.data.code === 0 || response.data.code === 2) {
       return response;
     }
   } else {
