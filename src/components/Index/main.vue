@@ -36,7 +36,7 @@
     </mt-popup>
     <div class="tableBody" ref="wrapper" :style="{ height: wrapperHeight + 'px' }">
       <mt-loadmore :bottom-method="loadBottom" :auto-fill="false" :bottomDistance='40' @bottom-status-change="handleBottomChange" :bottom-all-loaded="allLoaded" ref="loadmore">
-        <battery-list-item v-for="item in tableData" :key="item.code" :listData="item" @unbindSuc="ifUnbind"></battery-list-item>
+        <battery-list-item v-for="item in tableData" :key="item.code + new Date().getTime()" :listData="item" @unbindSuc="ifUnbind"></battery-list-item>
         <div slot="bottom" class="mint-loadmore-bottom">
           <span v-show="bottomStatus !== 'loading'" :class="{ 'is-rotate': bottomStatus === 'loading' }">↑</span>
           <span v-show="bottomStatus === 'loading'">
@@ -46,6 +46,14 @@
       </mt-loadmore>
       <div v-show="isShowSpinner" class="loadEnd">没有更多了</div>
     </div>
+    <!-- <mt-palette-button content="+" @expand="main_log('expand')" @expanded="main_log('expanded')" @collapse="main_log('collapse')" direction="lt" class="pb" :radius="80" ref="target_1" mainButtonStyle="color:#fff;background-color:#71BFDB;">
+      <div class="my-icon-button" @click.stop="sub_log('hand')">
+        <img src="/static/hand.svg" alt="">
+      </div>
+        <div class="my-icon-button" @click.stop="sub_log('scan')">
+          <img src="/static/scan.svg" alt="">
+      </div>
+    </mt-palette-button> -->
   </div>
 </template>
 
@@ -110,6 +118,8 @@ export default {
     };
   },
   methods: {
+    // main_log() {},
+    // sub_log() {},
     handleBottomChange(status) {
       this.bottomStatus = status;
     },
@@ -131,15 +141,17 @@ export default {
       console.log(picker, "picker");
       this.company = values[0].name;
       this.searchContent.companyId = values[0].id;
+      this.tableData = [];
       this.getBatteryList();
     },
     onBatteryChange(picker, values) {
       console.log(values, "name");
       console.log(picker, "picker");
-      this.batteryName = values[0].name;
-
-      this.searchContent.batteryId = values[0].id;
-      this.getBatteryList();
+      if (values[0].id !== "noData") {
+        this.batteryName = values[0].name;
+        this.searchContent.batteryId = values[0].id;
+        this.getBatteryList();
+      }
     },
     searchInput() {
       this.getBatteryList();
@@ -169,8 +181,9 @@ export default {
       this.searchContent.companyId = null;
       this.searchContent.batteryId = null;
       this.isShowbind = false;
-      this.searchContent.bindStatus = 1;
+      this.searchContent.bindStatus = "";
       this.searchContent.content = "";
+      this.tableData = [];
       this.getBatteryList();
     },
     getBatteryList() {
@@ -198,7 +211,6 @@ export default {
           if (result.pageData.length < this.pageSize) {
             this.allLoaded = true;
           }
-          this.tableData = [];
           if (result.pageData.length > 0) {
             this.isShowSpinner = false;
             result.pageData.forEach(key => {
@@ -238,13 +250,23 @@ export default {
         if (res.data && res.data.code === 0) {
           this.Modeloptions = res.data.data;
           // this.batterySlot[0].values = [...this.Modeloptions];
-          this.batterySlot[0].values = [];
-          this.Modeloptions.forEach(key => {
-            this.batterySlot[0].values.push({
-              id: key.id,
-              name: key.dicKey
+          if (this.Modeloptions.length > 0) {
+            this.batterySlot[0].values = [];
+            this.Modeloptions.forEach(key => {
+              this.batterySlot[0].values.push({
+                id: key.id,
+                name: key.dicKey
+              });
             });
-          });
+          } else {
+            this.batterySlot[0].values = [
+              {
+                name: "暂无数据",
+                id: "noData"
+              }
+            ];
+            // this.batterySlot[0].id = "no";
+          }
           // this.slotss[0].values = [...this.Modeloptions];
         }
       });
@@ -256,7 +278,8 @@ export default {
     this.getBatteryModelList();
     this.wrapperHeight =
       document.documentElement.clientHeight -
-      this.$refs.wrapper.getBoundingClientRect().top;
+      this.$refs.wrapper.getBoundingClientRect().top -
+      53;
   }
 };
 </script>

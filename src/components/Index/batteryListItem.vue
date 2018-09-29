@@ -58,9 +58,11 @@
 
 <script>
 import { MessageBox, Toast, Indicator } from "mint-ui";
+/* eslint-disable */
+import WX from "wx";
 import _cache from "../cache";
 import * as _ from "lodash";
-import { checkPermisstion } from "../../common/js/auth";
+// import { checkPermisstion } from "../../common/js/auth";
 
 export default {
   props: {
@@ -123,14 +125,6 @@ export default {
     },
     //解绑操作
     cancelBind(row) {
-      // if (!checkPermisstion(17)) {
-      //   Toast({
-      //     message: "您无此操作权限!",
-      //     position: "bottom"
-      //   });
-      //   return;
-      // }
-
       MessageBox({
         title: "设备解绑",
         message: "是否将电池与设备解绑",
@@ -196,16 +190,16 @@ export default {
     },
     //扫码绑定
     scanBind() {
-      if (!checkPermisstion(17)) {
-        Toast({
-          message: "您无此操作权限!",
-          position: "bottom"
-        });
-        return;
-      }
+      // if (!checkPermisstion(17)) {
+      //   Toast({
+      //     message: "您无此操作权限!",
+      //     position: "bottom"
+      //   });
+      //   return;
+      // }
       console.log("=> url: " + location.href.split("#")[0]);
       console.log("scanBind: ", JSON.stringify(_cache.wxJsCfg));
-      wx.config({
+      WX.config({
         debug: false, // 是否开启调试模式
         appId: _cache.wxJsCfg.appId, // 必填，微信号AppID
         timestamp: _cache.wxJsCfg.timestamp, // 必填，生成签名的时间戳
@@ -216,7 +210,7 @@ export default {
 
       let that = this;
 
-      wx.scanQRCode({
+      WX.scanQRCode({
         needResult: 1, // 默认为0，扫描结果由微信处理，1则直接返回扫描结果，
         scanType: ["qrCode"], // 可以指定扫二维码还是一维码，默认二者都有
         success: function(res) {

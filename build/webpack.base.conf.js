@@ -91,7 +91,7 @@ module.exports = {
     'AMap': 'window.AMap',
     'AMapUI': 'window.AMapUI',
     'echarts': 'echarts',
-    // 'axios': 'axios',
+    'wx': 'window.wx',
     // 'vuex': 'Vuex',
     'vue-router': 'VueRouter',
     'lodash': '_',

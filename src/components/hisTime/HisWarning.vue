@@ -47,6 +47,14 @@ export default {
       sum: ""
     };
   },
+  watch: {
+    alaData: {
+      handler: function(val) {
+        console.log(val);
+        this.alarmData = val;
+      }
+    }
+  },
   mounted() {
     console.log(this.alaData);
   }

@@ -1,5 +1,5 @@
 <template>
-  <div v-show="visibility" class="bottomNav">
+  <div v-show="visibility">
     <mt-tabbar v-model="selected">
       <mt-tab-item id="index" @click.native="toIndex">
         <img class="navIcon" slot="" src="../static/fffff.png">

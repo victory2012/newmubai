@@ -111,33 +111,28 @@
       <div class="wrap-map">
         <p>监测位置变化趋势</p>
         <div class="dami2"></div>
-        <div id="map-container" ref="mapChoice"></div>
       </div>
+      <travel-map :travelData="positions"></travel-map>
     </div>
   </div>
 </template>
 
 
 <script>
-import AMap from "AMap";
 import { Indicator } from "mint-ui";
 import utils from "@/utils/utils";
 import echartMap from "./historyChart";
 import lnglatTrabsofor from "@/utils/longlatTransfor";
 import chartPie from "./echartPie";
+import travelMap from "./map";
 
-let map;
-let pathSimplifierIns;
-let navg;
-let infoWindow;
-let heatmap;
 let address;
-let marker;
 export default {
   name: "histime",
   components: {
     echartMap,
     chartPie,
+    travelMap,
     hisAlarm: () => import("./HisWarning.vue"),
     fluidAlarm: () => import("./HisBushui.vue")
   },
@@ -179,7 +174,7 @@ export default {
       eventSummary: {},
       peiObj: {},
       endDate: new Date(),
-      positions: [],
+      positions: {},
       fourObj: {},
       isA: true,
       topShow: true,
@@ -191,22 +186,9 @@ export default {
     this.hostObj = this.$route.query;
     this.getChartData();
     this.getCompanyInfo();
-    this.mapInit();
+    // this.mapInit();
   },
   methods: {
-    mapInit() {
-      map = new AMap.Map("map-container", {
-        resizeEnable: true,
-        zoom: 10
-      });
-      AMap.plugin(["AMap.Heatmap"], () => {
-        // 初始化heatmap对象
-        heatmap = new AMap.Heatmap(map, {
-          radius: 12, // 给定半径
-          opacity: [0, 1] // 透明度
-        });
-      });
-    },
     /* 确认按钮 */
     getChartData() {
       let startTime = utils.toUTCTime(utils.startTime(this.showStartTime));
@@ -240,14 +222,11 @@ export default {
           if (res.data && res.data.code === 0) {
             let result = res.data.data;
             this.exportData = result.list;
-            this.positions = []; // 轨迹点集合
-            // let positions = [];
-            this.heatData = []; // 热力图集合
+            this.positions = {
+              travel: [],
+              heatmap: []
+            }; // 轨迹点集合
             this.resultList = result.list;
-            if (this.resultList.length < 300) {
-              this.btnTypeUp = "info";
-              this.enlargeBtn = true;
-            }
             this.resultList.forEach((key, index) => {
               let timeArr = utils.TimeSconds(key.time); // 时间
               let capacity = Math.round(key.capacity * 100);
@@ -281,12 +260,12 @@ export default {
                 Math.abs(gcjLongitude) > 1 &&
                 Math.abs(gcjLatitude) > 1
               ) {
-                this.positions.push([
+                this.positions.travel.push([
                   key.gcjLongitude,
                   key.gcjLatitude,
                   timeArr
                 ]); // 坐标
-                this.heatData.push({
+                this.positions.heatmap.push({
                   lng: key.gcjLongitude,
                   lat: key.gcjLatitude,
                   count: 100
@@ -314,7 +293,7 @@ export default {
             };
             this.peiObj.eventSummary = result.eventSummary || {};
             this.peiObj.summary = this.summary || {};
-            this.heatMapFun();
+            // this.heatMapFun();
             // this.positionChange(positions);
           }
         });
@@ -334,6 +313,7 @@ export default {
       this.endTime = this.getTime(res);
       this.showEndTime = utils.sortTime2(res);
     },
+    /* 获取公司信息 */
     getCompanyInfo() {
       this.$axios
         .get(`/battery_group/${this.hostObj.hostId}/info`)
@@ -359,19 +339,7 @@ export default {
           }
         });
     },
-    /* 热力图 方法 */
-    heatMapFun() {
-      this.trajectory = true;
-      if (this.markerArr.length > 0) {
-        // 显示热力图的时候 删除地图上的marker点
-        map.remove(this.markerArr);
-      }
-      pathSimplifierIns && pathSimplifierIns.setData([]); // 同理 去除轨迹
-      map.setCenter([this.heatData[0].lng, this.heatData[0].lat]); // 显示热力图的时候，把热力图的第一个的 作为地图中心点
-      heatmap.setDataSet({
-        data: this.heatData
-      });
-    },
+
     /* 根据经纬度 用高德查询详细地址 */
     positionData(data) {
       if (data && data.gcjLongitude) {
@@ -391,137 +359,7 @@ export default {
         });
       }
     },
-    /* 轨迹相关方法 */
-    positionChange() {
-      this.trajectory = false;
-      heatmap && heatmap.setDataSet({ data: [] });
-      if (!this.positions || this.positions.length < 1) {
-        return;
-      }
-      if (this.markerArr.length > 0) {
-        // 先删除地图上的marker点 然后在后面添加
-        map.remove(this.markerArr);
-      }
-      this.alldistance = 0; // 两个点之间的距离
-      for (let i = 0; i < this.positions.length; i++) {
-        var distance, p1, p2;
-        let key = this.positions[i];
-        if (i < this.positions.length - 1) {
-          p1 = new AMap.LngLat(key[0], key[1]);
-          p2 = new AMap.LngLat(
-            this.positions[i + 1][0],
-            this.positions[i + 1][1]
-          );
-          distance = Math.round(p1.distance(p2));
-        }
-        this.alldistance += distance;
-      }
-      AMapUI.load(["ui/misc/PathSimplifier"], PathSimplifier => {
-        if (!PathSimplifier.supportCanvas) {
-          alert("当前环境不支持 Canvas！");
-          return;
-        }
-        AMapUI.loadUI(["misc/PositionPicker"], PositionPicker => {
-          let positionPicker = new PositionPicker({
-            mode: "dragMarker",
-            map: map,
-            iconStyle: {
-              url: "../../static/img/iocna.png",
-              size: [1, 1],
-              ancher: [1, 1]
-            }
-          });
-          pathSimplifierIns = new PathSimplifier({
-            zIndex: 100,
-            map: map,
-            getHoverTitle: function(pathData, pathIndex, pointIndex) {
-              if (pointIndex >= 0) {
-                return "第" + pointIndex + "个点";
-              }
-            },
-            getPath: function(pathData, pathIndex) {
-              return pathData.path;
-            },
-            renderOptions: {
-              pathLineStyle: {
-                strokeStyle: "rgb(193,21,52)",
-                lineWidth: 6,
-                dirArrowStyle: true
-              },
-              keyPointTolerance: 10,
-              keyPointStyle: {
-                radius: 3,
-                fillStyle: "#20acff"
-              }
-            }
-          });
-          pathSimplifierIns.on("pointClick", function(e, info) {
-            let pointIndex = info.pointIndex;
-            let pathData = info.pathData;
-            let point = pathData.path[pointIndex];
-            let position = new AMap.LngLat(point[0], point[1]);
-            positionPicker.start(position);
-            positionPicker.on("success", result => {
-              var info = [];
-              info.push(`<div><div>时间：${utils.dateFomat(point[2])}</div>`);
-              info.push(
-                `<div style="font-size:14px;">地址 :${
-                  result.address
-                }</div></div>`
-              );
-              infoWindow = new AMap.InfoWindow({
-                content: info.join("<br/>")
-              });
-              infoWindow.open(map, position);
-              map.on("click", () => {
-                infoWindow.close();
-              });
-            });
-          });
-          window.pathSimplifierIns = pathSimplifierIns;
-          pathSimplifierIns.setData([
-            {
-              name: "轨迹",
-              path: this.positions
-            }
-          ]);
-          // console.log("this.lineArr", this.lineArr);
-          let distance = Number(this.alldistance) / 1000; // 米转成千米
-          let times = Number(this.timeSeconds) / 3600; // 秒转成小时
-          let speeds = Math.ceil(distance / times); // 最终得到的速度是 km/h
-          navg = pathSimplifierIns.createPathNavigator(0, {
-            loop: true,
-            speed: speeds,
-            pathNavigatorStyle: {
-              width: 12,
-              height: 18,
-              strokeStyle: null,
-              fillStyle: null,
-              // 使用图片
-              content: PathSimplifier.Render.Canvas.getImageContent(
-                "../../../../static/img/car.png"
-              )
-            }
-          });
-        });
-        let startPot = this.positions[0];
-        let endPot = this.positions[this.positions.length - 1];
-        let start = new AMap.Marker({
-          map: map,
-          position: [startPot[0], startPot[1]], // 基点位置  开始位置
-          icon: "https://webapi.amap.com/theme/v1.3/markers/n/start.png",
-          zIndex: 50
-        });
-        let end = new AMap.Marker({
-          map: map,
-          position: [endPot[0], endPot[1]], // 基点位置  结束位置
-          icon: "https://webapi.amap.com/theme/v1.3/markers/n/end.png",
-          zIndex: 10
-        });
-        this.markerArr.push(start);
-        this.markerArr.push(end);
-      });
-    },
+
     addressCallBack(data) {
       let param = {
         id: this.hostObj.id,
@@ -536,7 +374,7 @@ export default {
     },
     timeZoom() {},
     /* 历史告警 */
-    getAlarmData() {
+    getAlarmDataFun() {
       let startTime = utils.toUTCTime(utils.startTime(this.showStartTime));
       let endTime = utils.toUTCTime(utils.endTime(this.showEndTime));
       let pageObj = {
@@ -572,14 +410,20 @@ export default {
                   key.index = index + 1;
                   this.alarmData.push(key);
                 });
-                this.alarm = true;
-                this.alarmFluid = false;
               }
             }
           }
         });
     },
+    getAlarmData() {
+      this.isA = true;
+      this.alarm = true;
+      this.alarmFluid = false;
+      Indicator.open();
+      this.getAlarmDataFun();
+    },
     getliquidData() {
+      this.isA = false;
       Indicator.open();
       this.getliquidDataFun();
     },
@@ -630,6 +474,7 @@ export default {
                   key.Replenishing = utils.UTCTime(key.time);
                   key.address = "查看地址";
                   key.disabled = false;
+                  key.hasAdress = false;
                   if (index < this.pageSize) {
                     dataArr.push(key);
                   }
@@ -725,6 +570,10 @@ export default {
 
 
 <style scope lang="scss">
+.page {
+  font-size: 14px;
+  padding: 10px 0;
+}
 .fenyeBtn {
   font-size: 14px;
 }
@@ -738,7 +587,7 @@ export default {
   }
   .index {
     min-height: 100%;
-    overflow: hidden;
+    // overflow: hidden;
   }
 
   .realTimeHead {
@@ -917,9 +766,11 @@ export default {
     z-index: 99;
   }
   .list-title {
-    height: 18px;
+    padding: 10px 0;
+    height: 38px;
+    overflow: hidden;
     width: 100%;
-    font-size: 12px;
+    font-size: 14px;
     div:nth-child(1) {
       border-right: 1px #aaaaaa solid;
     }
@@ -992,27 +843,29 @@ export default {
     background: #fff !important;
   }
   .wrap-map {
+    text-align: center;
     margin-top: 20px;
+    font-size: 0;
+    margin-bottom: 10px;
+    // overflow: hidden;
     p {
-      font-size: 12px;
-      text-align: left;
+      font-size: 14px;
+      // text-align: left;
+      display: inline-block;
       margin-left: 20px;
-      float: left;
+      vertical-align: middle;
+      // float: left;
     }
     .dami2 {
-      float: left;
+      // float: left;
       width: 8px;
       height: 16px;
       background: #5fb6d5;
       border-radius: 4px;
+      display: inline-block;
       margin-left: 8px;
-      margin-bottom: 15px;
-    }
-    #map-container {
-      width: 96%;
-      margin-left: 2%;
-      height: 200px;
-      margin-top: 15px;
+      vertical-align: middle;
+      // margin-bottom: 15px;
     }
   }
 }

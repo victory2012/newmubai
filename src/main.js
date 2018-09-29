@@ -7,7 +7,7 @@ import MintUI from 'mint-ui'
 import FastClick from 'fastclick';
 import 'mint-ui/lib/style.css'
 import './assets/reset.css'
-// import VueAMap from 'vue-amap';
+import '../static/icon/iconfont.css';
 import api from './api'
 
 Vue.config.productionTip = false

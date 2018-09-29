@@ -34,7 +34,7 @@
         </div>
       </div>
     </div>
-    <p v-if='loadingDom' class='loading'>没有更多数据</p>
+    <p v-show='loadingDom' class='loading'>没有更多数据</p>
     <mt-popup v-model="popupVisible" :modal="false" position="right">
       <mt-detail @closeIt="closeModel" :warnData="warnIngData"></mt-detail>
       <!-- <button>123456</button> -->
@@ -105,6 +105,7 @@ export default {
           let result = res.data.data;
           // this.tableData = [];
           if (result.pageData.length > 0) {
+            this.loadingDom = false;
             // if (result.pageData.length < 20) {
             //   this.allLoaded = true;
             // }
@@ -120,6 +121,8 @@ export default {
               this.tableData.push(key);
             });
             this.loading = false;
+          } else {
+            this.loadingDom = true;
           }
         }
       });

@@ -3,7 +3,7 @@
     <!-- <keep-alive>
       <router-view/>
     </keep-alive> -->
-    <router-view/>
+    <router-view />
     <bottomNav class="bottomNav"></bottomNav>
   </div>
 </template>
@@ -34,6 +34,7 @@ body {
 .bottomNav {
   position: fixed;
   bottom: 0;
+  height: 53px;
   width: 100%;
 }
 </style>

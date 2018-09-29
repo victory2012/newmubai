@@ -15,7 +15,7 @@
         </li>
       </ul>
       <ul>
-        <li>
+        <li @click="getAddress(item)">
           <div>{{item.address}}</div>
         </li>
       </ul>
@@ -25,6 +25,8 @@
 </template>
 
 <script>
+import lnglatTrabsofor from "@/utils/longlatTransfor";
+
 export default {
   name: "HisBushui",
   props: {
@@ -38,8 +40,30 @@ export default {
       listData: this.fliudData
     };
   },
+  watch: {
+    fliudData: {
+      handler: function(val) {
+        console.log(val);
+        this.listData = val;
+      },
+      deep: true
+    }
+  },
   mounted() {
     console.log(this.listData);
+  },
+  methods: {
+    getAddress(item) {
+      console.log(item);
+      if (!item.hasAdress) {
+        let postion = [item.gcjLongitude, item.gcjLatitude];
+        lnglatTrabsofor(postion, res => {
+          console.log(res);
+          item.address = res.formattedAddress;
+          item.hasAdress = true;
+        });
+      }
+    }
   }
 };
 </script>

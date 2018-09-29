@@ -8,11 +8,11 @@
     </mt-header>
     <p class="Logintitle">绑定登录</p>
     <div class="iptPhone">
-      <img src="../../../static/phone.svg" alt="">
+      <img src="../../../static/phone.svg" class="icon" alt="">
       <mt-field class="phone" label="" placeholder="请输入手机号" type="tel" v-model="phone"></mt-field>
     </div>
     <div class="iptYzm">
-      <img src="../../../static/yanzheng.svg" alt="">
+      <img src="../../../static/yanzheng.svg" class="icon" alt="">
 
       <mt-field class="yzm" label="" placeholder="请输入验证码" v-model="captcha"></mt-field>
       <div class="VerButton" @click="getSmsCode" type="primary">{{smsMsg}}</div>
@@ -61,7 +61,6 @@ export default {
             });
         } else if (res.data.code === 2) {
           this.openid = res.data.msg;
-          // this.$axios.
         }
       }
     });
@@ -125,15 +124,16 @@ export default {
         phone: this.phone,
         code: this.captcha
       };
-      this.$axios.post("/login/sms/verify", phoneObj).then(res => {
-        console.log(res);
-        if (res.data && res.data.code === 0) {
-          utils.setStorage("loginData", JSON.stringify(res.data));
-          utils.setToken(res.headers.token);
-          this.$axios.put(`/user/${this.openid}/wx`).then(res => {
-            if (res.data && res.data.code === 0) {
+      this.$axios.post("/login/sms/verify", phoneObj).then(login => {
+        console.log(login);
+        if (login.data && login.data.code === 0) {
+          utils.setStorage("loginData", JSON.stringify(login.data));
+          utils.setToken(login.headers.token);
+
+          this.$axios.put(`/user/${this.openid}/wx`).then(data => {
+            if (data.data.code === 0) {
               this.$axios
-                .get(`/user/permissions/${res.data.data.id}`)
+                .get(`/user/permissions/${login.data.data.id}`)
                 .then(opts => {
                   if (opts.data && opts.data.code === 0) {
                     utils.setStorage(
@@ -150,8 +150,8 @@ export default {
     },
     testlogin() {
       let person = {
-        account: "demo001",
-        password: "demo001"
+        account: "plat",
+        password: "plat"
       };
       this.$axios.post(`/login`, person).then(res => {
         console.log(res);
@@ -175,6 +175,9 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="scss">
+.icon {
+  margin-right: 10px;
+}
 .login-content {
   overflow: hidden;
   background: #ffffff;
