@@ -1,7 +1,10 @@
 <template>
   <div class="main">
     <div class="headNav">
-      <mt-header class="Loginhead" title="基本信息"></mt-header>
+      <mt-header class="Loginhead" title="基本信息">
+        <mt-button icon="" slot="left"></mt-button>
+        <mt-button icon="" slot="right"></mt-button>
+      </mt-header>
       <nav>
         <div class="search">
           <input placeholder="电池编号/设备编号" v-model="searchContent.content" type="text">
@@ -150,6 +153,7 @@ export default {
       if (values[0].id !== "noData") {
         this.batteryName = values[0].name;
         this.searchContent.batteryId = values[0].id;
+        this.tableData = [];
         this.getBatteryList();
       }
     },

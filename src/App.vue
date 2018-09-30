@@ -1,8 +1,5 @@
 <template>
   <div id="app">
-    <!-- <keep-alive>
-      <router-view/>
-    </keep-alive> -->
     <router-view />
     <bottomNav class="bottomNav"></bottomNav>
   </div>

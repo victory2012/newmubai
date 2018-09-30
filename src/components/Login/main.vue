@@ -45,26 +45,28 @@ export default {
   },
   mounted() {
     let codes = this.getQueryString();
-    this.$axios.post("/wechat/login", { code: codes.code }).then(res => {
-      console.log(res);
-      if (res.data && res.data !== null) {
-        if (res.data.code === 0) {
-          utils.setStorage("loginData", JSON.stringify(res.data));
-          utils.setToken(res.headers.token);
-          this.$axios
-            .get(`/user/permissions/${res.data.data.id}`)
-            .then(opts => {
-              if (opts.data && opts.data !== null) {
-                utils.setStorage("userRoles", JSON.stringify(opts.data.data));
-                this.$router.push("/index");
-              }
-            });
-        } else if (res.data.code === 2) {
-          this.openid = res.data.msg;
+    console.log(codes.code);
+    if (codes.code) {
+      this.$axios.post("/wechat/login", { code: codes.code }).then(res => {
+        console.log(res);
+        if (res.data && res.data !== null) {
+          if (res.data.code === 0) {
+            utils.setStorage("loginData", JSON.stringify(res.data));
+            utils.setToken(res.headers.token);
+            this.$axios
+              .get(`/user/permissions/${res.data.data.id}`)
+              .then(opts => {
+                if (opts.data && opts.data !== null) {
+                  utils.setStorage("userRoles", JSON.stringify(opts.data.data));
+                  this.$router.push("/index");
+                }
+              });
+          } else if (res.data.code === 2) {
+            this.openid = res.data.msg;
+          }
         }
-      }
-    });
-    // console.log(codes.code);
+      });
+    }
   },
   methods: {
     getQueryString() {
@@ -129,22 +131,25 @@ export default {
         if (login.data && login.data.code === 0) {
           utils.setStorage("loginData", JSON.stringify(login.data));
           utils.setToken(login.headers.token);
-
-          this.$axios.put(`/user/${this.openid}/wx`).then(data => {
-            if (data.data.code === 0) {
-              this.$axios
-                .get(`/user/permissions/${login.data.data.id}`)
-                .then(opts => {
-                  if (opts.data && opts.data.code === 0) {
-                    utils.setStorage(
-                      "userRoles",
-                      JSON.stringify(opts.data.data)
-                    );
-                    this.$router.push("/index");
-                  }
-                });
-            }
-          });
+          if (this.openid) {
+            this.$axios.put(`/user/${this.openid}/wx`).then(data => {
+              if (data.data.code === 0) {
+                this.$axios
+                  .get(`/user/permissions/${login.data.data.id}`)
+                  .then(opts => {
+                    if (opts.data && opts.data.code === 0) {
+                      utils.setStorage(
+                        "userRoles",
+                        JSON.stringify(opts.data.data)
+                      );
+                      this.$router.push("/index");
+                    }
+                  });
+              }
+            });
+          } else {
+            Toast("网络请求失败，请稍后重试");
+          }
         }
       });
     },

@@ -34,11 +34,15 @@
         <div class="fr">{{userArr.email}}</div>
       </li>
     </ul>
-
+    <div class="unbindWarrp">
+      <mt-button size="large" type="primary" @click="unbindWX">微信解绑</mt-button>
+    </div>
+    <!-- <button @click="unbindWX">微信解绑</button> -->
   </div>
 </template>
 
 <script>
+import { Toast, Indicator } from "mint-ui";
 import utils from "@/utils/utils";
 export default {
   name: "warning",
@@ -48,6 +52,19 @@ export default {
     };
   },
   methods: {
+    unbindWX() {
+      Indicator.open();
+      this.$axios.put("/user/unbind_wx").then(res => {
+        Indicator.close();
+        if (res.data && res.data.code === 0) {
+          Toast("解绑成功");
+          setTimeout(() => {
+            window.location.href = "#/login";
+            sessionStorage.clear();
+          }, 1000);
+        }
+      });
+    },
     getSelf() {
       this.$axios.get("/user/current").then(res => {
         console.log(res);
@@ -71,6 +88,10 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped="" lang="scss">
+.unbindWarrp {
+  padding: 0 20px;
+  margin: 30px;
+}
 .Loginhead {
   background: #484848;
 }

@@ -6,11 +6,11 @@ let env = locationHost.indexOf('myriadiot');
 const mqtt = {
   hostname: env > 0 ? "47.99.120.144" : '47.96.8.239',
   port: 443,
-  clientId: `pc${new Date().getTime()}`,
+  clientId: `wechat${new Date().getTime()}`,
   timeout: 30,
   keepAliveInterval: 100,
   cleanSession: false,
-  useSSL: false,
+  useSSL: true,
   reconnect: true // 断开后 是否重连
 };
 console.log(mqtt);

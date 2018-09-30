@@ -119,7 +119,7 @@
 
 
 <script>
-import { Indicator } from "mint-ui";
+import { Indicator, Toast } from "mint-ui";
 import utils from "@/utils/utils";
 import echartMap from "./historyChart";
 import lnglatTrabsofor from "@/utils/longlatTransfor";
@@ -182,27 +182,41 @@ export default {
       showEndTime: utils.sortTime2(new Date())
     };
   },
+  // activated() {
+  //   Toast("activated");
+  // },
   mounted() {
     this.hostObj = this.$route.query;
-    this.getChartData();
+    this.getChartData("mounted");
     this.getCompanyInfo();
+    // Toast("mounted222");
+    // this.mapInit();
+  },
+  created() {
+    this.hostObj = this.$route.query;
+    this.getChartData("created");
+    this.getCompanyInfo();
+    // Toast("created111");
     // this.mapInit();
   },
   methods: {
     /* 确认按钮 */
-    getChartData() {
+    getChartData(str) {
+      // Toast("getChartData", str);
+      Indicator.open();
       let startTime = utils.toUTCTime(utils.startTime(this.showStartTime));
       let endTime = utils.toUTCTime(utils.endTime(this.showEndTime));
-      Indicator.open();
       this.getChartDatafun(startTime, endTime);
     },
     /* 获取Echart相关数据 以及 地图坐标 */
     getChartDatafun(startTime, endTime) {
       this.loading = true;
-      console.log(this.hostObj);
-      if (!this.hostObj.hostId || !this.hostObj.deviceId) {
-        return;
-      }
+      // console.log(this.hostObj);
+
+      // if (!this.hostObj.hostId || !this.hostObj.deviceId) {
+      //   Toast(this.hostObj.hostId);
+      //   return;
+      // }
       this.$axios
         .get(
           `/battery_group/${this.hostObj.hostId}/${
@@ -315,6 +329,7 @@ export default {
     },
     /* 获取公司信息 */
     getCompanyInfo() {
+      Toast("getCompanyInfo");
       this.$axios
         .get(`/battery_group/${this.hostObj.hostId}/info`)
         .then(res => {

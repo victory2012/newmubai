@@ -115,7 +115,8 @@
       </li>
     </ul>
     <div class="wrap-map">
-      <div id="map-container"></div>
+      <p v-if="loadMap">地图未加载</p>
+      <div id="map-container" class="realMapContainer"></div>
     </div>
 
     <div class="updateTime">
@@ -160,6 +161,7 @@ export default {
   },
   data() {
     return {
+      loadMap: true, // 调试用的
       showBatteryList: false,
       companyInfo: {},
       quantity: "",
@@ -221,6 +223,7 @@ export default {
         resizeEnable: true,
         zoom: 10
       });
+      this.loadMap = false;
     },
     init() {
       this.connectMqtt();
@@ -281,9 +284,7 @@ export default {
     getData() {
       let startTime = utils.getFourHours();
       let endTime = utils.getNowTime();
-      // if (!this.IdObj.hostId || !this.IdObj.deviceId) {
-      //   return;
-      // }
+      Toast("图表数据");
       this.$axios
         .get(
           `/battery_group/${this.IdObj.hostId}/${
@@ -603,9 +604,9 @@ export default {
   border-radius: 5px;
 }
 
-#map-container {
+.realMapContainer {
   width: 100%;
-  height: 100%;
+  height: 220px;
 }
 
 .index {
