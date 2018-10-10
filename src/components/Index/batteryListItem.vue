@@ -60,9 +60,10 @@
 import { MessageBox, Toast } from "mint-ui";
 /* eslint-disable */
 import WX from "wx";
-import _cache from "../cache";
-import * as _ from "lodash";
-// import { checkPermisstion } from "../../common/js/auth";
+// import _cache from "../cache";
+// import * as _ from "lodash";
+import utils from "@/utils/utils";
+import roles from "@/utils/role";
 
 export default {
   props: {
@@ -79,6 +80,7 @@ export default {
       isShow: false
     };
   },
+  mounted() {},
   methods: {
     //打开实时数据
     sssj() {
@@ -143,20 +145,6 @@ export default {
         }
       });
     },
-    checkDevice(deviceNo) {
-      let item = _.filter(_cache.dList, function(o) {
-        return o["no"] == deviceNo;
-      });
-
-      if (Array.isArray(item) && item.length) {
-        this.edit(item[0]["id"]);
-      } else {
-        Toast({
-          message: "设备编号不存在！",
-          position: "bottom"
-        });
-      }
-    },
     edit(dId) {
       this.httpRequest
         .batteryBind({
@@ -184,57 +172,67 @@ export default {
     },
     //扫码绑定
     scanBind() {
-      // if (!checkPermisstion(17)) {
-      //   Toast({
-      //     message: "您无此操作权限!",
-      //     position: "bottom"
-      //   });
-      //   return;
-      // }
-      console.log("=> url: " + location.href.split("#")[0]);
-      console.log("scanBind: ", JSON.stringify(_cache.wxJsCfg));
-      WX.config({
-        debug: false, // 是否开启调试模式
-        appId: _cache.wxJsCfg.appId, // 必填，微信号AppID
-        timestamp: _cache.wxJsCfg.timestamp, // 必填，生成签名的时间戳
-        nonceStr: _cache.wxJsCfg.nonceStr, // 必填，生成签名的随机串
-        signature: _cache.wxJsCfg.signature, // 必填，签名，见附录1
-        jsApiList: ["scanQRCode"] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
-      });
-
-      let that = this;
-
-      WX.scanQRCode({
-        needResult: 1, // 默认为0，扫描结果由微信处理，1则直接返回扫描结果，
-        scanType: ["qrCode"], // 可以指定扫二维码还是一维码，默认二者都有
-        success: function(res) {
-          var result = res.resultStr; // 当needResult 为 1 时，扫码返回的结果
-          // alert("扫描结果："+result);
-          // window.location.href = result;//因为我这边是扫描后有个链接，然后跳转到该页面
-          console.log("=> CODE : \n" + JSON.stringify(result));
-
-          // 判断 result 是否通过正则
-          var reg = new RegExp("[0-9A-Za-z]{12}");
-          if (!reg.test(result)) {
-            Toast({
-              message: "设备编号无效！",
-              position: "bottom"
+      let URl = window.location.href.split("#")[0];
+      console.log("url===>>>", URl);
+      console.log(encodeURIComponent(URl));
+      // let URl = sessionStorage.getItem("URl");
+      this.$axios
+        .post(`/wechat/config`, { url: encodeURIComponent(URl) })
+        .then(res => {
+          console.log(res);
+          if (res.data && res.data.code === 0) {
+            let result = res.data.data;
+            let that = this;
+            WX.config({
+              debug: false, // 是否开启调试模式
+              appId: result.appId, // 必填，微信号AppID
+              timestamp: Number(result.timestamp), // 必填，生成签名的时间戳
+              nonceStr: result.nonceStr, // 必填，生成签名的随机串
+              signature: result.signature, // 必填，签名
+              jsApiList: ["scanQRCode"] // 必填，需要使用的JS接口列表
             });
-          } else {
-            that.checkDevice(result);
+            WX.ready(() => {
+              WX.checkJsApi({
+                jsApiList: ["scanQRCode"],
+                success: function(res) {
+                  console.log("checkJsApi", res);
+                  // Toast(JSON.stringify(res));
+                }
+              });
+              WX.scanQRCode({
+                needResult: 1,
+                desc: "scanQRCode desc",
+                scanType: ["qrCode", "barCode"], // 可以指定扫二维码还是一维码，默认二者都有
+                success: function(res) {
+                  console.log("scanQRCode", res);
+                  that.scanQRbind(res.resultStr);
+                  // console.log("scanQRCode", JSON.stringify(res));
+                  // Toast(JSON.stringify(res));
+                }
+              });
+            });
+            WX.error(res => {
+              Toast(res.errMsg);
+              console.log(res.errMsg);
+            });
           }
-        }
-      });
+        });
+    },
+    scanQRbind(str) {
+      let reg = new RegExp("[0-9A-Za-z]");
+      if (!reg.test(str)) {
+        Toast("设备编号无效！");
+        return;
+      } else {
+        MessageBox.confirm(`确定与设备(${str})绑定吗?`).then(action => {
+          if (action === "confirm") {
+            console.log("yes");
+          }
+        });
+      }
     },
     //手动绑定
     handBind(item) {
-      // if (!checkPermisstion(17)) {
-      //   Toast({
-      //     message: "您无此操作权限!",
-      //     position: "bottom"
-      //   });
-      //   return;
-      // }
       console.log(item);
       this.$router.push({
         path: "/batteryBind",

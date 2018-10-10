@@ -89,7 +89,7 @@ export default {
   data() {
     return {
       isShowSpinner: false,
-      pageSize: 10,
+      pageSize: 50,
       wrapperHeight: 0,
       currentPage: 1,
       allLoaded: false,
@@ -132,10 +132,8 @@ export default {
       }, 1500);
     },
     ifUnbind(data) {
-      console.log("data", data);
-      if (data.unbind) {
-        this.getBatteryList();
-      }
+      this.tableData = [];
+      this.getBatteryList();
     },
     onCompanyChange(picker, values) {
       console.log(values, "name");

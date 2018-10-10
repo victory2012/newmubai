@@ -19,11 +19,13 @@ const warning = () =>
 const warningDetail = () =>
   import( /* webpackChunkName: "warningDetail" */ `@/components/warning/detail`);
 const person = () =>
-  import( /* webpackChunkName: "person" */ `@/components/person/main`)
+  import( /* webpackChunkName: "person" */ `@/components/person/main`);
 const detail = () =>
-  import( /* webpackChunkName: "detail" */ `@/components/detail/main`)
+  import( /* webpackChunkName: "detail" */ `@/components/detail/main`);
 const hisTime = () =>
-  import( /* webpackChunkName: "hisTime" */ `@/components/hisTime/main`)
+  import( /* webpackChunkName: "hisTime" */ `@/components/hisTime/main`);
+const loading = () =>
+  import( /* webpackChunkName: "hisTime" */ `@/components/loading/loading`);
 
 Vue.use(Router);
 
@@ -31,17 +33,16 @@ const router = new Router({
   mode: 'hash',
   routes: [{
       path: '/',
-      redirect: '/login'
+      redirect: '/loading'
     },
-    // {
-    //   path: '/batteryInfo',
-    //   name: 'HelloWorld',
-    //   routeSets: {
-    //     bottomNavVisible: true,
-    //     bottomId: 'batteryInfo'
-    //   },
-    //   component: HelloWorld
-    // },
+    {
+      path: '/loading',
+      routeSets: {
+        bottomNavVisible: false,
+        bottomId: 'loading'
+      },
+      component: loading
+    },
     {
       path: '/login',
       name: 'login',

@@ -43,49 +43,10 @@ export default {
       hasGetSms: false
     };
   },
-  activated() {
-    let codes = this.getQueryString();
-    console.log(codes.code);
-    if (codes.code) {
-      this.$axios.post("/wechat/login", { code: codes.code }).then(res => {
-        console.log(res);
-        if (res.data && res.data !== null) {
-          if (res.data.code === 0) {
-            utils.setStorage("loginData", JSON.stringify(res.data));
-            utils.setToken(res.headers.token);
-            this.$axios
-              .get(`/user/permissions/${res.data.data.id}`)
-              .then(opts => {
-                if (opts.data && opts.data !== null) {
-                  utils.setStorage("userRoles", JSON.stringify(opts.data.data));
-                  this.$router.push("/index");
-                }
-              });
-          } else if (res.data.code === 2) {
-            this.openid = res.data.msg;
-          }
-        }
-      });
-    }
+  mounted() {
+    this.openid = this.$route.query.openid;
   },
   methods: {
-    getQueryString() {
-      let qs = window.location.search.substr(1); // 获取url中"?"符后的字串
-      let args = {}; // 保存参数数据的对象
-      let items = qs.length ? qs.split("&") : []; // 取得每一个参数项,
-      let item = null;
-      let len = items.length;
-
-      for (let i = 0; i < len; i++) {
-        item = items[i].split("=");
-        let name = decodeURIComponent(item[0]);
-        let value = decodeURIComponent(item[1]);
-        if (name) {
-          args[name] = value;
-        }
-      }
-      return args;
-    },
     getSmsCode() {
       if (this.hasGetSms) {
         Toast("操作过于频繁");
