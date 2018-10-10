@@ -202,7 +202,8 @@ export default {
   beforeDestroy() {
     if (
       typeof mqttClient === "object" &&
-      typeof mqttClient.isConnected === "function"
+      typeof mqttClient.isConnected === "function" &&
+      mqttClient.isConnected()
     ) {
       mqttClient.disconnect();
       mqttClient = {};
@@ -274,6 +275,8 @@ export default {
     getData() {
       let startTime = utils.getFourHours();
       let endTime = utils.getNowTime();
+      console.log('startTime', startTime);
+      console.log('endTime', endTime);
       // Toast("图表数据");
       this.$axios
         .get(

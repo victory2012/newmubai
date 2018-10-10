@@ -14,6 +14,7 @@ const daysInMonth = [
   [31]
 ];
 const TimezoneOffset = (new Date().getTimezoneOffset()) * 60000;
+
 export default {
   accountType: type => {
     let str = type.toString();
@@ -51,7 +52,7 @@ export default {
     hours = hours < 10 ? `0${hours}` : hours;
     minute = minute < 10 ? `0${minute}` : minute;
     second = second < 10 ? `0${second}` : second;
-    return `${year}-${mounth}-${day} ${hours}:${minute}:${second}`;
+    return `${year}/${mounth}/${day} ${hours}:${minute}:${second}`;
   },
   /* 硬件的格林威治时间 转北京时间 并格式化 */
   UTCTime: str => {
@@ -61,8 +62,8 @@ export default {
     let hour = str.substring(8, 10);
     let minute = str.substring(10, 12);
     let seconds = str.substring(12, 14);
-    let utc = `${yy}-${mm}-${day} ${hour}:${minute}:${seconds}`;
-    let msec = new Date(utc).getTime() + (-TimezoneOffset);
+    let utc = `${yy}/${mm}/${day} ${hour}:${minute}:${seconds} UTC`;
+    let msec = new Date(utc).getTime();
     return this.a.dateFomat(msec);
   },
   Days: str => {
@@ -101,17 +102,19 @@ export default {
     hours = hours < 10 ? `0${hours}` : hours;
     minute = minute < 10 ? `0${second}` : second;
     second = second < 10 ? `0${second}` : second;
-    return `${year}${mounth}${day}${hours}${minute}${second}`;
+    return `${year}/${mounth}/${day} ${hours}:${minute}:${second}`;
   },
   getNowTime: () => {
     let now = new Date().getTime();
     let nowTime = this.a.dateFomat(now);
+    console.log(nowTime)
     return this.a.toUTCTime(nowTime);
   },
   getFourHours: () => {
     let now = new Date().getTime();
     let yestoday = now - 14400000;
     let yesTime = this.a.dateFomat(yestoday);
+    console.log(yesTime)
     return this.a.toUTCTime(yesTime);
   },
   getWeek: () => {
@@ -311,8 +314,8 @@ export default {
     endMinute = endMinute < 10 ? `0${endMinute}` : endMinute;
     endSecond = endSecond < 10 ? `0${endSecond}` : endSecond;
 
-    let resultStart = `${startyear}-${startMonth}-${startday} ${startHours}:${startMinute}:${startSecond}`;
-    let resultEnd = `${endyear}-${endMonth}-${endday} ${endHours}:${endMinute}:${endSecond}`;
+    let resultStart = `${startyear}/${startMonth}/${startday} ${startHours}:${startMinute}:${startSecond}`;
+    let resultEnd = `${endyear}/${endMonth}/${endday} ${endHours}:${endMinute}:${endSecond}`;
     return {
       startTime: this.a.toUTCTime(resultStart),
       endTime: this.a.toUTCTime(resultEnd)
@@ -366,6 +369,7 @@ export default {
     let res1 = res.replace(/-/g, "");
     let res2 = res1.replace(/T/g, "");
     let res3 = res2.replace(/:/g, "");
+    // console.log(res1);
     return res3.substr(0, 14);
   },
   /* 格林威治时间转北京时间 毫秒数 */
@@ -376,10 +380,8 @@ export default {
     let hour = str.substring(8, 10);
     let minute = str.substring(10, 12);
     let seconds = str.substring(12, 14);
-    let utc = `${yy}-${mm}-${day} ${hour}:${minute}:${seconds}`;
-    let msec = new Date(utc).getTime() + (-TimezoneOffset);
-    console.log('utcTime ====>>>', msec);
-    // return utc;
+    let utc = `${yy}/${mm}/${day} ${hour}:${minute}:${seconds} UTC`;
+    let msec = new Date(utc).getTime();
     return msec;
   },
   DifferTime: (time1, time2) => {
@@ -397,9 +399,9 @@ export default {
     day = day < 10 ? `0${day}` : day;
     let result;
     if (hours > 0) {
-      result = `${year}-${mounth}-${day} 23:59:59`;
+      result = `${year}/${mounth}/${day} 23:59:59`;
     } else {
-      let times = `${year}-${mounth}-${day} 00:00:00`;
+      let times = `${year}/${mounth}/${day} 00:00:00`;
       result = new Date(times).getTime() + 86400000;
     }
     return result;
@@ -411,7 +413,7 @@ export default {
     let day = endTime.getDate();
     mounth = mounth < 10 ? `0${mounth}` : mounth;
     day = day < 10 ? `0${day}` : day;
-    let times = `${year}-${mounth}-${day} 00:00:00`;
+    let times = `${year}/${mounth}/${day} 00:00:00`;
     let result = new Date(times).getTime();
     return result;
   }

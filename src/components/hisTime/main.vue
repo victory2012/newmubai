@@ -191,16 +191,16 @@ export default {
       deviceCode: this.$route.query.deviceCode,
       id: this.$route.query.id
     };
-    this.getChartDatafun("20181001160000", "20181009155959");
+    this.getChartData();
     this.getCompanyInfo(this.hostObj);
   },
   methods: {
     /* 确认按钮 */
     getChartData() {
-      // let startTime = utils.toUTCTime(utils.startTime(this.showStartTime));
-      // let endTime = utils.toUTCTime(utils.endTime(this.showEndTime));
-
-      this.getChartDatafun("20181001160000", "20181009155959");
+      let startTime = utils.toUTCTime(utils.startTime(this.showStartTime));
+      let endTime = utils.toUTCTime(utils.endTime(this.showEndTime));
+      this.getChartDatafun(startTime, endTime);
+      // this.getChartDatafun("20181001160000", "20181009155959");
     },
     /* 获取Echart相关数据 以及 地图坐标 */
     getChartDatafun(startTime, endTime) {
@@ -231,8 +231,8 @@ export default {
             this.resultList = result.list;
             this.resultList.forEach((key, index) => {
               let timeStr = utils.TimeSconds(key.time); // 时间
-              console.log(timeStr);
-              console.log("key.time", key.time);
+              // console.log(timeStr);
+              // console.log("key.time", key.time);
               let capacity = Math.round(key.capacity * 100);
               this.dataObj.singleVoltage.push({
                 name: timeStr,

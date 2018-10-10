@@ -12,7 +12,7 @@
 /* eslint-disable */
 import echarts from "echarts";
 import _ from "lodash";
-import { Toast } from "mint-ui";
+// import { Toast } from "mint-ui";
 import utils from "@/utils/utils";
 import options from "@/config/echartOptions";
 
@@ -47,7 +47,7 @@ export default {
     },
     chartData: {
       handler: function(curVal) {
-        Toast("数据已更新");
+        // Toast("数据已更新");
         // console.log("chartData", curVal);
         this.dataChange(curVal);
       },
@@ -80,31 +80,31 @@ export default {
         this.myEcharts4
       ]);
 
-      this.myEcharts1.on("datazoom", param => {
-        // console.log(param);
-        let opt = this.myEcharts1.getOption();
-        let dz = opt.dataZoom[0];
-        let tstart = opt.xAxis[0].rangeStart;
-        let tend = opt.xAxis[0].rangeEnd;
-        let barStart;
-        let barEnd;
-        if (param.batch) {
-          barStart = param.batch[0].start;
-          barEnd = param.batch[0].end;
-        } else {
-          barStart = param.start;
-          barEnd = param.end;
-        }
-        clearTimeout(this.timeoutId);
-        this.timeoutId = setTimeout(() => {
-          this.$emit("timeZoom", {
-            tstart: tstart,
-            tend: tend,
-            batchStart: barStart,
-            batchEnd: barEnd
-          });
-        }, 500);
-      });
+      // this.myEcharts1.on("datazoom", param => {
+      //   // console.log(param);
+      //   let opt = this.myEcharts1.getOption();
+      //   let dz = opt.dataZoom[0];
+      //   let tstart = opt.xAxis[0].rangeStart;
+      //   let tend = opt.xAxis[0].rangeEnd;
+      //   let barStart;
+      //   let barEnd;
+      //   if (param.batch) {
+      //     barStart = param.batch[0].start;
+      //     barEnd = param.batch[0].end;
+      //   } else {
+      //     barStart = param.start;
+      //     barEnd = param.end;
+      //   }
+      //   clearTimeout(this.timeoutId);
+      //   this.timeoutId = setTimeout(() => {
+      //     this.$emit("timeZoom", {
+      //       tstart: tstart,
+      //       tend: tend,
+      //       batchStart: barStart,
+      //       batchEnd: barEnd
+      //     });
+      //   }, 500);
+      // });
       window.onresize = () => {
         this.myEcharts1.resize();
         this.myEcharts2.resize();
@@ -148,7 +148,7 @@ export default {
         let item = "";
         p.forEach(v => {
           item +=
-            // this.dateFomat(v.value[0]) +
+            utils.dateFomat(v.value[0]) +
             "<br/>" + "单体电压" + " : " + v.value[1] + "V<br/>";
         });
         return item;
@@ -164,7 +164,7 @@ export default {
         p.forEach(v => {
           // console.log(v);
           item +=
-            // this.dateFomat(v.value[0]) +
+            utils.dateFomat(v.value[0]) +
             "<br/>" + "电流" + " : " + v.value[1] + "A<br/>";
         });
         return item;
@@ -179,7 +179,7 @@ export default {
         let item = "";
         p.forEach(v => {
           item +=
-            // this.dateFomat(v.value[0]) +
+            utils.dateFomat(v.value[0]) +
             "<br/>" + "温度" + " : " + v.value[1] + "℃<br/>";
         });
         return item;
@@ -194,7 +194,7 @@ export default {
         let item = "";
         p.forEach(v => {
           item +=
-            // this.dateFomat(v.value[0]) +
+            utils.dateFomat(v.value[0]) +
             "<br/>" + "电量" + " : " + v.value[1] + "%<br/>";
         });
         return item;
@@ -205,25 +205,9 @@ export default {
       // console.log(p);
       let item = "";
       p.forEach(v => {
-        item += `电压:${v.value[1]}V<br/>`;
+        item += `${utils.dateFomat(v.value[0])}<br/>电压:${v.value[1]}V<br/>`;
       });
       return item;
-    },
-    dateFomat(str) {
-      console.log("时间戳===》》》", str);
-      let timeDate = new Date(str);
-      let year = timeDate.getFullYear();
-      let mounth = timeDate.getMonth() + 1;
-      let day = timeDate.getDate();
-      let hours = timeDate.getHours();
-      let minute = timeDate.getMinutes();
-      let second = timeDate.getSeconds();
-      mounth = mounth < 10 ? `0${mounth}` : mounth;
-      day = day < 10 ? `0${day}` : day;
-      hours = hours < 10 ? `0${hours}` : hours;
-      minute = minute < 10 ? `0${minute}` : minute;
-      second = second < 10 ? `0${second}` : second;
-      return `${year}-${mounth}-${day} ${hours}:${minute}:${second}`;
     }
   }
 };
