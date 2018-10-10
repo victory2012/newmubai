@@ -120,7 +120,7 @@
 
 
 <script>
-import { Toast } from "mint-ui";
+import { Toast,Indicator } from "mint-ui";
 import utils from "@/utils/utils";
 import lineEchart from "./historyChart";
 import lnglatTrabsofor from "@/utils/longlatTransfor";
@@ -200,11 +200,11 @@ export default {
       let startTime = utils.toUTCTime(utils.startTime(this.showStartTime));
       let endTime = utils.toUTCTime(utils.endTime(this.showEndTime));
       this.getChartDatafun(startTime, endTime);
-      // this.getChartDatafun("20181001160000", "20181009155959");
     },
     /* 获取Echart相关数据 以及 地图坐标 */
     getChartDatafun(startTime, endTime) {
       this.loading = true;
+      Indicator.open();
       // Toast("开始请求数据");
       this.$axios
         .get(
@@ -213,6 +213,7 @@ export default {
           }/data2?startTime=${startTime}&endTime=${endTime}`
         )
         .then(res => {
+          Indicator.close();
           this.dataObj = {
             singleVoltage: [],
             timeArr: [],
@@ -320,9 +321,10 @@ export default {
     },
     /* 获取公司信息 */
     getCompanyInfo(hostObj) {
-      console.log(hostObj);
+      Indicator.open();
       this.$axios.get(`/battery_group/${hostObj.hostId}/info`).then(res => {
         console.log(res);
+        Indicator.close();
         this.companyInfo = "";
         if (res.data && res.data.code === 0 && res.data.data) {
           let result = res.data.data;
@@ -375,6 +377,7 @@ export default {
     timeZoom() {},
     /* 历史告警 */
     getAlarmDataFun() {
+      Indicator.open();
       let startTime = utils.toUTCTime(utils.startTime(this.showStartTime));
       let endTime = utils.toUTCTime(utils.endTime(this.showEndTime));
       let pageObj = {
@@ -389,6 +392,7 @@ export default {
           pageObj
         )
         .then(res => {
+          Indicator.close();
           if (res.data && res.data.code === 0) {
             let result = res.data.data;
             if (result) {
@@ -426,6 +430,7 @@ export default {
     },
     /* 历史补水 */
     getliquidDataFun() {
+      Indicator.open();
       let startTime = utils.toUTCTime(utils.startTime(this.showStartTime));
       let endTime = utils.toUTCTime(utils.endTime(this.showEndTime));
       let pageObj = {
@@ -442,6 +447,7 @@ export default {
           pageObj
         )
         .then(res => {
+          Indicator.close();
           console.log(res);
           if (res.data && res.data.code === 0) {
             let result = res.data.data;

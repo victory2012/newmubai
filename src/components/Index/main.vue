@@ -67,6 +67,7 @@ import {
   Popup,
   PaletteButton,
   Picker,
+  Indicator,
   Loadmore
 } from "mint-ui";
 import { checkPermisstion } from "../../common/js/auth";
@@ -120,8 +121,6 @@ export default {
     };
   },
   methods: {
-    // main_log() {},
-    // sub_log() {},
     handleBottomChange(status) {
       this.bottomStatus = status;
     },
@@ -157,6 +156,7 @@ export default {
       }
     },
     searchInput() {
+      this.tableData = [];
       this.getBatteryList();
     },
     switchCompany() {
@@ -171,11 +171,13 @@ export default {
     searchBind() {
       this.isShowbind = false;
       this.searchContent.bindStatus = 1;
+      this.tableData = [];
       this.getBatteryList();
     },
     searchNoBind() {
       this.isShowbind = false;
       this.searchContent.bindStatus = 2;
+      this.tableData = [];
       this.getBatteryList();
     },
     clearAll() {
@@ -190,6 +192,7 @@ export default {
       this.getBatteryList();
     },
     getBatteryList() {
+      Indicator.open();
       let options = {
         pageSize: this.pageSize,
         pageNum: this.currentPage,
@@ -208,6 +211,7 @@ export default {
       };
       this.$axios.get("/battery_group", options).then(res => {
         console.log(res);
+        Indicator.close();
         if (res.data && res.data.code === 0) {
           let result = res.data.data;
           this.total = result.total;
@@ -276,15 +280,6 @@ export default {
     }
   },
   activated() {
-    this.getBatteryList();
-    this.getCompanyId();
-    this.getBatteryModelList();
-    this.wrapperHeight =
-      document.documentElement.clientHeight -
-      this.$refs.wrapper.getBoundingClientRect().top -
-      53;
-  },
-  mounted() {
     // this.getBatteryList();
     // this.getCompanyId();
     // this.getBatteryModelList();
@@ -292,6 +287,15 @@ export default {
     //   document.documentElement.clientHeight -
     //   this.$refs.wrapper.getBoundingClientRect().top -
     //   53;
+  },
+  mounted() {
+    this.getBatteryList();
+    this.getCompanyId();
+    this.getBatteryModelList();
+    this.wrapperHeight =
+      document.documentElement.clientHeight -
+      this.$refs.wrapper.getBoundingClientRect().top -
+      53;
   }
 };
 </script>

@@ -61,7 +61,7 @@ const router = new Router({
         bottomId: 'index'
       },
       meta: {
-        keepAlive: true
+        keepAlive: false
       },
       component: Index
     },

@@ -56,7 +56,8 @@
 </template>
 
 <script>
-import { Toast, InfiniteScroll, Spinner, Popup } from "mint-ui";
+
+import { Toast, InfiniteScroll,Indicator, Spinner, Popup } from "mint-ui";
 import detail from "./detail";
 import utils from "@/utils/utils";
 import lnglatTrabsofor from "../../utils/longlatTransfor";
@@ -95,12 +96,14 @@ export default {
       this.bottomStatus = status;
     },
     getListData() {
+      Indicator.open();
       let pageObj = {
         pageSize: 15,
         pageNum: this.nowpage
       };
       this.$axios.get("/battery_group_event", pageObj).then(res => {
         console.log(res);
+        Indicator.close();
         if (res.data && res.data.code === 0) {
           let result = res.data.data;
           // this.tableData = [];

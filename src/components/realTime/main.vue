@@ -143,7 +143,7 @@
 <script>
 import Paho from "Paho";
 import echarts from "echarts";
-import { Toast } from "mint-ui";
+import { Toast, Indicator } from "mint-ui";
 import mqttConfig from "@/api/mqtt.config";
 import utils from "@/utils/utils";
 import mapContainer from "./map";
@@ -211,6 +211,7 @@ export default {
     this.dataObj = {};
     this.ReceiveObj = {};
     // clearInterval(this.timer);
+    clearInterval(this.decriseTime);
   },
   methods: {
     componentInit() {
@@ -247,8 +248,10 @@ export default {
       }
     },
     getCompanyInfo() {
+      Indicator.open();
       this.$axios.get(`/battery_group/${this.IdObj.hostId}/info`).then(res => {
         console.log(res);
+        Indicator.close();
         this.companyInfo = "";
         if (res.data && res.data.code === 0 && res.data.data) {
           if (this.markerArr.length > 0) {
@@ -275,8 +278,9 @@ export default {
     getData() {
       let startTime = utils.getFourHours();
       let endTime = utils.getNowTime();
-      console.log('startTime', startTime);
-      console.log('endTime', endTime);
+      Indicator.open();
+      // console.log('startTime', startTime);
+      // console.log('endTime', endTime);
       // Toast("图表数据");
       this.$axios
         .get(
@@ -286,6 +290,7 @@ export default {
         )
         .then(res => {
           console.log(res);
+          Indicator.close();
           if (res.data && res.data.code === 0) {
             let result = res.data.data;
             this.dataObj = {
@@ -385,6 +390,8 @@ export default {
         let message = new Paho.MQTT.Message("c:get");
         message.destinationName = `cmd/${this.IdObj.deviceCode}`;
         mqttClient.send(message);
+      } else {
+        Toast("网络连接失败，请稍后重试")
       }
     },
     connectMqtt() {
