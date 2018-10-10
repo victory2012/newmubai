@@ -18,7 +18,7 @@
       <div class="VerButton" @click="getSmsCode" type="primary">{{smsMsg}}</div>
     </div>
     <mt-button @click="login" class="Loginbutton" type="primary">登录</mt-button>
-    <!-- <mt-button @click="testlogin" class="Loginbutton" type="primary">登录</mt-button> -->
+    <mt-button @click="testlogin" class="Loginbutton" type="primary">登录</mt-button>
   </div>
 </template>
 
@@ -43,7 +43,7 @@ export default {
       hasGetSms: false
     };
   },
-  mounted() {
+  activated() {
     let codes = this.getQueryString();
     console.log(codes.code);
     if (codes.code) {
@@ -70,16 +70,16 @@ export default {
   },
   methods: {
     getQueryString() {
-      var qs = location.search.substr(1), // 获取url中"?"符后的字串
-        args = {}, // 保存参数数据的对象
-        items = qs.length ? qs.split("&") : [], // 取得每一个参数项,
-        item = null,
-        len = items.length;
+      let qs = window.location.search.substr(1); // 获取url中"?"符后的字串
+      let args = {}; // 保存参数数据的对象
+      let items = qs.length ? qs.split("&") : []; // 取得每一个参数项,
+      let item = null;
+      let len = items.length;
 
-      for (var i = 0; i < len; i++) {
+      for (let i = 0; i < len; i++) {
         item = items[i].split("=");
-        var name = decodeURIComponent(item[0]),
-          value = decodeURIComponent(item[1]);
+        let name = decodeURIComponent(item[0]);
+        let value = decodeURIComponent(item[1]);
         if (name) {
           args[name] = value;
         }

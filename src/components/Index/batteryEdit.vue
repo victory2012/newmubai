@@ -1,50 +1,42 @@
 <template>
-<div class="bind-content">
-  <div class="headNav">
-    <mt-header class="Loginhead" v-bind:title="'更改'+item.text">
-      <router-link to="/batteryDetail" slot="left">
-        <mt-button  icon="back"></mt-button>
-      </router-link>
-      <mt-button icon="" slot="right" @click.stop="_submit">保存</mt-button>
-    </mt-header>
-  </div>
+  <div class="bind-content">
+    <div class="headNav">
+      <mt-header class="Loginhead" v-bind:title="'更改'+item.text">
+        <router-link to="/batteryDetail" slot="left">
+          <mt-button icon="back"></mt-button>
+        </router-link>
+        <mt-button icon="" slot="right" @click.stop="_submit">保存</mt-button>
+      </mt-header>
+    </div>
 
-  <div v-if="item.type=='text'">
-    <mt-field v-bind:placeholder="'请输入'+item.text" type="text" v-model="item.val"></mt-field>
-  </div>
-  <div v-if="item.type=='mumber'">
-    <mt-field v-bind:placeholder="'请输入'+item.text" type="number" v-model="item.val"></mt-field>
-  </div>
-  <div v-if="item.type=='date'"  @click="openDatePicker" class="mint-cell cell-val">
-    {{showVal || '请点击选择'+item.text}}
-  </div>
-  <div v-if="item.type=='select'"  @click="openPopPicker" class="mint-cell cell-val">
-    {{showVal || '请点击选择'+item.text}}
-  </div>
+    <div v-if="item.type=='text'">
+      <mt-field v-bind:placeholder="'请输入'+item.text" type="text" v-model="item.val"></mt-field>
+    </div>
+    <div v-if="item.type=='mumber'">
+      <mt-field v-bind:placeholder="'请输入'+item.text" type="number" v-model="item.val"></mt-field>
+    </div>
+    <div v-if="item.type=='date'" @click="openDatePicker" class="mint-cell cell-val">
+      {{showVal || '请点击选择'+item.text}}
+    </div>
+    <div v-if="item.type=='select'" @click="openPopPicker" class="mint-cell cell-val">
+      {{showVal || '请点击选择'+item.text}}
+    </div>
 
-  <mt-datetime-picker
-    ref="picker"
-    type="date"
-    v-model="date"
-    year-format="{value} 年"
-    month-format="{value} 月"
-    date-format="{value} 日"
-    @confirm="dateChange">
-  </mt-datetime-picker>
+    <mt-datetime-picker ref="picker" type="date" v-model="date" year-format="{value} 年" month-format="{value} 月" date-format="{value} 日" @confirm="dateChange">
+    </mt-datetime-picker>
 
-  <mt-popup v-model="popupVisible" position="bottom" class="mint-popup-4">
-    <mt-picker :slots="selectOpts" @change="onValuesChange" :visible-item-count="3" :show-toolbar="true">
-      <div class="mint-datetime-action mint-datetime-cancel" @click.stop="cancel">取消</div>
-      <div class="mint-datetime-action mint-datetime-confirm" @click.stop="ok">确定</div>
-    </mt-picker>
-  </mt-popup>
+    <mt-popup v-model="popupVisible" position="bottom" class="mint-popup-4">
+      <mt-picker :slots="selectOpts" @change="onValuesChange" :visible-item-count="3" :show-toolbar="true">
+        <div class="mint-datetime-action mint-datetime-cancel" @click.stop="cancel">取消</div>
+        <div class="mint-datetime-action mint-datetime-confirm" @click.stop="ok">确定</div>
+      </mt-picker>
+    </mt-popup>
 
-</div>
+  </div>
 </template>
 
 <script>
 import { MessageBox, Toast } from "mint-ui";
-import { Indicator } from "mint-ui";
 import * as _m from "moment";
 
 export default {
@@ -67,13 +59,9 @@ export default {
   },
   methods: {
     edit(params) {
-      Indicator.open();
-
       this.httpRequest
         .editBatteryItem(params)
         .then(res => {
-          Indicator.close();
-
           Toast({
             message: res["message"],
             position: "bottom"
@@ -82,8 +70,6 @@ export default {
           // this.$router.push("/index");
         })
         .catch(err => {
-          Indicator.close();
-
           Toast({
             message: err["response"]["data"]["message"],
             position: "bottom",
@@ -145,7 +131,7 @@ export default {
         this.showVal = sItem[0].no || sItem[0].name;
       }
     }
-  },
+  }
   // activated() {
   //   // init
   //   Object.assign(this.$data, this.$options.data());

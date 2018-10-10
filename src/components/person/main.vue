@@ -42,7 +42,7 @@
 </template>
 
 <script>
-import { Toast, Indicator } from "mint-ui";
+import { Toast } from "mint-ui";
 import utils from "@/utils/utils";
 export default {
   name: "warning",
@@ -53,9 +53,7 @@ export default {
   },
   methods: {
     unbindWX() {
-      Indicator.open();
       this.$axios.put("/user/unbind_wx").then(res => {
-        Indicator.close();
         if (res.data && res.data.code === 0) {
           Toast("解绑成功");
           setTimeout(() => {

@@ -100,14 +100,14 @@ export default {
   watch: {
     summary: {
       handler: function(vals) {
-        console.log(vals);
+        // console.log(vals);
         this.summaryChange(vals);
       },
       deep: true
     },
     eventSummary: {
       handler: function(vals) {
-        console.log(vals);
+        // console.log(vals);
         this.eventSummaryChange(vals);
       },
       deep: true
@@ -145,8 +145,8 @@ export default {
       }
     },
     summaryChange(peiData) {
-      console.log("peiData", peiData);
-      console.log("peiData", peiData.summary);
+      // console.log("peiData", peiData);
+      // console.log("peiData", peiData.summary);
       let voltageOptions = _.cloneDeep(this.pieOption);
       voltageOptions.legend.data = ["充电时间", "放电时间", "空载时间"];
       voltageOptions.tooltip.formatter = p => {

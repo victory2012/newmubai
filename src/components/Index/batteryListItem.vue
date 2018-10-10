@@ -7,57 +7,57 @@
           <img v-show="!listData.bindVisible" src="../../../static/jiantou2.svg" alt="">
           <img v-show="listData.bindVisible" src="../../../static/jiantou1.svg" alt="">
         </div>
-          <div class="left common">
-            <span class="number">
-              {{listData.code}}
-            </span>
-            <span class="sub">
-              电池组编号
-            </span>
-          </div>
-          <div class="binds">
-            {{listData.bindingName}}
-          </div>
-          <div class="right common">
-            <span class="number">
-              {{listData.deviceCode || "无"}}
-            </span>
-            <span class="sub">
-              设备编号
-            </span>
-          </div>
+        <div class="left common">
+          <span class="number">
+            {{listData.code}}
+          </span>
+          <span class="sub">
+            电池组编号
+          </span>
         </div>
-        <div class="bottom-wrapper clearfix">
-          <div class="item">
-            电池组型号
-            <span>{{listData.model}}</span>
-          </div>
-          <div class="item">
-            电池组规格
-            <span>{{listData.norm}}</span>
-          </div>
-          <div class="item item1">
-            额定电压
-            <span>{{listData.voltage}}</span>
-          </div>
+        <div class="binds">
+          {{listData.bindingName}}
         </div>
-        <div v-show="listData.visitBtn" class="bind-menu">
-          <div v-if="listData.deviceId === null" class="is-bind bind">
-            <div @click.stop="scanBind" class="bind-menu-item">扫码绑定</div>
-            <div @click.stop="handBind(listData)" class="bind-menu-item">手动绑定</div>
-            <div @click.stop="detailInfo(listData)" class="bind-menu-item">详情</div>
-          </div>
-          <div v-else class="not-bind bind">
-            <div @click.stop="cancelBind(listData)" class="bind-menu-item">解绑</div>
-            <div @click.stop="detailInfo(listData)" class="bind-menu-item">详情</div>
-          </div>
+        <div class="right common">
+          <span class="number">
+            {{listData.deviceCode || "无"}}
+          </span>
+          <span class="sub">
+            设备编号
+          </span>
+        </div>
+      </div>
+      <div class="bottom-wrapper clearfix">
+        <div class="item">
+          电池组型号
+          <span>{{listData.model}}</span>
+        </div>
+        <div class="item">
+          电池组规格
+          <span>{{listData.norm}}</span>
+        </div>
+        <div class="item item1">
+          额定电压
+          <span>{{listData.voltage}}</span>
+        </div>
+      </div>
+      <div v-show="listData.visitBtn" class="bind-menu">
+        <div v-if="listData.deviceId === null" class="is-bind bind">
+          <div @click.stop="scanBind" class="bind-menu-item">扫码绑定</div>
+          <div @click.stop="handBind(listData)" class="bind-menu-item">手动绑定</div>
+          <div @click.stop="detailInfo(listData)" class="bind-menu-item">详情</div>
+        </div>
+        <div v-else class="not-bind bind">
+          <div @click.stop="cancelBind(listData)" class="bind-menu-item">解绑</div>
+          <div @click.stop="detailInfo(listData)" class="bind-menu-item">详情</div>
         </div>
       </div>
     </div>
+  </div>
 </template>
 
 <script>
-import { MessageBox, Toast, Indicator } from "mint-ui";
+import { MessageBox, Toast } from "mint-ui";
 /* eslint-disable */
 import WX from "wx";
 import _cache from "../cache";
@@ -158,16 +158,12 @@ export default {
       }
     },
     edit(dId) {
-      Indicator.open();
-
       this.httpRequest
         .batteryBind({
           id: this.itemData.id,
           device_id: dId
         })
         .then(res => {
-          Indicator.close();
-
           Toast({
             message: res["message"],
             position: "bottom"
@@ -179,8 +175,6 @@ export default {
           });
         })
         .catch(err => {
-          Indicator.close();
-
           Toast({
             message: err["response"]["data"]["message"],
             position: "",

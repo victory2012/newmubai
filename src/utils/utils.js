@@ -13,6 +13,7 @@ const daysInMonth = [
   [30],
   [31]
 ];
+const TimezoneOffset = (new Date().getTimezoneOffset()) * 60000;
 export default {
   accountType: type => {
     let str = type.toString();
@@ -60,8 +61,9 @@ export default {
     let hour = str.substring(8, 10);
     let minute = str.substring(10, 12);
     let seconds = str.substring(12, 14);
-    let utc = `${yy}-${mm}-${day} ${hour}:${minute}:${seconds} UTC`;
-    return this.a.dateFomat(utc);
+    let utc = `${yy}-${mm}-${day} ${hour}:${minute}:${seconds}`;
+    let msec = new Date(utc).getTime() + (-TimezoneOffset);
+    return this.a.dateFomat(msec);
   },
   Days: str => {
     let days = parseInt(str / 86400000);
@@ -374,8 +376,11 @@ export default {
     let hour = str.substring(8, 10);
     let minute = str.substring(10, 12);
     let seconds = str.substring(12, 14);
-    let utc = `${yy}-${mm}-${day} ${hour}:${minute}:${seconds} UTC`;
-    return new Date(utc).getTime();
+    let utc = `${yy}-${mm}-${day} ${hour}:${minute}:${seconds}`;
+    let msec = new Date(utc).getTime() + (-TimezoneOffset);
+    console.log('utcTime ====>>>', msec);
+    // return utc;
+    return msec;
   },
   DifferTime: (time1, time2) => {
     let startTime = new Date(time1).getTime();

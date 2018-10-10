@@ -17,13 +17,13 @@
 
       <div class="searchIpt">
         <div @click="searchBetteryNo" class="searchBtn fl"><img src="../../../static/search.jpg" alt=""></div>
-          <input v-model="betteryNo" class="search" type="text" placeholder="电池编号/设备编号">
-          <div class="batteryList" v-show="showBatteryList">
-            <ul>
-              <li v-for="key in tableData" :key="key.code" @click="chooseList(key)">{{key.code}}</li>
-            </ul>
-          </div>
+        <input v-model="betteryNo" class="search" type="text" placeholder="电池编号/设备编号">
+        <div class="batteryList" v-show="showBatteryList">
+          <ul>
+            <li v-for="key in tableData" :key="key.code" @click="chooseList(key)">{{key.code}}</li>
+          </ul>
         </div>
+      </div>
     </nav>
     <div class="MMwrap"></div>
     <div class="message">
@@ -115,8 +115,9 @@
       </li>
     </ul>
     <div class="wrap-map">
-      <p v-if="loadMap">地图未加载</p>
-      <div id="map-container" class="realMapContainer"></div>
+      <map-container :mapCenter="mapPosition" @addressCallback="addressBack"></map-container>
+      <!-- <p v-if="loadMap">no</p>
+      <div id="mapContainers" class="realMapContainer"></div> -->
     </div>
 
     <div class="updateTime">
@@ -135,32 +136,30 @@
       <div>过去4小时监测数据</div>
       <div class="dami"></div>
     </div>
-    <echart-map :chartData="dataObj" :mqttData="ReceiveObj"></echart-map>
+    <line-chart :chartData="dataObj" :mqttData="ReceiveObj"></line-chart>
   </div>
 </template>
 
 <script>
-import AMap from "AMap";
 import Paho from "Paho";
 import echarts from "echarts";
 import { Toast } from "mint-ui";
 import mqttConfig from "@/api/mqtt.config";
-import lnglatTrabsofor from "@/utils/longlatTransfor";
 import utils from "@/utils/utils";
-import echartMap from "./Linechart";
+import mapContainer from "./map";
+import lineChart from "./Linechart";
 
 let mqttClient = {};
-let map;
-let marker;
-const PI = 3.14159265358979324;
-const x_pi = (3.14159265358979324 * 3000.0) / 180.0;
+
 export default {
   name: "realTime",
   components: {
-    echartMap
+    lineChart,
+    mapContainer
   },
   data() {
     return {
+      mapPosition: {},
       loadMap: true, // 调试用的
       showBatteryList: false,
       companyInfo: {},
@@ -183,54 +182,55 @@ export default {
       betteryNo: ""
     };
   },
-  watch: {
-    betteryNo: {
-      handler: function(val) {
-        if (val) {
-          this.getBatteryList(val);
-        }
-      },
-      deep: true
-    }
-  },
+  // watch: {
+  //   "$route.query.hostId": {
+  //     handler: function(val) {
+  //       console.log("hostId", typeof val);
+  //       if (val != undefined) {
+  //         this.componentInit();
+  //       }
+  //     },
+  //     deep: true
+  //   }
+  // },
+  // activated() {
+  //   this.init();
+  // },
   mounted() {
-    this.hostId = this.$route.query.hostId;
-    this.deviceId = this.$route.query.deviceId;
-    this.deviceCode = this.$route.query.deviceCode;
-    this.id = this.$route.query.id;
-    this.IdObj = {
-      hostId: this.hostId,
-      deviceId: this.deviceId,
-      deviceCode: this.deviceCode,
-      id: this.id
-    };
-    this.init();
-    this.mapInit();
+    this.componentInit();
   },
   beforeDestroy() {
-    if (typeof mqttClient === "object" && mqttClient.isConnected()) {
+    if (
+      typeof mqttClient === "object" &&
+      typeof mqttClient.isConnected === "function"
+    ) {
       mqttClient.disconnect();
       mqttClient = {};
-      map = null;
     }
     this.dataObj = {};
     this.ReceiveObj = {};
-    clearInterval(this.timer);
+    // clearInterval(this.timer);
   },
   methods: {
-    mapInit() {
-      map = new AMap.Map("map-container", {
-        resizeEnable: true,
-        zoom: 10
-      });
-      this.loadMap = false;
-    },
-    init() {
+    componentInit() {
+      this.hostId = this.$route.query.hostId;
+      this.deviceId = this.$route.query.deviceId;
+      this.deviceCode = this.$route.query.deviceCode;
+      this.id = this.$route.query.id;
+      this.IdObj = {
+        hostId: this.hostId,
+        deviceId: this.deviceId,
+        deviceCode: this.deviceCode,
+        id: this.id
+      };
       this.connectMqtt();
       this.getCompanyInfo();
       this.getQuantity();
       this.getData();
     },
+    // init() {
+    //   map = new AMap.Map("mapContainers");
+    // },
     /* 获取电量 */
     getQuantity() {
       if (this.IdObj.deviceCode) {
@@ -264,27 +264,17 @@ export default {
           this.companyInfo.fluid = result.fluidLevel === 0 ? "正常" : "异常";
           this.companyInfo.yyddmm = utils.yyyymmdd(new Date());
           this.companyInfo.hhmmss = utils.hhmmss(new Date());
-          this.positionData(position);
+          this.mapPosition = position;
         }
       });
     },
-    /* 发送地址给后台 */
-    addressCallBack(data) {
-      let param = {
-        id: this.IdObj.id,
-        address: data
-      };
-      this.$axios.put(`battery_group/address`, param).then(res => {
-        console.log(res);
-        if (res.data && res.data.code === 0) {
-          this.hasSend = true;
-        }
-      });
+    addressBack(data) {
+      this.address = data;
     },
     getData() {
       let startTime = utils.getFourHours();
       let endTime = utils.getNowTime();
-      Toast("图表数据");
+      // Toast("图表数据");
       this.$axios
         .get(
           `/battery_group/${this.IdObj.hostId}/${
@@ -356,9 +346,8 @@ export default {
       mqttClient.disconnect();
       this.IdObj = data;
       this.showBatteryList = false;
-      this.init();
+      // this.init();
     },
-
     toHisTime() {
       console.log(this.IdObj);
       this.$router.push({
@@ -473,36 +462,7 @@ export default {
         this.ReceiveObj = dataObj;
       }
     },
-    positionData(data) {
-      if (data && data.gcjLongitude) {
-        let position = new AMap.LngLat(data.gcjLongitude, data.gcjLatitude);
-        if (this.markerArr.length > 0) {
-          this.markerArr.forEach(key => {
-            key.setMap(null);
-          });
-        }
-        marker = new AMap.Marker({
-          icon: "https://webapi.amap.com/theme/v1.3/markers/n/mark_b.png",
-          position: position
-        });
-        marker.setMap(map);
-        this.markerArr.push(marker);
-        map.setCenter(position);
-        /* 根据经纬度 用高德查询详细地址 */
-        lnglatTrabsofor(position, res => {
-          let sendAddress = `${res.addressComponent.province}-${
-            res.addressComponent.city
-          }`;
-          if (this.address !== sendAddress) {
-            this.hasSend = false;
-            this.address = sendAddress;
-          }
-          if (!this.hasSend) {
-            this.addressCallBack(sendAddress);
-          }
-        });
-      }
-    },
+
     onConnect() {
       console.log("connect");
       if (
@@ -596,18 +556,18 @@ export default {
   margin-left: 5%;
   margin-top: 40px;
 }
-.wrap-map {
-  width: 94%;
-  height: 220px;
-  margin-left: 3%;
-  text-align: center;
-  border-radius: 5px;
-}
+// .wrap-map {
+//   width: 94%;
+//   height: 220px;
+//   margin-left: 3%;
+//   text-align: center;
+//   border-radius: 5px;
+// }
 
-.realMapContainer {
-  width: 100%;
-  height: 220px;
-}
+// .realMapContainer {
+//   width: 100%;
+//   height: 220px;
+// }
 
 .index {
   // height: 300%;

@@ -45,7 +45,7 @@ export default {
   watch: {
     travelData: {
       handler: function(vals) {
-        console.log("component map", vals);
+        // console.log("component map", vals);
         if (this.trajectory) {
           this.heatMapFun(vals.heatmap);
         } else {
@@ -64,15 +64,15 @@ export default {
       alldistance: 0
     };
   },
+  activated() {
+    this.mapInit();
+  },
   mounted() {
     this.mapInit();
   },
   methods: {
     mapInit() {
-      map = new AMap.Map("map-container", {
-        resizeEnable: true,
-        zoom: 10
-      });
+      map = new AMap.Map("map-container");
       AMap.plugin(["AMap.Heatmap"], () => {
         // 初始化heatmap对象
         heatmap = new AMap.Heatmap(map, {
@@ -118,14 +118,18 @@ export default {
       }
       this.alldistance = 0; // 两个点之间的距离
       for (let i = 0; i < travels.length; i++) {
-        var distance, p1, p2;
+        let dis;
+        let p1;
+        let p2;
         let key = travels[i];
         if (i < travels.length - 1) {
           p1 = new AMap.LngLat(key[0], key[1]);
           p2 = new AMap.LngLat(travels[i + 1][0], travels[i + 1][1]);
-          distance = Math.round(p1.distance(p2));
+          dis = Math.round(p1.distance(p2));
         }
-        this.alldistance += distance;
+        if (typeof dis === "number") {
+          this.alldistance += dis;
+        }
       }
       AMapUI.load(["ui/misc/PathSimplifier"], PathSimplifier => {
         if (!PathSimplifier.supportCanvas) {
@@ -173,9 +177,11 @@ export default {
             let position = new AMap.LngLat(point[0], point[1]);
             positionPicker.start(position);
             positionPicker.on("success", result => {
-              var info = [];
-              info.push(`<div><div>时间：${utils.dateFomat(point[2])}</div>`);
-              info.push(
+              let infoAddress = [];
+              infoAddress.push(
+                `<div><div>时间：${utils.dateFomat(point[2])}</div>`
+              );
+              infoAddress.push(
                 `<div style="font-size:14px;">地址 :${
                   result.address
                 }</div></div>`

@@ -19,16 +19,16 @@ const warning = () =>
 const warningDetail = () =>
   import( /* webpackChunkName: "warningDetail" */ `@/components/warning/detail`);
 const person = () =>
-  import( /* webpackChunkName: "person" */ `@/components/person/main`);
+  import( /* webpackChunkName: "person" */ `@/components/person/main`)
 const detail = () =>
-  import( /* webpackChunkName: "detail" */ `@/components/detail/main`);
+  import( /* webpackChunkName: "detail" */ `@/components/detail/main`)
 const hisTime = () =>
-  import( /* webpackChunkName: "hisTime" */ `@/components/hisTime/main`);
+  import( /* webpackChunkName: "hisTime" */ `@/components/hisTime/main`)
 
-
-Vue.use(Router)
+Vue.use(Router);
 
 const router = new Router({
+  mode: 'hash',
   routes: [{
       path: '/',
       redirect: '/login'
@@ -49,6 +49,9 @@ const router = new Router({
         bottomNavVisible: false,
         bottomId: 'login'
       },
+      meta: {
+        keepAlive: true
+      },
       component: Login
     }, {
       path: '/index',
@@ -56,6 +59,9 @@ const router = new Router({
       routeSets: {
         bottomNavVisible: true,
         bottomId: 'index'
+      },
+      meta: {
+        keepAlive: true
       },
       component: Index
     },
@@ -65,6 +71,9 @@ const router = new Router({
       routeSets: {
         bottomNavVisible: false,
       },
+      meta: {
+        keepAlive: true
+      },
       component: batteryBind
     },
     {
@@ -72,6 +81,9 @@ const router = new Router({
       name: 'batteryDetail',
       routeSets: {
         bottomNavVisible: false,
+      },
+      meta: {
+        keepAlive: true
       },
       component: batteryDetail
     },
@@ -81,6 +93,9 @@ const router = new Router({
       routeSets: {
         bottomNavVisible: false,
       },
+      meta: {
+        keepAlive: true
+      },
       component: batteryEdit
     },
     {
@@ -89,12 +104,18 @@ const router = new Router({
       routeSets: {
         bottomNavVisible: false
       },
+      meta: {
+        keepAlive: false
+      },
       component: realTime
     }, {
       path: '/hisTime',
       name: 'hisTime',
       routeSets: {
         bottomNavVisible: false
+      },
+      meta: {
+        keepAlive: false
       },
       component: hisTime
     }, {
@@ -103,6 +124,9 @@ const router = new Router({
       routeSets: {
         bottomNavVisible: true,
         bottomId: 'warning'
+      },
+      meta: {
+        keepAlive: true
       },
       component: warning
     }, {
@@ -119,12 +143,18 @@ const router = new Router({
         bottomNavVisible: true,
         bottomId: 'person'
       },
+      meta: {
+        keepAlive: true
+      },
       component: person
     }, {
       path: '/detail',
       name: 'detail',
       routeSets: {
         bottomNavVisible: false,
+      },
+      meta: {
+        keepAlive: false
       },
       component: detail
     }

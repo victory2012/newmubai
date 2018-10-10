@@ -2,7 +2,7 @@
   <!--listData.data-->
   <div class="warrps">
 
-    <div class="wraningItem" v-for="item in alarmData" :key="item.time">
+    <div v-if="alarmData.length > 0" class="wraningItem" v-for="item in alarmData" :key="item.time">
       <ul class="WItop">
         <li class="fl">{{item.index}}</li>
         <li class="fl">
@@ -24,6 +24,7 @@
 
       </ul>
     </div>
+    <p v-else>暂无数据</p>
   </div>
 
 </template>
@@ -54,9 +55,6 @@ export default {
         this.alarmData = val;
       }
     }
-  },
-  mounted() {
-    console.log(this.alaData);
   }
 };
 </script>

@@ -14,11 +14,11 @@
           <img v-if="isShowbind" style="width: 20px;height: 20px;" src="../../../static/xiajiantoufff.svg" alt="">
           <img v-else style="width: 20px;height: 20px;" src="../../../static/jiantoufff.svg" alt="">
         </button>
-          <button @click.stop="switchBattery" class="batteryType fr">
-            <p>{{batteryName}}</p><img src="../../../static/xiasanjiao.svg" alt="">
+        <button @click.stop="switchBattery" class="batteryType fr">
+          <p>{{batteryName}}</p><img src="../../../static/xiasanjiao.svg" alt="">
         </button>
-            <button @click.stop="switchCompany" class="qiye fr">
-              <p>{{company}}</p><img src="../../../static/xiasanjiao.svg" alt="">
+        <button @click.stop="switchCompany" class="qiye fr">
+          <p>{{company}}</p><img src="../../../static/xiasanjiao.svg" alt="">
         </button>
 
       </nav>
@@ -67,7 +67,6 @@ import {
   Popup,
   PaletteButton,
   Picker,
-  Indicator,
   Loadmore
 } from "mint-ui";
 import { checkPermisstion } from "../../common/js/auth";
@@ -276,7 +275,7 @@ export default {
       });
     }
   },
-  mounted() {
+  activated() {
     this.getBatteryList();
     this.getCompanyId();
     this.getBatteryModelList();
@@ -284,6 +283,15 @@ export default {
       document.documentElement.clientHeight -
       this.$refs.wrapper.getBoundingClientRect().top -
       53;
+  },
+  mounted() {
+    // this.getBatteryList();
+    // this.getCompanyId();
+    // this.getBatteryModelList();
+    // this.wrapperHeight =
+    //   document.documentElement.clientHeight -
+    //   this.$refs.wrapper.getBoundingClientRect().top -
+    //   53;
   }
 };
 </script>

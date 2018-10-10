@@ -22,7 +22,7 @@
 </template>
 
 <script>
-import { MessageBox, Toast, Indicator } from "mint-ui";
+import { MessageBox, Toast } from "mint-ui";
 import Paho from "Paho";
 import mqttConfig from "../../api/mqtt.config";
 

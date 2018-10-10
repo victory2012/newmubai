@@ -4,7 +4,7 @@
 let locationHost = window.location.host;
 let env = locationHost.indexOf('myriadiot');
 const mqtt = {
-  hostname: env > 0 ? "47.99.120.144" : '47.96.8.239',
+  hostname: env > 0 ? '47.99.120.144' : '47.96.8.239',
   port: 443,
   clientId: `wechat${new Date().getTime()}`,
   timeout: 30,

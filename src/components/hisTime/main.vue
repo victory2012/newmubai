@@ -24,7 +24,7 @@
             <img v-show="topShow" style="width: 20px;height: 20px;" src="../../../static/jiantoufff.svg" alt="">
             <img v-show="!topShow" style="width: 20px;height: 20px;" src="../../../static/xiajiantoufff.svg" alt="">
           </div>
-          </div>
+        </div>
       </nav>
       <mt-datetime-picker ref="picker" type="date" v-model="pickerValue" :endDate="endDate" @confirm="handleConfirm">
       </mt-datetime-picker>
@@ -59,7 +59,8 @@
       </div>
       <div class="MMwrap" :class="{MMwrapNo:!topShow}"></div>
       <div class="chartsLine">
-        <echart-map :chartData="dataObj" :loading="loading" @timeZoom="timeZoom"></echart-map>
+        <line-echart :chartData="dataObj" :loading="loading" @timeZoom="timeZoom"></line-echart>
+        <!-- <echart-map :chartData="dataObj" :loading="loading" @timeZoom="timeZoom"></echart-map> -->
       </div>
 
       <ul class="DataTop">
@@ -119,9 +120,9 @@
 
 
 <script>
-import { Indicator, Toast } from "mint-ui";
+import { Toast } from "mint-ui";
 import utils from "@/utils/utils";
-import echartMap from "./historyChart";
+import lineEchart from "./historyChart";
 import lnglatTrabsofor from "@/utils/longlatTransfor";
 import chartPie from "./echartPie";
 import travelMap from "./map";
@@ -130,7 +131,7 @@ let address;
 export default {
   name: "histime",
   components: {
-    echartMap,
+    lineEchart,
     chartPie,
     travelMap,
     hisAlarm: () => import("./HisWarning.vue"),
@@ -182,41 +183,29 @@ export default {
       showEndTime: utils.sortTime2(new Date())
     };
   },
-  // activated() {
-  //   Toast("activated");
-  // },
+
   mounted() {
-    this.hostObj = this.$route.query;
-    this.getChartData("mounted");
-    this.getCompanyInfo();
-    // Toast("mounted222");
-    // this.mapInit();
-  },
-  created() {
-    this.hostObj = this.$route.query;
-    this.getChartData("created");
-    this.getCompanyInfo();
-    // Toast("created111");
-    // this.mapInit();
+    this.hostObj = {
+      deviceId: this.$route.query.deviceId,
+      hostId: this.$route.query.hostId,
+      deviceCode: this.$route.query.deviceCode,
+      id: this.$route.query.id
+    };
+    this.getChartDatafun("20181001160000", "20181009155959");
+    this.getCompanyInfo(this.hostObj);
   },
   methods: {
     /* 确认按钮 */
-    getChartData(str) {
-      // Toast("getChartData", str);
-      Indicator.open();
-      let startTime = utils.toUTCTime(utils.startTime(this.showStartTime));
-      let endTime = utils.toUTCTime(utils.endTime(this.showEndTime));
-      this.getChartDatafun(startTime, endTime);
+    getChartData() {
+      // let startTime = utils.toUTCTime(utils.startTime(this.showStartTime));
+      // let endTime = utils.toUTCTime(utils.endTime(this.showEndTime));
+
+      this.getChartDatafun("20181001160000", "20181009155959");
     },
     /* 获取Echart相关数据 以及 地图坐标 */
     getChartDatafun(startTime, endTime) {
       this.loading = true;
-      // console.log(this.hostObj);
-
-      // if (!this.hostObj.hostId || !this.hostObj.deviceId) {
-      //   Toast(this.hostObj.hostId);
-      //   return;
-      // }
+      // Toast("开始请求数据");
       this.$axios
         .get(
           `/battery_group/${this.hostObj.hostId}/${
@@ -224,10 +213,9 @@ export default {
           }/data2?startTime=${startTime}&endTime=${endTime}`
         )
         .then(res => {
-          Indicator.close();
           this.dataObj = {
-            timeArr: [],
             singleVoltage: [],
+            timeArr: [],
             temperature: [],
             voltage: [],
             current: [],
@@ -242,27 +230,29 @@ export default {
             }; // 轨迹点集合
             this.resultList = result.list;
             this.resultList.forEach((key, index) => {
-              let timeArr = utils.TimeSconds(key.time); // 时间
+              let timeStr = utils.TimeSconds(key.time); // 时间
+              console.log(timeStr);
+              console.log("key.time", key.time);
               let capacity = Math.round(key.capacity * 100);
               this.dataObj.singleVoltage.push({
-                name: timeArr,
-                value: [timeArr, key.singleVoltage]
+                name: timeStr,
+                value: [timeStr, key.singleVoltage]
               });
               this.dataObj.temperature.push({
-                name: timeArr,
-                value: [timeArr, key.temperature]
+                name: timeStr,
+                value: [timeStr, key.temperature]
               });
               this.dataObj.voltage.push({
-                name: timeArr,
-                value: [timeArr, key.voltage]
+                name: timeStr,
+                value: [timeStr, key.voltage]
               });
               this.dataObj.current.push({
-                name: timeArr,
-                value: [timeArr, -key.current]
+                name: timeStr,
+                value: [timeStr, -key.current]
               });
               this.dataObj.capacity.push({
-                name: timeArr,
-                value: [timeArr, capacity]
+                name: timeStr,
+                value: [timeStr, capacity]
               });
               let gcjLongitude = Number(key.gcjLongitude);
               let gcjLatitude = Number(key.gcjLatitude);
@@ -277,7 +267,7 @@ export default {
                 this.positions.travel.push([
                   key.gcjLongitude,
                   key.gcjLatitude,
-                  timeArr
+                  timeStr
                 ]); // 坐标
                 this.positions.heatmap.push({
                   lng: key.gcjLongitude,
@@ -320,39 +310,33 @@ export default {
       this.$refs.picker1.open();
     },
     handleConfirm(res) {
-      this.startTime = this.getTime(res);
+      // console.log(res);
+      // this.startTime = this.getTime(res);
       this.showStartTime = utils.sortTime2(res);
     },
     handleConfirm1(res) {
-      this.endTime = this.getTime(res);
+      // this.endTime = this.getTime(res);
       this.showEndTime = utils.sortTime2(res);
     },
     /* 获取公司信息 */
-    getCompanyInfo() {
-      Toast("getCompanyInfo");
-      this.$axios
-        .get(`/battery_group/${this.hostObj.hostId}/info`)
-        .then(res => {
-          console.log(res);
-          this.companyInfo = "";
-          if (res.data && res.data.code === 0 && res.data.data) {
-            if (this.markerArr.length > 0) {
-              this.markerArr.forEach(key => {
-                key.setMap(null);
-              });
-            }
-            let result = res.data.data;
-            let position = {
-              gcjLongitude: result.gcjLongitude,
-              gcjLatitude: result.gcjLatitude
-            };
-            this.companyInfo = result;
-            this.companyInfo.fluid = result.fluidLevel === 0 ? "正常" : "异常";
-            this.companyInfo.yyddmm = utils.yyyymmdd(new Date());
-            this.companyInfo.hhmmss = utils.hhmmss(new Date());
-            this.positionData(position);
-          }
-        });
+    getCompanyInfo(hostObj) {
+      console.log(hostObj);
+      this.$axios.get(`/battery_group/${hostObj.hostId}/info`).then(res => {
+        console.log(res);
+        this.companyInfo = "";
+        if (res.data && res.data.code === 0 && res.data.data) {
+          let result = res.data.data;
+          let position = {
+            gcjLongitude: result.gcjLongitude,
+            gcjLatitude: result.gcjLatitude
+          };
+          this.companyInfo = result;
+          this.companyInfo.fluid = result.fluidLevel === 0 ? "正常" : "异常";
+          this.companyInfo.yyddmm = utils.yyyymmdd(new Date());
+          this.companyInfo.hhmmss = utils.hhmmss(new Date());
+          this.positionData(position);
+        }
+      });
     },
 
     /* 根据经纬度 用高德查询详细地址 */
@@ -387,6 +371,7 @@ export default {
         }
       });
     },
+
     timeZoom() {},
     /* 历史告警 */
     getAlarmDataFun() {
@@ -404,7 +389,6 @@ export default {
           pageObj
         )
         .then(res => {
-          Indicator.close();
           if (res.data && res.data.code === 0) {
             let result = res.data.data;
             if (result) {
@@ -434,12 +418,10 @@ export default {
       this.isA = true;
       this.alarm = true;
       this.alarmFluid = false;
-      Indicator.open();
       this.getAlarmDataFun();
     },
     getliquidData() {
       this.isA = false;
-      Indicator.open();
       this.getliquidDataFun();
     },
     /* 历史补水 */
@@ -460,7 +442,6 @@ export default {
           pageObj
         )
         .then(res => {
-          Indicator.close();
           console.log(res);
           if (res.data && res.data.code === 0) {
             let result = res.data.data;
@@ -508,7 +489,6 @@ export default {
         this.pages = this.totalPage;
         return;
       }
-      Indicator.open();
       if (this.alarm) {
         this.getAlarmData();
       } else {
@@ -517,7 +497,7 @@ export default {
     },
     prevPage() {
       this.pages--;
-      Indicator.open();
+
       if (this.pages < 1) {
         this.pages = 1;
         return;

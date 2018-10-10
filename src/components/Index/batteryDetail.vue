@@ -92,7 +92,6 @@
 
 <script>
 // import { MessageBox, Toast } from "mint-ui";
-// import { Indicator } from "mint-ui";
 // import * as _m from "moment";
 // import _cache from "../cache.js";
 // import { checkPermisstion } from "../../common/js/auth";

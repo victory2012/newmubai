@@ -1,6 +1,9 @@
 <template>
   <div id="app">
-    <router-view />
+    <keep-alive>
+      <router-view v-if="$route.meta.keepAlive" />
+    </keep-alive>
+    <router-view v-if="!$route.meta.keepAlive" />
     <bottomNav class="bottomNav"></bottomNav>
   </div>
 </template>
@@ -31,7 +34,6 @@ body {
 .bottomNav {
   position: fixed;
   bottom: 0;
-  height: 53px;
   width: 100%;
 }
 </style>

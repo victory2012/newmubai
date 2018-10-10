@@ -1,22 +1,10 @@
 <template>
   <div class="bgFFF">
-    <div class="chartInfo" id="echart1"></div>
-    <div class="chartInfo" id="echart2"></div>
-    <div class="chartInfo" id="echart3"></div>
-    <div class="chartInfo" id="echart5"></div>
-    <div class="chartInfo" id="echart4"></div>
-    <!-- <div class="chartWarrp">
-      <div class="chartInfo" id="echart1"></div>
-      <div class="chartInfo" id="echart2"></div>
-    </div>
-    <div class="chartWarrp">
-      <div class="chartInfo" id="echart3"></div>
-      <div class="chartInfo" id="echart5"></div>
-    </div>
-    <div class="chartWarrp">
-      <div class="chartInfo" id="echart4"></div>
-      <div class="chartInfo" id="echart4"></div>
-    </div> -->
+    <div class="chartInfo" id="echartV"></div>
+    <div class="chartInfo" id="echartSv"></div>
+    <div class="chartInfo" id="echartA"></div>
+    <div class="chartInfo" id="echartC"></div>
+    <div class="chartInfo" id="echartT"></div>
   </div>
 </template>
 
@@ -24,6 +12,7 @@
 /* eslint-disable */
 import echarts from "echarts";
 import _ from "lodash";
+import { Toast } from "mint-ui";
 import utils from "@/utils/utils";
 import options from "@/config/echartOptions";
 
@@ -58,6 +47,8 @@ export default {
     },
     chartData: {
       handler: function(curVal) {
+        Toast("数据已更新");
+        // console.log("chartData", curVal);
         this.dataChange(curVal);
       },
       deep: true
@@ -66,13 +57,16 @@ export default {
   mounted() {
     this.init();
   },
+  // created() {
+  //   this.init();
+  // },
   methods: {
     init() {
-      let $echartsDOM1 = document.getElementById("echart1");
-      let $echartsDOM2 = document.getElementById("echart2");
-      let $echartsDOM3 = document.getElementById("echart3");
-      let $echartsDOM4 = document.getElementById("echart4");
-      let $echartsDOM5 = document.getElementById("echart5");
+      let $echartsDOM1 = document.getElementById("echartV");
+      let $echartsDOM2 = document.getElementById("echartSv");
+      let $echartsDOM3 = document.getElementById("echartA");
+      let $echartsDOM4 = document.getElementById("echartC");
+      let $echartsDOM5 = document.getElementById("echartT");
       this.myEcharts1 = echarts.init($echartsDOM1);
       this.myEcharts2 = echarts.init($echartsDOM2);
       this.myEcharts3 = echarts.init($echartsDOM3);
@@ -137,6 +131,7 @@ export default {
       }
     },
     dataChange(datas) {
+      console.log("chartData", datas);
       let voltageOptions = _.cloneDeep(options);
       voltageOptions.title.text = "电压";
       voltageOptions.yAxis.axisLabel.formatter = "{value} v";
@@ -153,16 +148,13 @@ export default {
         let item = "";
         p.forEach(v => {
           item +=
-            utils.dateFomat(v.value[0]) +
-            "<br/>" +
-            "单体电压" +
-            " : " +
-            v.value[1] +
-            "V<br/>";
+            // this.dateFomat(v.value[0]) +
+            "<br/>" + "单体电压" + " : " + v.value[1] + "V<br/>";
         });
         return item;
       };
       this.myEcharts2.setOption(singleVoltageOptions);
+
       let currentOptions = _.cloneDeep(options);
       currentOptions.title.text = "电流";
       currentOptions.yAxis.axisLabel.formatter = "{value} A";
@@ -170,13 +162,10 @@ export default {
       currentOptions.tooltip.formatter = p => {
         let item = "";
         p.forEach(v => {
+          // console.log(v);
           item +=
-            utils.dateFomat(v.value[0]) +
-            "<br/>" +
-            "电流" +
-            " : " +
-            v.value[1] +
-            "A<br/>";
+            // this.dateFomat(v.value[0]) +
+            "<br/>" + "电流" + " : " + v.value[1] + "A<br/>";
         });
         return item;
       };
@@ -190,12 +179,8 @@ export default {
         let item = "";
         p.forEach(v => {
           item +=
-            utils.dateFomat(v.value[0]) +
-            "<br/>" +
-            "温度" +
-            " : " +
-            v.value[1] +
-            "℃<br/>";
+            // this.dateFomat(v.value[0]) +
+            "<br/>" + "温度" + " : " + v.value[1] + "℃<br/>";
         });
         return item;
       };
@@ -209,12 +194,8 @@ export default {
         let item = "";
         p.forEach(v => {
           item +=
-            utils.dateFomat(v.value[0]) +
-            "<br/>" +
-            "电量" +
-            " : " +
-            v.value[1] +
-            "%<br/>";
+            // this.dateFomat(v.value[0]) +
+            "<br/>" + "电量" + " : " + v.value[1] + "%<br/>";
         });
         return item;
       };
@@ -224,9 +205,25 @@ export default {
       // console.log(p);
       let item = "";
       p.forEach(v => {
-        item += `${utils.dateFomat(v.value[0])}<br/>电压:${v.value[1]}V<br/>`;
+        item += `电压:${v.value[1]}V<br/>`;
       });
       return item;
+    },
+    dateFomat(str) {
+      console.log("时间戳===》》》", str);
+      let timeDate = new Date(str);
+      let year = timeDate.getFullYear();
+      let mounth = timeDate.getMonth() + 1;
+      let day = timeDate.getDate();
+      let hours = timeDate.getHours();
+      let minute = timeDate.getMinutes();
+      let second = timeDate.getSeconds();
+      mounth = mounth < 10 ? `0${mounth}` : mounth;
+      day = day < 10 ? `0${day}` : day;
+      hours = hours < 10 ? `0${hours}` : hours;
+      minute = minute < 10 ? `0${minute}` : minute;
+      second = second < 10 ? `0${second}` : second;
+      return `${year}-${mounth}-${day} ${hours}:${minute}:${second}`;
     }
   }
 };
