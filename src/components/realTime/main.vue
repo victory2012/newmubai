@@ -116,8 +116,6 @@
     </ul>
     <div class="wrap-map">
       <map-container :mapCenter="mapPosition" @addressCallback="addressBack"></map-container>
-      <!-- <p v-if="loadMap">no</p>
-      <div id="mapContainers" class="realMapContainer"></div> -->
     </div>
 
     <div class="updateTime">
@@ -182,21 +180,28 @@ export default {
       betteryNo: ""
     };
   },
-  // watch: {
-  //   "$route.query.hostId": {
-  //     handler: function(val) {
-  //       console.log("hostId", typeof val);
-  //       if (val != undefined) {
-  //         this.componentInit();
-  //       }
-  //     },
-  //     deep: true
-  //   }
-  // },
-  // activated() {
-  //   this.init();
-  // },
+  watch: {
+    betteryNo: {
+      handler: function(val) {
+        console.log("hostId", val);
+        if (val) {
+          this.getBatteryList(val);
+        }
+      },
+      deep: true
+    }
+  },
   mounted() {
+    this.hostId = this.$route.query.hostId;
+    this.deviceId = this.$route.query.deviceId;
+    this.deviceCode = this.$route.query.deviceCode;
+    this.id = this.$route.query.id;
+    this.IdObj = {
+      hostId: this.hostId,
+      deviceId: this.deviceId,
+      deviceCode: this.deviceCode,
+      id: this.id
+    };
     this.componentInit();
   },
   beforeDestroy() {
@@ -215,24 +220,11 @@ export default {
   },
   methods: {
     componentInit() {
-      this.hostId = this.$route.query.hostId;
-      this.deviceId = this.$route.query.deviceId;
-      this.deviceCode = this.$route.query.deviceCode;
-      this.id = this.$route.query.id;
-      this.IdObj = {
-        hostId: this.hostId,
-        deviceId: this.deviceId,
-        deviceCode: this.deviceCode,
-        id: this.id
-      };
       this.connectMqtt();
       this.getCompanyInfo();
       this.getQuantity();
       this.getData();
     },
-    // init() {
-    //   map = new AMap.Map("mapContainers");
-    // },
     /* 获取电量 */
     getQuantity() {
       if (this.IdObj.deviceCode) {
@@ -279,9 +271,6 @@ export default {
       let startTime = utils.getFourHours();
       let endTime = utils.getNowTime();
       Indicator.open();
-      // console.log('startTime', startTime);
-      // console.log('endTime', endTime);
-      // Toast("图表数据");
       this.$axios
         .get(
           `/battery_group/${this.IdObj.hostId}/${
@@ -324,10 +313,12 @@ export default {
         });
     },
     //实时数据页面搜索框
-    searchBetteryNo() {},
+    searchBetteryNo() {
+      console.log(this.betteryNo);
+    },
     /* 获取电池列表 */
     getBatteryList(data) {
-      let loginData = JSON.parse(utils.getStorage("loginData"));
+      // let loginData = JSON.parse(utils.getStorage("loginData"));
       let options = {
         pageSize: 9999,
         pageNum: 1,
@@ -351,10 +342,18 @@ export default {
     },
     chooseList(data) {
       console.log(data);
-      mqttClient.disconnect();
+      // this.betteryNo = data.code;
+      if (
+        typeof mqttClient === "object" &&
+        typeof mqttClient.isConnected === "function" &&
+        mqttClient.isConnected()
+      ) {
+        mqttClient.disconnect();
+        mqttClient = {};
+      }
       this.IdObj = data;
       this.showBatteryList = false;
-      // this.init();
+      this.componentInit();
     },
     toHisTime() {
       console.log(this.IdObj);
@@ -391,7 +390,7 @@ export default {
         message.destinationName = `cmd/${this.IdObj.deviceCode}`;
         mqttClient.send(message);
       } else {
-        Toast("网络连接失败，请稍后重试")
+        Toast("网络连接失败，请稍后重试");
       }
     },
     connectMqtt() {
@@ -627,17 +626,21 @@ nav {
   .batteryList {
     position: absolute;
     background: #ffffff;
-    width: 50%;
+    width: 100%;
     height: auto;
     top: 30px;
-    left: 37px;
+    left: 0;
     z-index: 300;
     box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.2);
-    li {
-      color: #3f3f3f;
-      text-align: left;
-      padding: 10px;
-      border-bottom: 1px solid #cccccc;
+    ul {
+      padding: 0 5px;
+      li {
+        color: #3f3f3f;
+        text-align: left;
+        padding: 10px;
+        padding-left: 32px;
+        border-bottom: 1px dashed #e5e5e5;
+      }
     }
   }
 }

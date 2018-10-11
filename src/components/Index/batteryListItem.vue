@@ -38,17 +38,19 @@
         </div>
         <div class="item item1">
           额定电压
-          <span>{{listData.voltage}}</span>
+          <span>{{listData.voltage}}v</span>
         </div>
       </div>
       <div v-show="listData.visitBtn" class="bind-menu">
         <div v-if="listData.deviceId === null" class="is-bind bind">
-          <div @click.stop="scanBind" class="bind-menu-item">扫码绑定</div>
+          <div @click.stop="scanBind(listData)" class="bind-menu-item">扫码绑定</div>
           <div @click.stop="handBind(listData)" class="bind-menu-item">手动绑定</div>
+          <!-- <div @click.stop="scanQRbind('0457100d131b', listData)" class="bind-menu-item">手动绑定</div> -->
           <div @click.stop="detailInfo(listData)" class="bind-menu-item">详情</div>
         </div>
         <div v-else class="not-bind bind">
           <div @click.stop="cancelBind(listData)" class="bind-menu-item">解绑</div>
+
           <div @click.stop="detailInfo(listData)" class="bind-menu-item">详情</div>
         </div>
       </div>
@@ -57,11 +59,10 @@
 </template>
 
 <script>
-import { MessageBox, Toast } from "mint-ui";
+import { MessageBox, Toast, Indicator } from "mint-ui";
 /* eslint-disable */
 import WX from "wx";
-// import _cache from "../cache";
-// import * as _ from "lodash";
+import isWeixin from "@/utils/checkBrowser";
 import utils from "@/utils/utils";
 import roles from "@/utils/role";
 
@@ -77,7 +78,8 @@ export default {
     return {
       bindVisible: false,
       jiantou: 1,
-      isShow: false
+      isShow: false,
+      chooseObj: {}
     };
   },
   mounted() {},
@@ -127,6 +129,12 @@ export default {
     },
     //解绑操作
     cancelBind(row) {
+      console.log(row);
+      let loginData = JSON.parse(utils.getStorage("loginData"));
+      if (loginData.type === 1) {
+        Toast("权限不足");
+        return;
+      }
       MessageBox({
         title: "设备解绑",
         message: "是否将电池与设备解绑",
@@ -171,18 +179,26 @@ export default {
         });
     },
     //扫码绑定
-    scanBind() {
+    scanBind(listData) {
+      let loginData = JSON.parse(utils.getStorage("loginData"));
+      if (!isWeixin()) {
+        return;
+      } // 如果不是在微信中打开 则禁止二维码
+      if (loginData.type === 1) {
+        Toast("权限不足");
+        return;
+      }
+      this.chooseObj = listData;
       let URl = window.location.href.split("#")[0];
-      console.log("url===>>>", URl);
-      console.log(encodeURIComponent(URl));
-      // let URl = sessionStorage.getItem("URl");
+      let that = this;
+      Indicator.open();
       this.$axios
         .post(`/wechat/config`, { url: encodeURIComponent(URl) })
         .then(res => {
           console.log(res);
           if (res.data && res.data.code === 0) {
+            Indicator.close();
             let result = res.data.data;
-            let that = this;
             WX.config({
               debug: false, // 是否开启调试模式
               appId: result.appId, // 必填，微信号AppID
@@ -206,8 +222,6 @@ export default {
                 success: function(res) {
                   console.log("scanQRCode", res);
                   that.scanQRbind(res.resultStr);
-                  // console.log("scanQRCode", JSON.stringify(res));
-                  // Toast(JSON.stringify(res));
                 }
               });
             });
@@ -219,21 +233,35 @@ export default {
         });
     },
     scanQRbind(str) {
-      let reg = new RegExp("[0-9A-Za-z]");
-      if (!reg.test(str)) {
-        Toast("设备编号无效！");
-        return;
-      } else {
-        MessageBox.confirm(`确定与设备(${str})绑定吗?`).then(action => {
-          if (action === "confirm") {
-            console.log("yes");
+      if (!str) return;
+      // this.chooseObj = listData;
+      this.$axios.post(`/device/${str}/check`).then(res => {
+        console.log("根据code拿到的设备id", res);
+        if (res.data && res.data.code === 0) {
+          let result = res.data.data;
+          if (result.hostId) {
+            Toast("该设备已绑定");
+          } else {
+            MessageBox.confirm(`确定与设备(编号：${str})绑定吗?`).then(
+              action => {
+                if (action === "confirm") {
+                  this.chooseObj.deviceBianhao = str;
+                  this.chooseObj.deviceBianhaoId = result.id;
+                  this.$emit("bindDevice", this.chooseObj);
+                }
+              }
+            );
           }
-        });
-      }
+        }
+      });
     },
     //手动绑定
     handBind(item) {
-      console.log(item);
+      let loginData = JSON.parse(utils.getStorage("loginData"));
+      if (loginData.type === 1) {
+        Toast("权限不足");
+        return;
+      }
       this.$router.push({
         path: "/batteryBind",
         query: { hostId: item.hostId, code: item.id, batteryCode: item.code }

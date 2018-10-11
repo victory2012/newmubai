@@ -34,10 +34,6 @@
         <div class="fr">{{userArr.email}}</div>
       </li>
     </ul>
-    <div class="unbindWarrp">
-      <mt-button size="large" type="primary" @click="unbindWX">微信解绑</mt-button>
-    </div>
-    <!-- <button @click="unbindWX">微信解绑</button> -->
   </div>
 </template>
 
@@ -52,17 +48,6 @@ export default {
     };
   },
   methods: {
-    unbindWX() {
-      this.$axios.put("/user/unbind_wx").then(res => {
-        if (res.data && res.data.code === 0) {
-          Toast("解绑成功");
-          setTimeout(() => {
-            window.location.href = "#/login";
-            sessionStorage.clear();
-          }, 1000);
-        }
-      });
-    },
     getSelf() {
       this.$axios.get("/user/current").then(res => {
         console.log(res);
@@ -73,7 +58,6 @@ export default {
           // this.InfoForm.email = this.userArr.email;
           // this.InfoForm.phones = res.data.data.phone;
           // this.InfoForm.userName = res.data.data.nickName;
-          console.log(this.userArr);
         }
       });
     }

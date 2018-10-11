@@ -43,7 +43,7 @@ export default {
   },
   methods: {
     selectItem(data) {
-      console.log("data", data);
+      console.log(data);
       let bindObj = {
         hostId: this.hostId,
         deviceId: data.id,
@@ -93,10 +93,6 @@ export default {
         typeof mqttClient.subscribe === "function"
       ) {
         console.log("mqtt is connected");
-        // mqttClient.subscribe(`dev/${this.infoData.deviceCode}`);
-        // let message = new Paho.MQTT.Message(`k:${this.bindRows.code}`);
-        // message.destinationName = `cmd/${this.bindRows.code}`;
-        // mqttClient.send(message);
       }
     },
     getDeviceList() {
@@ -136,7 +132,7 @@ export default {
     if (typeof mqttClient === "object" && mqttClient.isConnected()) {
       // console.log(mqttClient);
       mqttClient.disconnect();
-      mqttClient = null;
+      mqttClient = {};
     }
   }
 };

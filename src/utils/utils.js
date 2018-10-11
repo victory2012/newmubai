@@ -13,7 +13,6 @@ const daysInMonth = [
   [30],
   [31]
 ];
-const TimezoneOffset = (new Date().getTimezoneOffset()) * 60000;
 
 export default {
   accountType: type => {

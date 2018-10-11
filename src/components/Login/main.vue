@@ -25,7 +25,7 @@
 <script>
 import utils from "@/utils/utils";
 import { Toast } from "mint-ui";
-// import _cache from "../cache";
+import isWeixin from "@/utils/checkBrowser";
 const AppId = "wxee1c1e26121022f2";
 export default {
   name: "Login",
@@ -109,7 +109,21 @@ export default {
               }
             });
           } else {
-            Toast("网络请求失败，请稍后重试");
+            if (isWeixin()) {
+              Toast("网络请求失败，请稍后重试");
+            } else {
+              this.$axios
+                .get(`/user/permissions/${login.data.data.id}`)
+                .then(opts => {
+                  if (opts.data && opts.data.code === 0) {
+                    utils.setStorage(
+                      "userRoles",
+                      JSON.stringify(opts.data.data)
+                    );
+                    this.$router.push("/index");
+                  }
+                });
+            }
           }
         }
       });

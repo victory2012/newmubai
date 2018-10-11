@@ -25,8 +25,8 @@
       <div class="showIsBind" v-show="isShowbind">
         <div>状态</div>
         <ul>
-          <li @click="searchBind">已绑定</li>
-          <li @click="searchNoBind">未绑定</li>
+          <li :class="{'active': choosed == 'hasbind'}" @click="searchBind">已绑定</li>
+          <li :class="{'active': choosed == 'nobind'}" @click="searchNoBind">未绑定</li>
           <li @click="clearAll">清空筛选</li>
         </ul>
       </div>
@@ -37,7 +37,15 @@
     <mt-popup v-model="selecttwo" position="bottom">
       <mt-picker valueKey="name" v-if="selecttwo" class="enterprise" :slots="companySlots" @change="onCompanyChange"></mt-picker>
     </mt-popup>
+    <!-- <div class="listwapper"> -->
+
     <div class="tableBody" ref="wrapper" :style="{ height: wrapperHeight + 'px' }">
+      <div ref="wrapper" class="wrapper" v-infinite-scroll="loadBottom" infinite-scroll-disabled="loading" infinite-scroll-distance="20">
+        <battery-list-item v-for="item in tableData" :key="item.code + new Date().getTime()" :listData="item" @bindDevice="selectItem" @unbindSuc="ifUnbind"></battery-list-item>
+        <p v-show='isShowSpinner' class='loading'>没有更多数据</p>
+      </div>
+    </div>
+    <!-- <div class="tableBody" ref="wrapper" :style="{ height: wrapperHeight + 'px' }">
       <mt-loadmore :bottom-method="loadBottom" :auto-fill="false" :bottomDistance='40' @bottom-status-change="handleBottomChange" :bottom-all-loaded="allLoaded" ref="loadmore">
         <battery-list-item v-for="item in tableData" :key="item.code + new Date().getTime()" :listData="item" @unbindSuc="ifUnbind"></battery-list-item>
         <div slot="bottom" class="mint-loadmore-bottom">
@@ -48,7 +56,7 @@
         </div>
       </mt-loadmore>
       <div v-show="isShowSpinner" class="loadEnd">没有更多了</div>
-    </div>
+    </div> -->
     <!-- <mt-palette-button content="+" @expand="main_log('expand')" @expanded="main_log('expanded')" @collapse="main_log('collapse')" direction="lt" class="pb" :radius="80" ref="target_1" mainButtonStyle="color:#fff;background-color:#71BFDB;">
       <div class="my-icon-button" @click.stop="sub_log('hand')">
         <img src="/static/hand.svg" alt="">
@@ -65,6 +73,7 @@ import {
   MessageBox,
   Toast,
   Popup,
+  InfiniteScroll,
   PaletteButton,
   Picker,
   Indicator,
@@ -75,7 +84,10 @@ import { loginOverTime } from "../../common/js/loginovertime";
 import batteryListItem from "./batteryListItem";
 import Vues from "./main";
 import _cache from "../cache.js";
+import Paho from "Paho";
+import mqttConfig from "@/api/mqtt.config";
 
+let mqttClient = {};
 export default {
   name: "index",
   components: {
@@ -88,10 +100,12 @@ export default {
   },
   data() {
     return {
+      choosed: "",
       isShowSpinner: false,
-      pageSize: 50,
-      wrapperHeight: 0,
+      pageSize: 10,
       currentPage: 1,
+      loadingDom: true,
+      wrapperHeight: 0,
       allLoaded: false,
       bottomStatus: "",
       company: "企业",
@@ -101,7 +115,6 @@ export default {
       selecttwo: false,
       isShowbind: false,
       tableData: [],
-      pageNum: 1,
       companySlots: [
         {
           flex: 1,
@@ -127,9 +140,12 @@ export default {
     loadBottom() {
       setTimeout(() => {
         this.currentPage++;
-        this.getBatteryList();
-        this.$refs.loadmore.onBottomLoaded();
-      }, 1500);
+        if (this.currentPage <= this.totalPage) {
+          this.getBatteryList();
+        } else {
+          this.isShowSpinner = true;
+        }
+      }, 800);
     },
     ifUnbind(data) {
       this.tableData = [];
@@ -167,18 +183,21 @@ export default {
       this.isShowbind = !this.isShowbind;
     },
     searchBind() {
+      this.choosed = "hasbind";
       this.isShowbind = false;
       this.searchContent.bindStatus = 1;
       this.tableData = [];
       this.getBatteryList();
     },
     searchNoBind() {
+      this.choosed = "nobind";
       this.isShowbind = false;
       this.searchContent.bindStatus = 2;
       this.tableData = [];
       this.getBatteryList();
     },
     clearAll() {
+      this.currentPage = 1;
       this.company = "企业";
       this.batteryName = "电池型号";
       this.searchContent.companyId = null;
@@ -187,6 +206,7 @@ export default {
       this.searchContent.bindStatus = "";
       this.searchContent.content = "";
       this.tableData = [];
+      this.choosed = "";
       this.getBatteryList();
     },
     getBatteryList() {
@@ -201,21 +221,23 @@ export default {
         modelId: this.searchContent.batteryId
           ? this.searchContent.batteryId
           : "",
-        bindingStatus:
-          this.searchContent.bindStatus && this.searchContent.bindStatus === 2
-            ? 0
-            : this.searchContent.bindStatus,
         status: 0
       };
+      if (
+        this.searchContent.bindStatus &&
+        this.searchContent.bindStatus === 2
+      ) {
+        options.bindingStatus = 0;
+      } else {
+        options.bindingStatus = this.searchContent.bindStatus;
+      }
       this.$axios.get("/battery_group", options).then(res => {
         console.log(res);
         Indicator.close();
         if (res.data && res.data.code === 0) {
           let result = res.data.data;
           this.total = result.total;
-          if (result.pageData.length < this.pageSize) {
-            this.allLoaded = true;
-          }
+          this.totalPage = result.totalPage;
           if (result.pageData.length > 0) {
             this.isShowSpinner = false;
             result.pageData.forEach(key => {
@@ -243,8 +265,30 @@ export default {
         console.log("获取电池组客户企业表", res);
         if (res.data && res.data.code === 0) {
           this.batCustomOpts = res.data.data;
-          this.companySlots[0].values = [...this.batCustomOpts];
-          // utils.setStorage("batCustomOpts", JSON.stringify(res.data.data));
+          // this.companySlots[0].values = [...this.batCustomOpts];
+
+          if (this.batCustomOpts.length > 0) {
+            this.companySlots[0].values = [
+              {
+                id: "",
+                name: "全部"
+              }
+            ];
+            res.data.data.forEach(key => {
+              let obj = {
+                id: key.id,
+                name: key.name
+              };
+              this.companySlots[0].values.push(obj);
+            });
+          } else {
+            this.companySlots[0].values = [
+              {
+                name: "暂无数据",
+                id: "noData"
+              }
+            ];
+          }
         }
       });
     },
@@ -256,7 +300,12 @@ export default {
           this.Modeloptions = res.data.data;
           // this.batterySlot[0].values = [...this.Modeloptions];
           if (this.Modeloptions.length > 0) {
-            this.batterySlot[0].values = [];
+            this.batterySlot[0].values = [
+              {
+                id: "",
+                name: "全部"
+              }
+            ];
             this.Modeloptions.forEach(key => {
               this.batterySlot[0].values.push({
                 id: key.id,
@@ -270,30 +319,82 @@ export default {
                 id: "noData"
               }
             ];
-            // this.batterySlot[0].id = "no";
           }
-          // this.slotss[0].values = [...this.Modeloptions];
         }
       });
+    },
+    /* 扫码后绑定 */
+    selectItem(data) {
+      console.log("扫码返回值", data);
+      Toast("开始绑定");
+      Indicator.open();
+      let bindObj = {
+        hostId: data.hostId,
+        deviceId: data.deviceBianhaoId,
+        hostCode: data.id,
+        deviceCode: data.deviceBianhao
+      };
+      this.$axios.put("host/bind", bindObj).then(res => {
+        console.log(res);
+        Indicator.close();
+        if (res.data && res.data.code === 0) {
+          this.tableData = [];
+          this.getBatteryList();
+          Toast(res.data.msg);
+          let message = new Paho.MQTT.Message(`k:${data.code}`);
+          message.destinationName = `cmd/${data.deviceBianhao}`;
+          console.log(message);
+          mqttClient.send(message);
+        }
+      });
+    },
+    /* mqtt链接 */
+    connectMqtt() {
+      mqttClient = new Paho.MQTT.Client(
+        mqttConfig.hostname,
+        mqttConfig.port,
+        mqttConfig.clientId
+      );
+      mqttClient.connect({
+        onSuccess: this.onConnect,
+        reconnect: mqttConfig.reconnect,
+        keepAliveInterval: mqttConfig.keepAliveInterval,
+        useSSL: mqttConfig.useSSL,
+        timeout: mqttConfig.timeout
+      });
+      mqttClient.onFailure = res => {
+        console.log(res);
+      };
+      mqttClient.onConnectionLost = responseObject => {
+        console.log("mqtt-closed:", responseObject);
+      };
+      mqttClient.onMessageArrived = message => {
+        console.log("message", message);
+      };
+    },
+    onConnect() {
+      if (
+        typeof mqttClient === "object" &&
+        typeof mqttClient.subscribe === "function"
+      ) {
+        console.log("mqtt is connected");
+      }
     }
   },
-  activated() {
-    // this.getBatteryList();
-    // this.getCompanyId();
-    // this.getBatteryModelList();
-    // this.wrapperHeight =
-    //   document.documentElement.clientHeight -
-    //   this.$refs.wrapper.getBoundingClientRect().top -
-    //   53;
+  beforeRouteLeave(to, from, next) {
+    if (to.name !== "loading") {
+      next();
+    }
   },
   mounted() {
+    this.connectMqtt();
     this.getBatteryList();
     this.getCompanyId();
     this.getBatteryModelList();
     this.wrapperHeight =
       document.documentElement.clientHeight -
       this.$refs.wrapper.getBoundingClientRect().top -
-      53;
+      60;
   }
 };
 </script>
@@ -338,7 +439,10 @@ nav {
   left: 0;
   padding-left: 7px;
 }
-
+.active {
+  background: #ffffff;
+  color: #333333;
+}
 .search {
   float: left;
   width: 37%;
