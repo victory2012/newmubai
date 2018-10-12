@@ -256,10 +256,11 @@ export default {
             gcjLongitude: result.gcjLongitude,
             gcjLatitude: result.gcjLatitude
           };
+          let Times = utils.TimeSconds(result.time);
           this.companyInfo = result;
           this.companyInfo.fluid = result.fluidLevel === 0 ? "正常" : "异常";
-          this.companyInfo.yyddmm = utils.yyyymmdd(new Date());
-          this.companyInfo.hhmmss = utils.hhmmss(new Date());
+          this.companyInfo.yyddmm = utils.yyyymmdd(Times);
+          this.companyInfo.hhmmss = utils.hhmmss(Times);
           this.mapPosition = position;
         }
       });
@@ -457,8 +458,8 @@ export default {
       this.companyInfo.voltage = dataObj.voltage;
       this.companyInfo.singleVoltage = dataObj.singleVoltage;
       this.companyInfo.current = dataObj.current;
-      this.companyInfo.hhmmss = utils.hhmmss(new Date());
-      this.companyInfo.yyddmm = utils.yyyymmdd(new Date());
+      this.companyInfo.hhmmss = utils.hhmmss(dataObj.times);
+      this.companyInfo.yyddmm = utils.yyyymmdd(dataObj.times);
       this.companyInfo.gcjLongitude = posData.lon;
       this.companyInfo.gcjLatitude = posData.lat;
       let resultPos = {

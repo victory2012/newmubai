@@ -18,7 +18,7 @@ export default {
   grid: {
     left: "3%",
     right: "4%",
-    bottom: "20%",
+    bottom: "14%",
     containLabel: true
   },
   /* eslint-disable */

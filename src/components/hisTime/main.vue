@@ -63,40 +63,46 @@
         <!-- <echart-map :chartData="dataObj" :loading="loading" @timeZoom="timeZoom"></echart-map> -->
       </div>
 
-      <ul class="DataTop">
-        <li>
-          <div class="Data1">{{summary.cycle}}</div>
-          <div class="Data2">电池循环次数</div>
-        </li>
-        <li>
-          <div class="Data1">{{summary.chargeDuration}}h</div>
-          <div class="Data2">充电时间</div>
-        </li>
-        <li>
-          <div class="Data1">{{summary.dischargeDuration}}h</div>
-          <div class="Data2">放电时间</div>
-        </li>
-      </ul>
-      <ul class="DataDown">
-        <li>
-          <div class="Data1">{{summary.avgChargeDuration}}h</div>
-          <div class="Data2">平均充电时间</div>
-        </li>
-        <li>
-          <div class="Data1">{{summary.avgDischargeDuration}}h</div>
-          <div class="Data2">平均放电时间</div>
-        </li>
-        <li>
-          <div class="Data1">{{summary.fluidSupplementTimes}}</div>
-          <div class="Data2">补水次数</div>
-        </li>
-        <li>
-          <div class="Data1">{{summary.avgFluidSupplementDuration}}h</div>
-          <div class="Data2">平均补水时长</div>
-        </li>
-      </ul>
+      <div class="timeWarrp">
+        <div class="TimeBorder">
+          <ul class="DataTop">
+            <li>
+              <div class="Data1">{{summary.cycle}}</div>
+              <div class="Data2">电池循环次数</div>
+            </li>
+            <li>
+              <div class="Data1">{{summary.chargeDuration}}h</div>
+              <div class="Data2">充电时间</div>
+            </li>
+            <li>
+              <div class="Data1">{{summary.dischargeDuration}}h</div>
+              <div class="Data2">放电时间</div>
+            </li>
+          </ul>
+          <ul class="DataDown">
+            <li>
+              <div class="Data1">{{summary.avgChargeDuration}}h</div>
+              <div class="Data2">平均充电时间</div>
+            </li>
+            <li>
+              <div class="Data1">{{summary.avgDischargeDuration}}h</div>
+              <div class="Data2">平均放电时间</div>
+            </li>
+            <li>
+              <div class="Data1">{{summary.fluidSupplementTimes}}</div>
+              <div class="Data2">补水次数</div>
+            </li>
+            <li>
+              <div class="Data1">{{summary.avgFluidSupplementDuration}}h</div>
+              <div class="Data2">平均补水时长</div>
+            </li>
+          </ul>
+        </div>
+      </div>
 
-      <chart-pie :loading="loading" :summary="summary" :eventSummary="eventSummary"></chart-pie>
+      <div class="timeWarrp">
+        <chart-pie :loading="loading" :summary="summary" :eventSummary="eventSummary"></chart-pie>
+      </div>
 
       <div class="list-title">
         <div class="fl1" :class="{C484848:isA,CACACAC:!isA}" @click="getAlarmData">告警事件列表</div>
@@ -120,7 +126,7 @@
 
 
 <script>
-import { Toast,Indicator } from "mint-ui";
+import { Toast, Indicator } from "mint-ui";
 import utils from "@/utils/utils";
 import lineEchart from "./historyChart";
 import lnglatTrabsofor from "@/utils/longlatTransfor";
@@ -792,7 +798,14 @@ export default {
     position: absolute;
   }
   .chartsLine {
-    padding-top: 226px;
+    padding: 226px 15px 0;
+  }
+  .timeWarrp {
+    padding: 15px;
+  }
+  .TimeBorder {
+    border: 1px solid #e5e5e5;
+    border-radius: 5px;
   }
   .MMwrapNo {
     height: 0px;

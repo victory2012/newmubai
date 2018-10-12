@@ -1,9 +1,5 @@
 <template>
   <div class="circel">
-    <!-- <div class="msg">
-      <div class="titles">电池使用情况</div>
-      <div class="dami"></div>
-    </div> -->
     <div class="circelInfo">
       <div class="pei" id="peiCharts1"></div>
     </div>
@@ -55,18 +51,20 @@ export default {
           trigger: "item",
           formatter: "{b}: {d}%"
         },
+        grid: {
+          right: "15%"
+        },
         legend: {
           right: 5,
           top: "center",
           orient: "vertical",
           itemWidth: 8,
           itemHeight: 8,
-          itemGap: 13,
+          itemGap: 15,
           textStyle: {
             color: "#484848"
           },
           data: []
-          // data: ["直接访问", "邮件营销", "联盟广告", "视频广告", "搜索引擎"]
         },
         series: [
           {
@@ -184,7 +182,8 @@ export default {
 <style scoped lang="scss">
 .circel {
   background: #ffffff;
-  padding: 24px 0;
+  border: 1px solid #e5e5e5;
+  border-radius: 5px;
   .circelInfo {
     height: 200px;
     display: flex;
@@ -195,6 +194,7 @@ export default {
     }
     .msg {
       text-align: center;
+      border-top: 1px solid #e5e5e5;
     }
   }
 }

@@ -152,20 +152,18 @@ export default {
       this.getBatteryList();
     },
     onCompanyChange(picker, values) {
-      console.log(values, "name");
-      console.log(picker, "picker");
       this.company = values[0].name;
       this.searchContent.companyId = values[0].id;
       this.tableData = [];
+      this.currentPage = 1;
       this.getBatteryList();
     },
     onBatteryChange(picker, values) {
-      console.log(values, "name");
-      console.log(picker, "picker");
       if (values[0].id !== "noData") {
         this.batteryName = values[0].name;
         this.searchContent.batteryId = values[0].id;
         this.tableData = [];
+        this.currentPage = 1;
         this.getBatteryList();
       }
     },
@@ -183,17 +181,29 @@ export default {
       this.isShowbind = !this.isShowbind;
     },
     searchBind() {
-      this.choosed = "hasbind";
       this.isShowbind = false;
-      this.searchContent.bindStatus = 1;
+      if (this.choosed === "hasbind") {
+        this.choosed = "";
+        this.searchContent.bindStatus = "";
+      } else {
+        this.choosed = "hasbind";
+        this.searchContent.bindStatus = 1;
+      }
+      this.currentPage = 1;
       this.tableData = [];
       this.getBatteryList();
     },
     searchNoBind() {
-      this.choosed = "nobind";
+      if (this.choosed === "nobind") {
+        this.choosed = "";
+        this.searchContent.bindStatus = "";
+      } else {
+        this.choosed = "nobind";
+        this.searchContent.bindStatus = 2;
+      }
       this.isShowbind = false;
-      this.searchContent.bindStatus = 2;
       this.tableData = [];
+      this.currentPage = 1;
       this.getBatteryList();
     },
     clearAll() {
@@ -228,8 +238,11 @@ export default {
         this.searchContent.bindStatus === 2
       ) {
         options.bindingStatus = 0;
-      } else {
-        options.bindingStatus = this.searchContent.bindStatus;
+      } else if (
+        this.searchContent.bindStatus &&
+        this.searchContent.bindStatus === 1
+      ) {
+        options.bindingStatus = 1;
       }
       this.$axios.get("/battery_group", options).then(res => {
         console.log(res);

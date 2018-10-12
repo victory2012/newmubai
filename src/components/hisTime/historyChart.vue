@@ -149,7 +149,11 @@ export default {
         p.forEach(v => {
           item +=
             utils.dateFomat(v.value[0]) +
-            "<br/>" + "单体电压" + " : " + v.value[1] + "V<br/>";
+            "<br/>" +
+            "单体电压" +
+            " : " +
+            v.value[1] +
+            "V<br/>";
         });
         return item;
       };
@@ -165,7 +169,11 @@ export default {
           // console.log(v);
           item +=
             utils.dateFomat(v.value[0]) +
-            "<br/>" + "电流" + " : " + v.value[1] + "A<br/>";
+            "<br/>" +
+            "电流" +
+            " : " +
+            v.value[1] +
+            "A<br/>";
         });
         return item;
       };
@@ -180,7 +188,11 @@ export default {
         p.forEach(v => {
           item +=
             utils.dateFomat(v.value[0]) +
-            "<br/>" + "温度" + " : " + v.value[1] + "℃<br/>";
+            "<br/>" +
+            "温度" +
+            " : " +
+            v.value[1] +
+            "℃<br/>";
         });
         return item;
       };
@@ -195,7 +207,11 @@ export default {
         p.forEach(v => {
           item +=
             utils.dateFomat(v.value[0]) +
-            "<br/>" + "电量" + " : " + v.value[1] + "%<br/>";
+            "<br/>" +
+            "电量" +
+            " : " +
+            v.value[1] +
+            "%<br/>";
         });
         return item;
       };
@@ -216,29 +232,18 @@ export default {
 <style scoped lang="scss">
 .bgFFF {
   background: #ffffff;
+  border: 1px solid #e5e5e5;
+  border-radius: 5px;
   .chartInfo {
     padding: 0 15px;
     flex: 1;
     width: 100%;
     height: 340px;
-  }
-}
-.chartWarrp {
-  margin-bottom: 30px;
-  display: flex;
-  .chartInfo {
-    padding: 0 15px;
-    flex: 1;
-    width: 100%;
-    height: 400px;
+    margin-bottom: 20px;
   }
 }
 .btns {
   padding-left: 22px;
   margin-bottom: 20px;
 }
-// .echarts {
-//   width: 100%;
-//   height: 100%;
-// }
 </style>

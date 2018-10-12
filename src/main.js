@@ -14,6 +14,7 @@ Vue.config.productionTip = false;
 Vue.prototype.$axios = api;
 Vue.use(MintUI);
 FastClick.attach(document.body);
+
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
