@@ -360,25 +360,25 @@ export default {
             this.hasSend = false;
             this.address = sendAddress;
           }
-          if (!this.hasSend) {
-            this.addressCallBack(sendAddress);
-          }
+          // if (!this.hasSend) {
+          //   this.addressCallBack(sendAddress);
+          // }
         });
       }
     },
 
-    addressCallBack(data) {
-      let param = {
-        id: this.hostObj.id,
-        address: data
-      };
-      this.$axios.put(`battery_group/address`, param).then(res => {
-        console.log(res);
-        if (res.data && res.data.code === 0) {
-          this.hasSend = true;
-        }
-      });
-    },
+    // addressCallBack(data) {
+    //   let param = {
+    //     id: this.hostObj.id,
+    //     address: data
+    //   };
+    //   this.$axios.put(`battery_group/address`, param).then(res => {
+    //     console.log(res);
+    //     if (res.data && res.data.code === 0) {
+    //       this.hasSend = true;
+    //     }
+    //   });
+    // },
 
     timeZoom() {},
     /* 历史告警 */
@@ -719,6 +719,7 @@ export default {
         font-size: 18px;
         height: 50px;
         line-height: 50px;
+        font-weight: bold;
       }
       .Data2 {
         font-size: 9px;

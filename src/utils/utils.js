@@ -106,14 +106,13 @@ export default {
   getNowTime: () => {
     let now = new Date().getTime();
     let nowTime = this.a.dateFomat(now);
-    console.log(nowTime)
     return this.a.toUTCTime(nowTime);
   },
   getFourHours: () => {
     let now = new Date().getTime();
     let yestoday = now - 14400000;
     let yesTime = this.a.dateFomat(yestoday);
-    console.log(yesTime)
+
     return this.a.toUTCTime(yesTime);
   },
   getWeek: () => {

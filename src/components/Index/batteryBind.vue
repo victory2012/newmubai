@@ -56,11 +56,13 @@ export default {
           Toast({
             message: res.data.msg
           });
+          setTimeout(() => {
+            this.$router.push("/index");
+          }, 1200);
           let message = new Paho.MQTT.Message(`k:${this.batteryCode}`);
           message.destinationName = `cmd/${bindObj.deviceCode}`;
           console.log(message);
           mqttClient.send(message);
-          this.getDeviceList();
         }
       });
     },

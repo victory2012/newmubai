@@ -1,7 +1,7 @@
 <template>
   <div class="edit-battery">
     <div class="headNav">
-      <mt-header class="Loginhead" v-bind:title="id?'详细信息':'电池登记'">
+      <mt-header class="Loginhead" v-bind:title="'详细信息'">
         <router-link to="/index" slot="left">
           <mt-button icon="back"></mt-button>
         </router-link>
@@ -69,8 +69,8 @@
         </div>
       </div>
       <div class="select-item">
-        <div class="select-item_value">设备编号(选填)</div>
-        <div class="select-item_title">{{tableObj.deviceCode || '无'}}</div>
+        <div class="select-item_value">设备编号</div>
+        <div class="select-item_title">{{deviceCode || '无'}}</div>
         <div class="arrow-right" v-show="isAddPt">
           <img src="/static/jiantou2.svg" alt="">
         </div>
@@ -145,6 +145,7 @@ export default {
       date: new Date(), // picker model
       datePickerState: "",
       tableObj: {},
+      deviceCode: "",
       id: "",
       isAddPt: false // 是否有add、编辑权限
     };
@@ -164,6 +165,7 @@ export default {
   },
   mounted() {
     this.id = this.$route.query.code;
+    this.deviceCode = this.$route.query.deviceCode;
     if (this.id) {
       this.queryDetail();
     }

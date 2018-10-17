@@ -77,7 +77,7 @@ export default {
             this.$emit("addressCallback", sendAddress);
           }
           if (!this.hasSend) {
-            this.addressCallBack(sendAddress);
+            this.addressCallBack(res.addressComponent);
           }
         });
       }
@@ -86,7 +86,8 @@ export default {
     addressCallBack(data) {
       let param = {
         id: this.IdObj.id,
-        address: data
+        province: data.province ? data.province : data.city,
+        city: data.city
       };
       this.$axios.put(`battery_group/address`, param).then(res => {
         console.log(res);

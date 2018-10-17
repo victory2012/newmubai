@@ -119,7 +119,7 @@ export default {
       // }
       this.$router.push({
         path: "/batteryDetail",
-        query: { code: item.id }
+        query: { code: item.id, deviceCode: item.deviceCode }
       });
     },
     //绑定操作visible
@@ -181,13 +181,14 @@ export default {
     //扫码绑定
     scanBind(listData) {
       let loginData = JSON.parse(utils.getStorage("loginData"));
-      if (!isWeixin()) {
-        return;
-      } // 如果不是在微信中打开 则禁止二维码
-      if (loginData.type === 1) {
+      if (loginData.type === 1 || loginData.type === 3) {
         Toast("权限不足");
         return;
       }
+      if (!isWeixin()) {
+        Toast("此功能仅在微信中使用");
+        return;
+      } // 如果不是在微信中打开 则禁止二维码
       this.chooseObj = listData;
       let URl = window.location.href.split("#")[0];
       let that = this;
@@ -258,7 +259,7 @@ export default {
     //手动绑定
     handBind(item) {
       let loginData = JSON.parse(utils.getStorage("loginData"));
-      if (loginData.type === 1) {
+      if (loginData.type === 1 || loginData.type === 3) {
         Toast("权限不足");
         return;
       }

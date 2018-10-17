@@ -147,8 +147,9 @@ export default {
         }
       }, 800);
     },
-    ifUnbind(data) {
+    ifUnbind() {
       this.tableData = [];
+      this.currentPage = 1;
       this.getBatteryList();
     },
     onCompanyChange(picker, values) {
