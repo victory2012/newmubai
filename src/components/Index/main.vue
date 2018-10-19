@@ -37,32 +37,32 @@
     <mt-popup v-model="selecttwo" position="bottom">
       <mt-picker valueKey="name" v-if="selecttwo" class="enterprise" :slots="companySlots" @change="onCompanyChange"></mt-picker>
     </mt-popup>
-    <!-- <div class="listwapper"> -->
 
     <div class="tableBody" ref="wrapper" :style="{ height: wrapperHeight + 'px' }">
-      <div ref="wrapper" class="wrapper" v-infinite-scroll="loadBottom" infinite-scroll-disabled="loading" infinite-scroll-distance="20">
+      <div ref="wrapper" v-infinite-scroll="loadBottom" infinite-scroll-distance="30">
         <battery-list-item v-for="item in tableData" :key="item.code + new Date().getTime()" :listData="item" @bindDevice="selectItem" @unbindSuc="ifUnbind"></battery-list-item>
         <p v-show='isShowSpinner' class='loading'>没有更多数据</p>
       </div>
     </div>
-    <!-- <div class="tableBody" ref="wrapper" :style="{ height: wrapperHeight + 'px' }">
-      <mt-loadmore :bottom-method="loadBottom" :auto-fill="false" :bottomDistance='40' @bottom-status-change="handleBottomChange" :bottom-all-loaded="allLoaded" ref="loadmore">
-        <battery-list-item v-for="item in tableData" :key="item.code + new Date().getTime()" :listData="item" @unbindSuc="ifUnbind"></battery-list-item>
-        <div slot="bottom" class="mint-loadmore-bottom">
-          <span v-show="bottomStatus !== 'loading'" :class="{ 'is-rotate': bottomStatus === 'loading' }">↑</span>
-          <span v-show="bottomStatus === 'loading'">
-            <mt-spinner type="snake"></mt-spinner>
-          </span>
-        </div>
-      </mt-loadmore>
-      <div v-show="isShowSpinner" class="loadEnd">没有更多了</div>
-    </div> -->
-    <!-- <mt-palette-button content="+" @expand="main_log('expand')" @expanded="main_log('expanded')" @collapse="main_log('collapse')" direction="lt" class="pb" :radius="80" ref="target_1" mainButtonStyle="color:#fff;background-color:#71BFDB;">
-      <div class="my-icon-button" @click.stop="sub_log('hand')">
+    <!-- <div> -->
+    <!-- <mt-loadmore :bottom-method="loadBottom" ref="loadmore">
+        <battery-list-item v-for="item in tableData" :key="item.code + new Date().getTime()" :listData="item" @bindDevice="selectItem" @unbindSuc="ifUnbind"></battery-list-item>
+      </mt-loadmore> -->
+    <!-- <div slot="top" class="mint-loadmore-top">
+        <span v-show="topStatus !== 'loading'" :class="{ 'rotate': topStatus === 'drop' }">↓</span>
+        <span v-show="topStatus === 'loading'">Loading...</span>
+      </div> -->
+    <!-- <div v-show="isShowSpinner" class="loadEnd">没有更多了</div> -->
+    <!-- </div> -->
+    <div class="pb" :class="{'animation': activeBtn}" @click="batteryAdd">
+      登记
+    </div>
+    <!-- <mt-palette-button content="登记" @expand="main_log('expand')" @expanded="main_log('expanded')" @collapse="main_log('collapse')" direction="lt" class="pb" :radius="80" ref="target_1" mainButtonStyle="color:#fff;background-color:#71BFDB;font-size: 14px">
+      <div class="my-icon-button" @touchstart="batteryAdd">
         <img src="/static/hand.svg" alt="">
       </div>
-        <div class="my-icon-button" @click.stop="sub_log('scan')">
-          <img src="/static/scan.svg" alt="">
+      <div class="my-icon-button" @touchstart="batteryAdd('scan')">
+        <img src="/static/scan.svg" alt="">
       </div>
     </mt-palette-button> -->
   </div>
@@ -85,9 +85,9 @@ import batteryListItem from "./batteryListItem";
 import Vues from "./main";
 import _cache from "../cache.js";
 import Paho from "Paho";
-import mqttConfig from "@/api/mqtt.config";
+import mqtt from "@/api/mqtt.config";
 
-let mqttClient = {};
+// let mqttClient = {};
 export default {
   name: "index",
   components: {
@@ -100,9 +100,12 @@ export default {
   },
   data() {
     return {
+      topStatus: "",
+      activeBtn: false,
+      mqttClient: {},
       choosed: "",
       isShowSpinner: false,
-      pageSize: 10,
+      pageSize: 8,
       currentPage: 1,
       loadingDom: true,
       wrapperHeight: 0,
@@ -134,10 +137,12 @@ export default {
     };
   },
   methods: {
-    handleBottomChange(status) {
-      this.bottomStatus = status;
+    batteryAdd() {
+      this.activeBtn = !this.activeBtn;
+      this.$router.push("/batteryEdit");
     },
     loadBottom() {
+      // this.$refs.loadmore.onBottomLoaded();
       setTimeout(() => {
         this.currentPage++;
         if (this.currentPage <= this.totalPage) {
@@ -145,7 +150,10 @@ export default {
         } else {
           this.isShowSpinner = true;
         }
-      }, 800);
+      }, 500);
+    },
+    handleBottomChange(status) {
+      this.bottomStatus = status;
     },
     ifUnbind() {
       this.tableData = [];
@@ -358,57 +366,70 @@ export default {
           let message = new Paho.MQTT.Message(`k:${data.code}`);
           message.destinationName = `cmd/${data.deviceBianhao}`;
           console.log(message);
-          mqttClient.send(message);
+          this.mqttClient.send(message);
         }
       });
     },
     /* mqtt链接 */
     connectMqtt() {
-      mqttClient = new Paho.MQTT.Client(
-        mqttConfig.hostname,
-        mqttConfig.port,
-        mqttConfig.clientId
-      );
-      mqttClient.connect({
+      this.mqttClient = mqtt.mqttClient();
+      this.mqttClient.connect({
         onSuccess: this.onConnect,
-        reconnect: mqttConfig.reconnect,
-        keepAliveInterval: mqttConfig.keepAliveInterval,
-        useSSL: mqttConfig.useSSL,
-        timeout: mqttConfig.timeout
+        reconnect: mqtt.mqttConfig().reconnect,
+        keepAliveInterval: mqtt.mqttConfig().keepAliveInterval,
+        useSSL: mqtt.mqttConfig().useSSL,
+        timeout: mqtt.mqttConfig().timeout
       });
-      mqttClient.onFailure = res => {
+      this.mqttClient.onFailure = res => {
         console.log(res);
       };
-      mqttClient.onConnectionLost = responseObject => {
+      this.mqttClient.onConnectionLost = responseObject => {
         console.log("mqtt-closed:", responseObject);
       };
-      mqttClient.onMessageArrived = message => {
+      this.mqttClient.onMessageArrived = message => {
         console.log("message", message);
       };
     },
     onConnect() {
       if (
-        typeof mqttClient === "object" &&
-        typeof mqttClient.subscribe === "function"
+        typeof this.mqttClient === "object" &&
+        typeof this.mqttClient.subscribe === "function"
       ) {
         console.log("mqtt is connected");
       }
     }
   },
+  // beforeRouteEnter (to, from, next) {
+  //   // ...
+  // },
   beforeRouteLeave(to, from, next) {
     if (to.name !== "loading") {
       next();
     }
   },
   mounted() {
+    console.log(mqtt);
     this.connectMqtt();
     this.getBatteryList();
     this.getCompanyId();
     this.getBatteryModelList();
+    // console.log(typeof this.$refs.wrapper.scrollTo);
+    // this.$refs.wrapper.scrollTo(0, 0);
     this.wrapperHeight =
       document.documentElement.clientHeight -
       this.$refs.wrapper.getBoundingClientRect().top -
       60;
+  },
+  beforeDestroy() {
+    if (
+      typeof this.mqttClient === "object" &&
+      typeof this.mqttClient.isConnected === "function" &&
+      this.mqttClient.isConnected()
+    ) {
+      this.mqttClient.disconnect();
+      this.mqttClient = {};
+    }
+    this.wrapperHeight = 0;
   }
 };
 </script>
@@ -429,7 +450,7 @@ nav {
   position: relative;
 }
 .tableBody {
-  overflow: scroll;
+  overflow: auto;
 }
 .search button {
   border: none;
@@ -556,14 +577,23 @@ nav button {
   width: 61px;
   height: 61px;
   line-height: 61px;
-  color: #fff;
+  color: rgb(255, 255, 255);
+  background-color: rgb(113, 191, 219);
+  font-size: 14px;
+  text-align: center;
+  border-radius: 50%;
+  transition: transform 0.1s ease-in-out;
   position: fixed;
   top: 75%;
   right: 20px;
+  // background:
   -webkit-box-shadow: 0 2px 12px rgba(0, 0, 0, 0.175);
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.175);
 }
-
+.animation {
+  -webkit-animation: mint-zoom 0.5s ease-in-out;
+  animation: mint-zoom 0.5s ease-in-out;
+}
 .my-icon-button {
   width: 40px;
   padding: 8px;

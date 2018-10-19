@@ -8,13 +8,14 @@
         </router-link>
         <mt-button icon="more" slot=""></mt-button>
       </mt-header>
-      <div class="realTime demo1 left">
-        实时数据
+      <div class="itmeMenu">
+        <div class="realTime demo1">
+          实时数据
+        </div>
+        <div @click="toHisTime" class="histroyTime demo1">
+          历史数据
+        </div>
       </div>
-      <div @click="toHisTime" class="histroyTime demo1 left">
-        历史数据
-      </div>
-
       <div class="searchIpt">
         <div @click="searchBetteryNo" class="searchBtn fl"><img src="../../../static/search.jpg" alt=""></div>
         <input v-model="betteryNo" class="search" type="text" placeholder="电池编号/设备编号">
@@ -117,7 +118,10 @@
     <div class="wrap-map">
       <map-container :mapCenter="mapPosition" @addressCallback="addressBack"></map-container>
     </div>
-
+    <div class="version">
+      <p class="verId"><img :src="iconSrc.verison" alt="">：{{version}}</p>
+      <p class="ccid"><img :src="iconSrc.ccid" alt="">：{{CCID}}</p>
+    </div>
     <div class="updateTime">
       <div class="updateTimeShow">
         <p>更新时间</p>
@@ -139,16 +143,16 @@
 </template>
 
 <script>
-import Paho from "Paho";
+// import Paho from "Paho";
 import echarts from "echarts";
 import { Toast, Indicator } from "mint-ui";
-import mqttConfig from "@/api/mqtt.config";
+import mqtt from "@/api/mqtt.config";
 import utils from "@/utils/utils";
 import mapContainer from "./map";
 import lineChart from "./Linechart";
 
-let mqttClient = {};
-
+const PI = 3.14159265358979324;
+const x_pi = (3.14159265358979324 * 3000.0) / 180.0;
 export default {
   name: "realTime",
   components: {
@@ -177,7 +181,14 @@ export default {
       },
       isShowMain: true,
       address: "",
-      betteryNo: ""
+      betteryNo: "",
+      mqttClient: {},
+      CCID: "",
+      version: "",
+      iconSrc: {
+        ccid: require("../../../static/device-flesh.png"),
+        verison: require("../../../static/iconfont-version.png")
+      }
     };
   },
   watch: {
@@ -192,6 +203,7 @@ export default {
     }
   },
   mounted() {
+    console.log(mqtt.mqttConfig());
     this.hostId = this.$route.query.hostId;
     this.deviceId = this.$route.query.deviceId;
     this.deviceCode = this.$route.query.deviceCode;
@@ -206,12 +218,11 @@ export default {
   },
   beforeDestroy() {
     if (
-      typeof mqttClient === "object" &&
-      typeof mqttClient.isConnected === "function" &&
-      mqttClient.isConnected()
+      typeof this.mqttClient === "object" &&
+      typeof this.mqttClient.isConnected === "function" &&
+      this.mqttClient.isConnected()
     ) {
-      mqttClient.disconnect();
-      mqttClient = {};
+      this.mqttClient.disconnect();
     }
     this.dataObj = {};
     this.ReceiveObj = {};
@@ -345,12 +356,12 @@ export default {
       console.log(data);
       // this.betteryNo = data.code;
       if (
-        typeof mqttClient === "object" &&
-        typeof mqttClient.isConnected === "function" &&
-        mqttClient.isConnected()
+        typeof this.mqttClient === "object" &&
+        typeof this.mqttClient.isConnected === "function" &&
+        this.mqttClient.isConnected()
       ) {
-        mqttClient.disconnect();
-        mqttClient = {};
+        this.mqttClient.disconnect();
+        this.mqttClient = {};
       }
       this.IdObj = data;
       this.showBatteryList = false;
@@ -369,7 +380,7 @@ export default {
       });
     },
     activeQuery() {
-      if (mqttClient.isConnected() && !this.queryData) {
+      if (this.mqttClient.isConnected() && !this.queryData) {
         this.queryData = true;
         clearInterval(this.decriseTime);
         let index = 10;
@@ -389,28 +400,24 @@ export default {
         }, 1000);
         let message = new Paho.MQTT.Message("c:get");
         message.destinationName = `cmd/${this.IdObj.deviceCode}`;
-        mqttClient.send(message);
+        this.mqttClient.send(message);
       } else {
         Toast("网络连接失败，请稍后重试");
       }
     },
     connectMqtt() {
-      mqttClient = new Paho.MQTT.Client(
-        mqttConfig.hostname,
-        mqttConfig.port,
-        mqttConfig.clientId
-      );
-      mqttClient.connect({
+      this.mqttClient = mqtt.mqttClient();
+      this.mqttClient.connect({
         onSuccess: this.onConnect,
-        reconnect: mqttConfig.reconnect,
-        keepAliveInterval: mqttConfig.keepAliveInterval,
-        useSSL: mqttConfig.useSSL,
-        timeout: mqttConfig.timeout
+        reconnect: mqtt.mqttConfig().reconnect,
+        keepAliveInterval: mqtt.mqttConfig().keepAliveInterval,
+        useSSL: mqtt.mqttConfig().useSSL,
+        timeout: mqtt.mqttConfig().timeout
       });
-      mqttClient.onConnectionLost = responseObject => {
+      this.mqttClient.onConnectionLost = responseObject => {
         console.log("mqtt-closed:", responseObject);
       };
-      mqttClient.onMessageArrived = message => {
+      this.mqttClient.onMessageArrived = message => {
         console.log("message:", message);
         let payload = message.payloadString;
         if (payload) {
@@ -466,7 +473,8 @@ export default {
         gcjLongitude: posData.lon,
         gcjLatitude: posData.lat
       };
-      this.positionData(resultPos);
+      this.mapPosition = resultPos;
+      // this.positionData(resultPos);
 
       if (this.checked) {
         this.ReceiveObj = dataObj;
@@ -476,10 +484,10 @@ export default {
     onConnect() {
       console.log("connect");
       if (
-        typeof mqttClient === "object" &&
-        typeof mqttClient.subscribe === "function"
+        typeof this.mqttClient === "object" &&
+        typeof this.mqttClient.subscribe === "function"
       ) {
-        mqttClient.subscribe(`dev/${this.IdObj.deviceCode}`);
+        this.mqttClient.subscribe(`dev/${this.IdObj.deviceCode}`);
       }
     },
     //硬件GPS----转高德经纬度 ----开始
@@ -557,11 +565,29 @@ export default {
 </script>
 
 <style scoped lang="scss">
-/*#Vecharts {*/
-/*width: 100%;*/
-/*height: 200px;*/
-/*}*/
-
+.version {
+  text-align: left;
+  // margin-top: 10px;
+  display: flex;
+  padding: 0 20px;
+  font-size: 14px;
+  border-bottom: 1px dashed #e5e5e5;
+  p {
+    line-height: 40px;
+    flex: 1;
+    img {
+      vertical-align: middle;
+      width: 22px;
+      height: auto;
+    }
+    &.verId {
+      flex: 0 0 30%;
+    }
+    &.ccid {
+      text-align: right;
+    }
+  }
+}
 .charts {
   margin-left: 5%;
   margin-top: 40px;
@@ -602,13 +628,16 @@ nav {
   z-index: 99999999;
 }
 
-.demo1 {
-  width: 50%;
-  text-align: center;
-  height: 10%;
-  font-size: 12pt;
+.itmeMenu {
+  display: flex;
+  padding: 0 30px;
+  .demo1 {
+    flex: 1;
+    text-align: center;
+    height: 10%;
+    font-size: 12pt;
+  }
 }
-
 .histroyTime {
   color: #9b9b9b;
   height: 30px;
@@ -770,7 +799,6 @@ nav {
     height: 80%;
     overflow: hidden;
     float: left;
-    margin-top: 10px;
     p {
       font-size: 12px;
       color: #a0a0a0;
@@ -803,7 +831,7 @@ nav {
     width: 40%;
     height: 40%;
     border-left: 1px #ccc solid;
-    margin-top: 20px;
+    margin-top: 10px;
     .initiativeButton {
       background: #71bfdb;
       width: 90px;

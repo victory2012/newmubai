@@ -2,7 +2,7 @@
   <!--listData.data-->
   <div class="warrps">
 
-    <div v-if="alarmData.length > 0" class="wraningItem" v-for="item in alarmData" :key="item.time">
+    <div v-if="alarmData.length !== 0" class="wraningItem" v-for="item in alarmData" :key="item.time">
       <ul class="WItop">
         <li class="fl">{{item.index}}</li>
         <li class="fl">
@@ -24,7 +24,7 @@
 
       </ul>
     </div>
-    <p v-else>暂无数据</p>
+    <p class="tipmsg" v-if="alarmData.length == 0">暂无数据</p>
   </div>
 
 </template>
@@ -42,7 +42,7 @@ export default {
   },
   data() {
     return {
-      alarmData: this.alaData,
+      alarmData: "",
       listData: {},
       pages: 1,
       sum: ""
@@ -51,16 +51,25 @@ export default {
   watch: {
     alaData: {
       handler: function(val) {
-        console.log(val);
+        console.log("告警次数", val);
         this.alarmData = val;
       }
     }
+  },
+  mounted() {
+    this.alarmData = this.alaData;
+    console.log("告警次数", this.alarmData.length);
   }
 };
 </script>
 
 
 <style scoped="" lang="scss">
+.tipmsg {
+  font-size: 14px;
+  line-height: 40px;
+  color: #999;
+}
 .warrps {
   width: 100%;
   background: #ffffff;

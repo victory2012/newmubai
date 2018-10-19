@@ -8,11 +8,13 @@
           </router-link>
           <mt-button icon="more" slot=""></mt-button>
         </mt-header>
-        <div @click="torealTime" class="realTime demo1 left">
-          实时数据
-        </div>
-        <div class="histroyTime demo1 left">
-          历史数据
+        <div class="itmeMenu">
+          <div @click="torealTime" class="realTime demo1">
+            实时数据
+          </div>
+          <div class="histroyTime demo1">
+            历史数据
+          </div>
         </div>
         <div class="checkTime">
           <p class="fl">从</p>
@@ -111,9 +113,10 @@
       <his-alarm v-if="alarm" :alaData="alarmData"></his-alarm>
       <fluid-Alarm v-if="alarmFluid" :fliudData="liquidData"></fluid-Alarm>
       <div class="page">
-        <span>当前第{{pages}}页，共{{totalPage}}页</span>
-        <mt-button @click="nextPage" size="small" class="fenyeBtn" type="primary">下一页</mt-button>
+        <span>当前第{{pages}}页</span>
         <mt-button @click="prevPage" size="small" class="fenyeBtn" type="primary">上一页</mt-button>
+        <mt-button @click="nextPage" size="small" class="fenyeBtn" type="primary">下一页</mt-button>
+        <span>共{{totalPage}}页</span>
       </div>
       <div class="wrap-map">
         <p>监测位置变化趋势</p>
@@ -155,7 +158,7 @@ export default {
       TimeTap: [
         { item: "最近一周", isShow: false, index: 1 },
         { item: "最近一个月", isShow: false, index: 2 },
-        { item: "最近三天个月", isShow: false, index: 3 },
+        { item: "最近三个月", isShow: false, index: 3 },
         { item: "最近六个月", isShow: false, index: 4 },
         { item: "最近一年", isShow: false, index: 5 },
         { item: "全生命周期", isShow: false, index: 6 }
@@ -582,6 +585,7 @@ export default {
   padding: 10px 0;
 }
 .fenyeBtn {
+  margin: 0 5px;
   font-size: 14px;
 }
 .indexHis {
@@ -617,11 +621,15 @@ export default {
     color: #000;
     background: #fff;
   }
-  .demo1 {
-    width: 50%;
-    text-align: center;
-    height: 10%;
-    font-size: 12pt;
+  .itmeMenu {
+    display: flex;
+    padding: 0 30px;
+    .demo1 {
+      flex: 1;
+      text-align: center;
+      height: 10%;
+      font-size: 12pt;
+    }
   }
 
   .realTime {
@@ -738,6 +746,7 @@ export default {
         font-size: 18px;
         height: 50px;
         line-height: 50px;
+        font-weight: bold;
       }
       .Data2 {
         font-size: 9px;

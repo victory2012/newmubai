@@ -24,14 +24,14 @@
 <script>
 import { MessageBox, Toast } from "mint-ui";
 import Paho from "Paho";
-import mqttConfig from "../../api/mqtt.config";
+import mqtt from "../../api/mqtt.config";
 
-let mqttClient = {};
 export default {
   name: "batteryBind",
 
   data() {
     return {
+      mqttClient: {},
       id: "", // 电池id
       no: "", //输入no
       bindHostId: "",
@@ -62,37 +62,33 @@ export default {
           let message = new Paho.MQTT.Message(`k:${this.batteryCode}`);
           message.destinationName = `cmd/${bindObj.deviceCode}`;
           console.log(message);
-          mqttClient.send(message);
+          this.mqttClient.send(message);
         }
       });
     },
     connectMqtt() {
-      mqttClient = new Paho.MQTT.Client(
-        mqttConfig.hostname,
-        mqttConfig.port,
-        mqttConfig.clientId
-      );
-      mqttClient.connect({
+      this.mqttClient = mqtt.mqttClient();
+      this.mqttClient.connect({
         onSuccess: this.onConnect,
-        reconnect: mqttConfig.reconnect,
-        keepAliveInterval: mqttConfig.keepAliveInterval,
-        useSSL: mqttConfig.useSSL,
-        timeout: mqttConfig.timeout
+        reconnect: mqtt.mqttConfig().reconnect,
+        keepAliveInterval: mqtt.mqttConfig().keepAliveInterval,
+        useSSL: mqtt.mqttConfig().useSSL,
+        timeout: mqtt.mqttConfig().timeout
       });
-      mqttClient.onFailure = res => {
+      this.mqttClient.onFailure = res => {
         console.log(res);
       };
-      mqttClient.onConnectionLost = responseObject => {
+      this.mqttClient.onConnectionLost = responseObject => {
         console.log("mqtt-closed:", responseObject);
       };
-      mqttClient.onMessageArrived = message => {
+      this.mqttClient.onMessageArrived = message => {
         console.log("message", message);
       };
     },
     onConnect() {
       if (
-        typeof mqttClient === "object" &&
-        typeof mqttClient.subscribe === "function"
+        typeof this.mqttClient === "object" &&
+        typeof this.mqttClient.subscribe === "function"
       ) {
         console.log("mqtt is connected");
       }
@@ -131,10 +127,9 @@ export default {
     this.connectMqtt();
   },
   destroyed() {
-    if (typeof mqttClient === "object" && mqttClient.isConnected()) {
+    if (typeof this.mqttClient === "object" && this.mqttClient.isConnected()) {
       // console.log(mqttClient);
-      mqttClient.disconnect();
-      mqttClient = {};
+      this.mqttClient.disconnect();
     }
   }
 };

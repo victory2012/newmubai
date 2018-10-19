@@ -1,6 +1,6 @@
 <template>
   <div class="warrps">
-    <div class="wraningItem" v-for="item in listData" :key="item.time">
+    <div v-if="listData.length>0" class="wraningItem" v-for="item in listData" :key="item.time">
       <ul class="WItop">
         <li class="fl">{{item.index}}</li>
         <li class="fl"></li>
@@ -20,6 +20,7 @@
         </li>
       </ul>
     </div>
+    <p class="tipmsg" v-if="listData.length == 0">暂无数据</p>
   </div>
 
 </template>
@@ -71,6 +72,11 @@ export default {
 .warrps {
   width: 100%;
   background: #ffffff;
+}
+.tipmsg {
+  font-size: 14px;
+  line-height: 40px;
+  color: #999;
 }
 .fl {
   float: left;

@@ -58,9 +58,9 @@ export default {
           right: 5,
           top: "center",
           orient: "vertical",
-          itemWidth: 8,
-          itemHeight: 8,
-          itemGap: 15,
+          itemWidth: 12,
+          itemHeight: 12,
+          itemGap: 25,
           textStyle: {
             color: "#484848"
           },
@@ -70,7 +70,7 @@ export default {
           {
             type: "pie",
             radius: ["30%", "50%"],
-            center: ["50%", "60%"],
+            center: ["35%", "50%"],
             data: [],
             itemStyle: {
               emphasis: {
@@ -152,9 +152,9 @@ export default {
         return item;
       };
       voltageOptions.series[0].data = [
-        { value: peiData.chargeDuration, name: "充电时间" },
-        { value: peiData.dischargeDuration, name: "放电时间" },
-        { value: peiData.idleDuration, name: "空载时间" }
+        { value: peiData.chargeDuration || 0, name: "充电时间" },
+        { value: peiData.dischargeDuration || 0, name: "放电时间" },
+        { value: peiData.idleDuration || 0, name: "空载时间" }
       ];
       voltageOptions.series[0].label.normal.formatter = "{c}h";
       this.peiEcharts1.setOption(voltageOptions);
@@ -167,11 +167,15 @@ export default {
         Number(peiData.current);
       let currentOptions = _.cloneDeep(this.pieOption);
       currentOptions.legend.data = ["温度", "液位", "电压", "电流"];
+      currentOptions.tooltip.formatter = p => {
+        let item = `${p.percent}%<br />${p.data.name}-告警: ${p.data.value}次`;
+        return item;
+      };
       currentOptions.series[0].data = [
-        { value: peiData.temperature, name: "温度" },
-        { value: peiData.fluidLevel, name: "液位" },
-        { value: peiData.voltage, name: "电压" },
-        { value: peiData.current, name: "电流" }
+        { value: peiData.temperature || 0, name: "温度" },
+        { value: peiData.fluidLevel || 0, name: "液位" },
+        { value: peiData.voltage || 0, name: "电压" },
+        { value: peiData.current || 0, name: "电流" }
       ];
       this.peiEcharts2.setOption(currentOptions);
     }

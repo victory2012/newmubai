@@ -1,6 +1,7 @@
 <template>
-  <div>
+  <div class="RealMaps">
     <div id="mapContainers" class="realMapContainer"></div>
+    <div class="localBtn" @click="gobackLocal"><img :src="ImgSrc" alt=""></div>
   </div>
 </template>
 <script>
@@ -11,8 +12,8 @@ import lnglatTrabsofor from "@/utils/longlatTransfor";
 
 let map;
 let marker;
-const PI = 3.14159265358979324;
-const x_pi = (3.14159265358979324 * 3000.0) / 180.0;
+// const PI = 3.14159265358979324;
+// const x_pi = (3.14159265358979324 * 3000.0) / 180.0;
 export default {
   props: ["mapCenter"],
   watch: {
@@ -26,12 +27,14 @@ export default {
   data() {
     return {
       markerArr: [],
+      ImgSrc: require("../../../static/local_normal.png"),
       IdObj: {},
       address: "",
       hostId: "",
       deviceId: "",
       deviceCode: "",
-      id: ""
+      id: "",
+      mapCenterPointer: ""
     };
   },
   mounted() {
@@ -65,6 +68,7 @@ export default {
         });
         marker.setMap(map);
         this.markerArr.push(marker);
+        this.mapCenterPointer = position;
         map.setCenter(position);
         /* 根据经纬度 用高德查询详细地址 */
         lnglatTrabsofor(position, res => {
@@ -80,6 +84,11 @@ export default {
             this.addressCallBack(res.addressComponent);
           }
         });
+      }
+    },
+    gobackLocal() {
+      if (this.mapCenterPointer) {
+        map.setCenter(this.mapCenterPointer);
       }
     },
     /* 发送地址给后台 */
@@ -100,8 +109,31 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-.realMapContainer {
-  width: 100%;
+.RealMaps {
+  position: relative;
   height: 220px;
+  .realMapContainer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 220px;
+  }
+  .localBtn {
+    position: absolute;
+    bottom: 5px;
+    left: 10px;
+    padding: 3px;
+    background: #ffffff;
+    border: 1px solid #e5e5e5;
+    border-radius: 3px;
+    z-index: 180;
+    font-size: 0;
+    box-shadow: 4px 4px 40px rgba(0, 0, 0, 0.2);
+    img {
+      width: 20px;
+      height: auto;
+    }
+  }
 }
 </style>
