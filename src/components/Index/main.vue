@@ -161,6 +161,7 @@ export default {
       this.getBatteryList();
     },
     onCompanyChange(picker, values) {
+      console.log("values", values);
       this.company = values[0].name;
       this.searchContent.companyId = values[0].id;
       this.tableData = [];

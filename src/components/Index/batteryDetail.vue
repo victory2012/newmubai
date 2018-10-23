@@ -2,85 +2,87 @@
   <div class="edit-battery">
     <div class="headNav">
       <mt-header class="Loginhead" v-bind:title="'详细信息'">
-        <router-link to="/index" slot="left">
+        <router-link v-show="!isAddPt" to="/index" slot="left">
           <mt-button icon="back"></mt-button>
         </router-link>
-        <mt-button icon="" slot="right" v-if="isAddPt">完成</mt-button>
+        <mt-button icon="" slot="left" @click="doCancelSaveData" v-show="isAddPt">取消</mt-button>
+        <mt-button icon="" slot="right" @click="doSaveData" v-show="isAddPt">保存</mt-button>
+        <mt-button icon="" slot="right" @click="editBattery" v-show="!isAddPt">编辑</mt-button>
       </mt-header>
     </div>
 
     <div class="dp-content">
       <div class="select-item">
         <div class="select-item_value">电池组客户企业</div>
-        <div class="select-item_title">{{tableObj.companyName}}</div>
-        <div class="arrow-right" v-show="isAddPt">
+        <div :class="{'colorGray': isAddPt}" class="select-item_title">{{tableObj.companyName}}</div>
+        <!-- <div class="arrow-right" v-show="isAddPt">
           <img src="/static/jiantou2.svg" alt="">
-        </div>
+        </div> -->
       </div>
       <div class="select-item">
-        <mt-field label="电池组编号" v-model="tableObj.code" :disabled="!isAddPt"></mt-field>
+        <mt-field label="电池组编号" :class="{'colorGray': isAddPt}" v-model="tableObj.code" :disabled="true"></mt-field>
       </div>
       <div class="select-item">
         <div class="select-item_value">电池组型号</div>
-        <div class="select-item_title">{{tableObj.model}}</div>
+        <div class="select-item_title" @click="openProp('model')">{{tableObj.model}}</div>
         <div class="arrow-right" v-show="isAddPt">
           <img src="/static/jiantou2.svg" alt="">
         </div>
       </div>
       <div class="select-item">
         <div class="select-item_value">电池组规格</div>
-        <div class="select-item_title">{{tableObj.norm}}</div>
+        <div class="select-item_title" @click="openProp('specif')">{{tableObj.norm}}</div>
         <div class="arrow-right" v-show="isAddPt">
           <img src="/static/jiantou2.svg" alt="">
         </div>
       </div>
       <div class="select-item">
-        <mt-field label="电池组额定电压" v-model="tableObj.voltage" type="number" :disabled="!isAddPt"></mt-field>
+        <mt-field label="电池组额定电压" v-model="tableObj.voltage" type="tel" :disabled="!isAddPt"></mt-field>
       </div>
       <div class="select-item">
-        <mt-field label="电池组额定容量" v-model="tableObj.capacity" type="number" :disabled="!isAddPt"></mt-field>
+        <mt-field label="电池组额定容量" v-model="tableObj.capacity" type="tel" :disabled="!isAddPt"></mt-field>
       </div>
       <div class="select-item">
         <div class="select-item_value">电池单体型号</div>
-        <div class="select-item_title">{{tableObj.singleModel}}</div>
+        <div class="select-item_title" @click="openProp('singleModel')">{{tableObj.singleModel}}</div>
         <div class="arrow-right" v-show="isAddPt">
           <img src="/static/jiantou2.svg" alt="">
         </div>
       </div>
       <div class="select-item">
         <div class="select-item_value">电池组生产日期</div>
-        <div class="select-item_title">{{tableObj.manufacturerDate}}</div>
+        <div class="select-item_title" @click="openPropDate('porduct')">{{tableObj.manufacturerDate}}</div>
         <div class="arrow-right" v-show="isAddPt">
           <img src="/static/jiantou2.svg" alt="">
         </div>
       </div>
       <div class="select-item">
         <div class="select-item_value">电池组出厂日期</div>
-        <div class="select-item_title">{{tableObj.productionDate}}</div>
+        <div class="select-item_title" @click="openPropDate('factory')">{{tableObj.productionDate}}</div>
         <div class="arrow-right" v-show="isAddPt">
           <img src="/static/jiantou2.svg" alt="">
         </div>
       </div>
       <div class="select-item">
         <div class="select-item_value">电池组质保期</div>
-        <div class="select-item_title">{{tableObj.qualityGuaranteeDate}}</div>
+        <div class="select-item_title" @click="openPropDate('quality')">{{tableObj.qualityGuaranteeDate}}</div>
         <div class="arrow-right" v-show="isAddPt">
           <img src="/static/jiantou2.svg" alt="">
         </div>
       </div>
       <div class="select-item">
         <div class="select-item_value">设备编号</div>
-        <div class="select-item_title">{{deviceCode || '无'}}</div>
-        <div class="arrow-right" v-show="isAddPt">
+        <div :class="{'colorGray': isAddPt}" class="select-item_title">{{deviceCode || '无'}}</div>
+        <!-- <div class="arrow-right" v-show="isAddPt">
           <img src="/static/jiantou2.svg" alt="">
-        </div>
+        </div> -->
       </div>
     </div>
 
     <mt-popup v-model="selectVisible" position="bottom" class="mint-popup-4">
-      <mt-picker :slots="selectOpts" :visible-item-count="5" :show-toolbar="true">
+      <mt-picker valueKey="name" @change="onValuesChange" :slots="selectOpts" :visible-item-count="5" :show-toolbar="true">
         <div class="mint-datetime-action mint-datetime-cancel" @click.stop="cancel">取消</div>
-        <div class="mint-datetime-action mint-datetime-confirm" @click.stop="ok">确定</div>
+        <div class="mint-datetime-action mint-datetime-confirm" @click.stop="sureBtn">确定</div>
       </mt-picker>
     </mt-popup>
 
@@ -91,7 +93,8 @@
 </template>
 
 <script>
-// import { MessageBox, Toast } from "mint-ui";
+import { MessageBox, Toast, Indicator } from "mint-ui";
+import utils from "@/utils/utils";
 // import * as _m from "moment";
 // import _cache from "../cache.js";
 // import { checkPermisstion } from "../../common/js/auth";
@@ -101,6 +104,7 @@ export default {
 
   data() {
     return {
+      chooseValue: "",
       form: {
         client_id: "",
         no: "",
@@ -145,27 +149,199 @@ export default {
       date: new Date(), // picker model
       datePickerState: "",
       tableObj: {},
+
+      Modeloptions: "",
+      singleModelOptions: "",
+      NormOpyions: "",
+      Timetype: "",
+
       deviceCode: "",
       id: "",
       isAddPt: false // 是否有add、编辑权限
     };
   },
   methods: {
-    dateChange() {},
+    /* 取消保存 */
+    doCancelSaveData() {
+      this.queryDetail();
+      this.isAddPt = false;
+    },
+    /* 保存修改 */
+    doSaveData() {
+      console.log(this.tableObj);
+      if (!this.tableObj.voltage) {
+        Toast("电压不能为空");
+        return;
+      }
+      if (!this.tableObj.capacity) {
+        Toast("额定容量不能为空");
+        return;
+      }
+
+      let options = {
+        normId: this.tableObj.normId,
+        norm: this.tableObj.norm,
+        modelId: this.tableObj.modelId,
+        model: this.tableObj.model,
+        singleModelId: this.tableObj.singleModelId,
+        singleModel: this.tableObj.singleModel,
+        voltage: this.tableObj.voltage,
+        capacity: this.tableObj.capacity,
+        productionDate: this.tableObj.manufacturerDate,
+        manufacturerDate: this.tableObj.productionDate,
+        qualityGuaranteeDate: this.tableObj.qualityGuaranteeDate
+      };
+      console.log(options);
+      Indicator.open();
+      this.$axios
+        .put(`/battery_group/${this.tableObj.id}`, options)
+        .then(res => {
+          Indicator.close();
+          console.log(res);
+          if (res.data && res.data.code === 0) {
+            Toast(res.data.msg);
+            this.doCancelSaveData();
+          }
+        });
+    },
+    cancel() {
+      this.selectVisible = false;
+    },
+    onValuesChange(picker, values) {
+      this.chooseValue = values[0];
+    },
+    sureBtn() {
+      if (this.selectType === "singleModel") {
+        /* 电池单体型号 */
+        this.tableObj.singleModel = this.chooseValue.name;
+        this.tableObj.singleModelId = this.chooseValue.id;
+      }
+      if (this.selectType === "specif") {
+        /* 电池组规格 */
+        this.tableObj.norm = this.chooseValue.name;
+        this.tableObj.normId = this.chooseValue.id;
+      }
+      if (this.selectType === "model") {
+        /* 电池组型号 */
+        this.tableObj.model = this.chooseValue.name;
+        this.tableObj.modelId = this.chooseValue.id;
+      }
+      this.selectVisible = false;
+    },
+    dateChange(value) {
+      let data = utils.yyyymmdd(value);
+      console.log(data);
+      if (this.Timetype === "porduct") {
+        this.$set(this.tableObj, "manufacturerDate", data);
+        // this.prodHasData = true;
+      }
+      if (this.Timetype === "factory") {
+        this.$set(this.tableObj, "productionDate", data);
+        // this.factoryTime = true;
+      }
+      if (this.Timetype === "quality") {
+        this.$set(this.tableObj, "qualityGuaranteeDate", data);
+        // this.qualityTime = true;
+      }
+    },
+    openPropDate(str) {
+      if (!this.isAddPt) return;
+      this.Timetype = str;
+      this.$refs.picker.open();
+    },
+    openProp(str) {
+      if (this.isAddPt) {
+        this.selectVisible = true;
+        console.log(str);
+        this.selectType = str;
+        this.selectOpts[0].values = [];
+        if (str === "singleModel") {
+          /* 电池单体型号 */
+          if (this.singleModelOptions) {
+            this.singleModelOptions.forEach(key => {
+              this.selectOpts[0].values.push({
+                id: key.id,
+                name: key.dicKey
+              });
+            });
+          }
+        }
+        if (str === "specif") {
+          /* 电池组规格 */
+          if (this.NormOpyions) {
+            this.NormOpyions.forEach(key => {
+              this.selectOpts[0].values.push({
+                id: key.id,
+                name: key.dicKey
+              });
+            });
+          }
+        }
+        if (str === "model") {
+          /* 电池组型号 */
+          if (this.Modeloptions) {
+            this.Modeloptions.forEach(key => {
+              this.selectOpts[0].values.push({
+                id: key.id,
+                name: key.dicKey
+              });
+            });
+          }
+        }
+      }
+    },
+    editBattery() {
+      this.isAddPt = true;
+    },
     /* 根据电池编号获取电池组 */
     queryDetail() {
+      Indicator.open();
       this.$axios.get(`/battery_group/${this.id}`).then(res => {
         console.log(res);
         if (res.data && res.data.code === 0) {
+          Indicator.close();
           let result = res.data.data;
           this.tableObj = result;
         }
       });
+    },
+    /* 获取电池组规格列表 */
+    getGroupSpecif() {
+      this.$axios.get("/dic?type=Norm&categoryId=2").then(res => {
+        console.log("电池组规格", res);
+        if (res.data && res.data.code === 0) {
+          this.NormOpyions = res.data.data;
+        }
+      });
+    },
+    /* 获取电池单体型号列表 */
+    getSinglBattery() {
+      this.$axios.get("/dic?type=SingleModel&categoryId=2").then(res => {
+        console.log("电池单体型号", res);
+        if (res.data && res.data.code === 0) {
+          this.singleModelOptions = res.data.data;
+        }
+      });
+    },
+    /* 获取电池型号列表 */
+    getBatteryModelList() {
+      this.$axios.get("/dic?type=Model&categoryId=2").then(res => {
+        console.log("获取电池型号列表", res);
+        if (res.data && res.data.code === 0) {
+          this.Modeloptions = res.data.data;
+        }
+      });
+    },
+    init() {
+      this.getGroupSpecif();
+      this.getSinglBattery();
+      this.getBatteryModelList();
     }
   },
   mounted() {
     this.id = this.$route.query.code;
     this.deviceCode = this.$route.query.deviceCode;
+    this.init();
     if (this.id) {
       this.queryDetail();
     }
@@ -174,6 +350,9 @@ export default {
 </script>
 
 <style lang="scss">
+.colorGray {
+  color: #a0a0a0;
+}
 .edit-battery {
   height: 100%;
   background-color: #f2f2f2;
@@ -201,7 +380,7 @@ export default {
     align-items: center;
     border-bottom: 1px dashed #e5e5e5;
     background-color: #fff;
-    padding: 0 20px;
+    padding: 0 10px;
     height: 42px;
   }
   .select-item_value {
