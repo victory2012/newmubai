@@ -1,3 +1,5 @@
+import t from '@/utils/translate';
+
 const daysInMonth = [
   [0],
   [31],
@@ -18,14 +20,14 @@ export default {
   accountType: type => {
     let str = type.toString();
     switch (str) {
-      case "1":
-        return "平台管理员";
-      case "2":
-        return "管理员";
-      case "3":
-        return "用户";
+      case '1':
+        return '平台管理员';
+      case '2':
+        return '管理员';
+      case '3':
+        return '用户';
       default:
-        return "未知";
+        return '未知';
     }
   },
   fomats: str => {
@@ -84,7 +86,7 @@ export default {
   removeStorageAll: () => {
     sessionStorage.clear();
   },
-  setToken: (token) => {
+  setToken: token => {
     sessionStorage.setItem('token', token);
   },
   /* 时间格式化 无分割线 */
@@ -227,9 +229,9 @@ export default {
   checkDate: data => {
     let res = data.toString();
     if (
-      res.indexOf("年") > 0 ||
-      res.indexOf("月") > 0 ||
-      res.indexOf("日") > 0 ||
+      res.indexOf('年') > 0 ||
+      res.indexOf('月') > 0 ||
+      res.indexOf('日') > 0 ||
       res.length < 7 ||
       res.length > 11
     ) {
@@ -260,25 +262,25 @@ export default {
     let Num = Number(num);
     switch (Num) {
       case 1:
-        return "高";
+        return t('group.high');
       case 2:
-        return "中";
+        return t('group.mid');
       case 3:
-        return "低";
+        return t('group.low');
       default:
         break;
     }
   },
   item: str => {
     switch (str) {
-      case "Voltage":
-        return "电压";
-      case "Current":
-        return "电流";
-      case "Temperature":
-        return "温度";
-      case "Fluid":
-        return "液位";
+      case 'Voltage':
+        return t('realTime.voltage');
+      case 'Current':
+        return t('realTime.current'); // "电流";
+      case 'Temperature':
+        return t('realTime.temperature'); // "温度";
+      case 'Fluid':
+        return t('realTime.fluid'); // "液位";
       default:
         break;
     }
@@ -356,17 +358,17 @@ export default {
     return days;
   },
   RexTime: str => {
-    let start = str.replace(/-/g, "");
-    let starts = start.replace(/:/g, "");
-    let startss = starts.replace(/ /g, "");
+    let start = str.replace(/-/g, '');
+    let starts = start.replace(/:/g, '');
+    let startss = starts.replace(/ /g, '');
     return startss;
   },
   /* 北京时间 转格林威治时间 */
   toUTCTime: data => {
     let res = new Date(data).toISOString();
-    let res1 = res.replace(/-/g, "");
-    let res2 = res1.replace(/T/g, "");
-    let res3 = res2.replace(/:/g, "");
+    let res1 = res.replace(/-/g, '');
+    let res2 = res1.replace(/T/g, '');
+    let res3 = res2.replace(/:/g, '');
     // console.log(res1);
     return res3.substr(0, 14);
   },

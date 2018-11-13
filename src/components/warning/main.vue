@@ -1,11 +1,15 @@
 <template>
   <div class="main">
     <div class="headNav">
-      <mt-header class="Loginhead" title="告警事件">
-        <router-link to="/index" slot="left">
+      <!-- 告警事件 -->
+      <mt-header class="Loginhead"
+        :title="$t('menu.alarm')">
+        <router-link to="/index"
+          slot="left">
           <mt-button icon=""></mt-button>
         </router-link>
-        <mt-button icon="" slot="right"></mt-button>
+        <mt-button icon=""
+          slot="right"></mt-button>
       </mt-header>
     </div>
     <warningList></warningList>
@@ -20,10 +24,10 @@ export default {
   components: {
     warningList: () => import("./warningList")
   },
-  data() {
+  data () {
     return {};
   },
-  created() {},
+  created () { },
   methods: {}
 };
 </script>

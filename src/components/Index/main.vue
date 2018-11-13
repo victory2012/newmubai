@@ -1,47 +1,90 @@
 <template>
   <div class="main">
     <div class="headNav">
-      <mt-header class="Loginhead" title="基本信息">
-        <mt-button icon="" slot="left"></mt-button>
-        <mt-button icon="" slot="right"></mt-button>
+      <!-- 基本信息 -->
+      <mt-header class="Loginhead"
+        :title="$t('batteryList.information')">
+        <mt-button icon=""
+          slot="left"></mt-button>
+        <mt-button icon=""
+          slot="right"></mt-button>
       </mt-header>
       <nav>
         <div class="search">
-          <input placeholder="电池编号/设备编号" v-model="searchContent.content" type="text">
-          <button @click="searchInput"><img src="../../../static/search.jpg" alt=""></button>
+          <input :placeholder="$t('batteryList.searchContent')"
+            v-model="searchContent.content"
+            type="text">
+          <button @click="searchInput"><img src="../../../static/search.jpg"
+              alt=""></button>
         </div>
-        <button class="searchBtn2 fr" @click="showMore">
-          <img v-if="isShowbind" style="width: 20px;height: 20px;" src="../../../static/xiajiantoufff.svg" alt="">
-          <img v-else style="width: 20px;height: 20px;" src="../../../static/jiantoufff.svg" alt="">
+        <button class="searchBtn2 fr"
+          @click="showMore">
+          <img v-if="isShowbind"
+            style="width: 20px;height: 20px;"
+            src="../../../static/xiajiantoufff.svg"
+            alt="">
+          <img v-else
+            style="width: 20px;height: 20px;"
+            src="../../../static/jiantoufff.svg"
+            alt="">
         </button>
-        <button @click.stop="switchBattery" class="batteryType fr">
-          <p>{{batteryName}}</p><img src="../../../static/xiasanjiao.svg" alt="">
+        <button @click.stop="switchBattery"
+          class="batteryType fr">
+          <p>{{batteryName}}</p><img src="../../../static/xiasanjiao.svg"
+            alt="">
         </button>
-        <button @click.stop="switchCompany" class="qiye fr">
-          <p>{{company}}</p><img src="../../../static/xiasanjiao.svg" alt="">
+        <button @click.stop="switchCompany"
+          class="qiye fr">
+          <p>{{company}}</p><img src="../../../static/xiasanjiao.svg"
+            alt="">
         </button>
 
       </nav>
-      <div class="showIsBind" v-show="isShowbind">
+      <div class="showIsBind"
+        v-show="isShowbind">
         <div>状态</div>
         <ul>
-          <li :class="{'active': choosed == 'hasbind'}" @click="searchBind">已绑定</li>
-          <li :class="{'active': choosed == 'nobind'}" @click="searchNoBind">未绑定</li>
-          <li @click="clearAll">清空筛选</li>
+          <!-- 已绑定 -->
+          <li :class="{'active': choosed == 'hasbind'}"
+            @click="searchBind">{{$t('batteryList.hasBind')}}</li>
+          <!-- 未绑定 -->
+          <li :class="{'active': choosed == 'nobind'}"
+            @click="searchNoBind">{{$t('batteryList.noBind')}}</li>
+          <li @click="clearAll">{{$t('timeBtn.clear')}}</li>
         </ul>
       </div>
     </div>
-    <mt-popup v-model="selectone" position="bottom">
-      <mt-picker valueKey="name" v-if="selectone" class="enterprise" :slots="batterySlot" @change="onBatteryChange"></mt-picker>
+    <mt-popup v-model="selectone"
+      position="bottom">
+      <mt-picker valueKey="name"
+        v-if="selectone"
+        class="enterprise"
+        :slots="batterySlot"
+        @change="onBatteryChange"></mt-picker>
     </mt-popup>
-    <mt-popup v-model="selecttwo" position="bottom">
-      <mt-picker valueKey="name" v-if="selecttwo" class="enterprise" :slots="companySlots" @change="onCompanyChange"></mt-picker>
+    <mt-popup v-model="selecttwo"
+      position="bottom">
+      <mt-picker valueKey="name"
+        v-if="selecttwo"
+        class="enterprise"
+        :slots="companySlots"
+        @change="onCompanyChange"></mt-picker>
     </mt-popup>
 
-    <div class="tableBody" ref="wrapper" :style="{ height: wrapperHeight + 'px' }">
-      <div ref="wrapper" v-infinite-scroll="loadBottom" infinite-scroll-distance="30">
-        <battery-list-item v-for="item in tableData" :key="item.code + new Date().getTime()" :listData="item" @bindDevice="selectItem" @unbindSuc="ifUnbind"></battery-list-item>
-        <p v-show='isShowSpinner' class='loading'>没有更多数据</p>
+    <div class="tableBody"
+      ref="wrapper"
+      :style="{ height: wrapperHeight + 'px' }">
+      <div ref="wrapper"
+        v-infinite-scroll="loadBottom"
+        infinite-scroll-distance="30">
+        <battery-list-item v-for="item in tableData"
+          :key="item.code + new Date().getTime()"
+          :listData="item"
+          @bindDevice="selectItem"
+          @unbindSuc="ifUnbind"></battery-list-item>
+        <!-- 没有更多数据 -->
+        <p v-show='isShowSpinner'
+          class='loading'>{{$t('noMoreData')}}</p>
       </div>
     </div>
     <!-- <div> -->
@@ -54,51 +97,40 @@
       </div> -->
     <!-- <div v-show="isShowSpinner" class="loadEnd">没有更多了</div> -->
     <!-- </div> -->
-    <div class="pb" :class="{'animation': activeBtn}" @click="batteryAdd">
-      登记
+    <div class="pb"
+      :class="{'animation': activeBtn}"
+      @click="batteryAdd">
+      {{$t('regBattery')}}
     </div>
-    <!-- <mt-palette-button content="登记" @expand="main_log('expand')" @expanded="main_log('expanded')" @collapse="main_log('collapse')" direction="lt" class="pb" :radius="80" ref="target_1" mainButtonStyle="color:#fff;background-color:#71BFDB;font-size: 14px">
-      <div class="my-icon-button" @touchstart="batteryAdd">
-        <img src="/static/hand.svg" alt="">
-      </div>
-      <div class="my-icon-button" @touchstart="batteryAdd('scan')">
-        <img src="/static/scan.svg" alt="">
-      </div>
-    </mt-palette-button> -->
   </div>
 </template>
 
 <script>
 import {
-  MessageBox,
   Toast,
   Popup,
-  InfiniteScroll,
   PaletteButton,
   Picker,
   Indicator,
   Loadmore
 } from "mint-ui";
-import { checkPermisstion } from "../../common/js/auth";
-import { loginOverTime } from "../../common/js/loginovertime";
-import batteryListItem from "./batteryListItem";
-import Vues from "./main";
-import _cache from "../cache.js";
+/* eslint-disable */
 import Paho from "Paho";
 import mqtt from "@/api/mqtt.config";
+import utils from "@/utils/utils";
+import t from "@/utils/translate";
+import batteryListItem from "./batteryListItem";
 
-// let mqttClient = {};
 export default {
   name: "index",
   components: {
     batteryListItem,
-    // batteryList,
     "mt-popup": Popup,
     "mt-palette-button": PaletteButton,
     "mt-picker": Picker,
     "mt-loadmore": Loadmore
   },
-  data() {
+  data () {
     return {
       topStatus: "",
       activeBtn: false,
@@ -111,8 +143,8 @@ export default {
       wrapperHeight: 0,
       allLoaded: false,
       bottomStatus: "",
-      company: "企业",
-      batteryName: "电池型号",
+      company: t('batteryList.company'), // "企业",
+      batteryName: t('batteryList.model'), // "电池型号",
       searchContent: {},
       selectone: false,
       selecttwo: false,
@@ -121,7 +153,7 @@ export default {
       companySlots: [
         {
           flex: 1,
-          values: ["获取错误"],
+          values: [],
           className: "slot1",
           textAlign: "center"
         }
@@ -129,19 +161,38 @@ export default {
       batterySlot: [
         {
           flex: 1,
-          values: ["获取错误"],
+          values: [],
           className: "slot2",
           textAlign: "center"
         }
       ]
     };
   },
+  mounted () {
+    this.loginData = JSON.parse(utils.getStorage("loginData")).data;
+    this.connectMqtt();
+    this.getBatteryList();
+    console.log("this.loginData", this.loginData);
+    this.getBatteryModelList();
+    if (
+      this.loginData.type === 1 ||
+      (this.loginData.type === 3 && this.loginData.layerName === "平台")
+    ) {
+      this.getCompanyManufacturer(); // 查询生产企业
+    } else {
+      this.getCompanyId();
+    }
+    this.wrapperHeight =
+      document.documentElement.clientHeight -
+      this.$refs.wrapper.getBoundingClientRect().top -
+      60;
+  },
   methods: {
-    batteryAdd() {
+    batteryAdd () {
       this.activeBtn = !this.activeBtn;
       this.$router.push("/batteryEdit");
     },
-    loadBottom() {
+    loadBottom () {
       // this.$refs.loadmore.onBottomLoaded();
       setTimeout(() => {
         this.currentPage++;
@@ -152,23 +203,22 @@ export default {
         }
       }, 500);
     },
-    handleBottomChange(status) {
+    handleBottomChange (status) {
       this.bottomStatus = status;
     },
-    ifUnbind() {
+    ifUnbind () {
       this.tableData = [];
       this.currentPage = 1;
       this.getBatteryList();
     },
-    onCompanyChange(picker, values) {
-      console.log("values", values);
+    onCompanyChange (picker, values) {
       this.company = values[0].name;
       this.searchContent.companyId = values[0].id;
       this.tableData = [];
       this.currentPage = 1;
       this.getBatteryList();
     },
-    onBatteryChange(picker, values) {
+    onBatteryChange (picker, values) {
       if (values[0].id !== "noData") {
         this.batteryName = values[0].name;
         this.searchContent.batteryId = values[0].id;
@@ -177,20 +227,20 @@ export default {
         this.getBatteryList();
       }
     },
-    searchInput() {
+    searchInput () {
       this.tableData = [];
       this.getBatteryList();
     },
-    switchCompany() {
+    switchCompany () {
       this.selecttwo = !this.selecttwo;
     },
-    switchBattery() {
+    switchBattery () {
       this.selectone = !this.selectone;
     },
-    showMore() {
+    showMore () {
       this.isShowbind = !this.isShowbind;
     },
-    searchBind() {
+    searchBind () {
       this.isShowbind = false;
       if (this.choosed === "hasbind") {
         this.choosed = "";
@@ -203,7 +253,7 @@ export default {
       this.tableData = [];
       this.getBatteryList();
     },
-    searchNoBind() {
+    searchNoBind () {
       if (this.choosed === "nobind") {
         this.choosed = "";
         this.searchContent.bindStatus = "";
@@ -216,10 +266,10 @@ export default {
       this.currentPage = 1;
       this.getBatteryList();
     },
-    clearAll() {
+    clearAll () {
       this.currentPage = 1;
-      this.company = "企业";
-      this.batteryName = "电池型号";
+      this.company = t('batteryList.company');// "企业";
+      this.batteryName = t('batteryList.model');// "电池型号";
       this.searchContent.companyId = null;
       this.searchContent.batteryId = null;
       this.isShowbind = false;
@@ -229,7 +279,7 @@ export default {
       this.choosed = "";
       this.getBatteryList();
     },
-    getBatteryList() {
+    getBatteryList () {
       Indicator.open();
       let options = {
         pageSize: this.pageSize,
@@ -267,9 +317,9 @@ export default {
               key.onLine = key.onlineStatus === 0 || key.onlineStatus === null;
               if (key.deviceId) {
                 key.hasbind = false;
-                key.bindingName = "已绑定";
+                key.bindingName = t('batteryList.hasBind');// "已绑定";
               } else {
-                key.bindingName = "未绑定";
+                key.bindingName = t('batteryList.noBind');// "未绑定";
                 key.hasbind = true;
               }
               key.visitBtn = false;
@@ -283,18 +333,16 @@ export default {
       });
     },
     /* 获取电池组客户企业表 */
-    getCompanyId() {
+    getCompanyId () {
       this.$axios.get("/company/purchase_names").then(res => {
         console.log("获取电池组客户企业表", res);
         if (res.data && res.data.code === 0) {
           this.batCustomOpts = res.data.data;
-          // this.companySlots[0].values = [...this.batCustomOpts];
-
           if (this.batCustomOpts.length > 0) {
             this.companySlots[0].values = [
               {
                 id: "",
-                name: "全部"
+                name: t('timeBtn.all')// "全部"
               }
             ];
             res.data.data.forEach(key => {
@@ -307,7 +355,7 @@ export default {
           } else {
             this.companySlots[0].values = [
               {
-                name: "暂无数据",
+                name: t('stock.noData'), // "暂无数据",
                 id: "noData"
               }
             ];
@@ -315,8 +363,41 @@ export default {
         }
       });
     },
+    /* 获取生产企业列表 */
+    getCompanyManufacturer () {
+      this.$axios
+        .get(`company/manufacturer_names?t=${new Date().getTime()}`)
+        .then(res => {
+          if (res.data && res.data.code === 0) {
+            this.batCustomOpts = res.data.data;
+            // this.companySlots[0].values = [...this.batCustomOpts];
+            if (this.batCustomOpts.length > 0) {
+              this.companySlots[0].values = [
+                {
+                  id: "",
+                  name: t('timeBtn.all')// "全部"
+                }
+              ];
+              res.data.data.forEach(key => {
+                let obj = {
+                  id: key.id,
+                  name: key.name
+                };
+                this.companySlots[0].values.push(obj);
+              });
+            } else {
+              this.companySlots[0].values = [
+                {
+                  name: t('stock.noData'), // "暂无数据",
+                  id: "noData"
+                }
+              ];
+            }
+          }
+        });
+    },
     /* 获取电池型号列表 */
-    getBatteryModelList() {
+    getBatteryModelList () {
       this.$axios.get("/dic?type=Model&categoryId=2").then(res => {
         console.log("获取电池型号列表", res);
         if (res.data && res.data.code === 0) {
@@ -326,7 +407,7 @@ export default {
             this.batterySlot[0].values = [
               {
                 id: "",
-                name: "全部"
+                name: t('timeBtn.all')// "全部"
               }
             ];
             this.Modeloptions.forEach(key => {
@@ -338,7 +419,7 @@ export default {
           } else {
             this.batterySlot[0].values = [
               {
-                name: "暂无数据",
+                name: t('stock.noData'), // "暂无数据",
                 id: "noData"
               }
             ];
@@ -347,9 +428,9 @@ export default {
       });
     },
     /* 扫码后绑定 */
-    selectItem(data) {
+    selectItem (data) {
       console.log("扫码返回值", data);
-      Toast("开始绑定");
+      // Toast("开始绑定");
       Indicator.open();
       let bindObj = {
         hostId: data.hostId,
@@ -363,7 +444,7 @@ export default {
         if (res.data && res.data.code === 0) {
           this.tableData = [];
           this.getBatteryList();
-          Toast(res.data.msg);
+          Toast(t('successTips.bindSuccess')); // 绑定成功
           let message = new Paho.MQTT.Message(`k:${data.code}`);
           message.destinationName = `cmd/${data.deviceBianhao}`;
           console.log(message);
@@ -372,7 +453,7 @@ export default {
       });
     },
     /* mqtt链接 */
-    connectMqtt() {
+    connectMqtt () {
       this.mqttClient = mqtt.mqttClient();
       this.mqttClient.connect({
         onSuccess: this.onConnect,
@@ -391,7 +472,7 @@ export default {
         console.log("message", message);
       };
     },
-    onConnect() {
+    onConnect () {
       if (
         typeof this.mqttClient === "object" &&
         typeof this.mqttClient.subscribe === "function"
@@ -403,25 +484,13 @@ export default {
   // beforeRouteEnter (to, from, next) {
   //   // ...
   // },
-  beforeRouteLeave(to, from, next) {
+  beforeRouteLeave (to, from, next) {
     if (to.name !== "loading") {
       next();
     }
   },
-  mounted() {
-    console.log(mqtt);
-    this.connectMqtt();
-    this.getBatteryList();
-    this.getCompanyId();
-    this.getBatteryModelList();
-    // console.log(typeof this.$refs.wrapper.scrollTo);
-    // this.$refs.wrapper.scrollTo(0, 0);
-    this.wrapperHeight =
-      document.documentElement.clientHeight -
-      this.$refs.wrapper.getBoundingClientRect().top -
-      60;
-  },
-  beforeDestroy() {
+
+  beforeDestroy () {
     if (
       typeof this.mqttClient === "object" &&
       typeof this.mqttClient.isConnected === "function" &&

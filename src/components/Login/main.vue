@@ -1,24 +1,44 @@
 <template>
   <div class="login-content">
-    <mt-header class="Loginhead" title="绑定登录">
-      <router-link to="/" slot="left">
-        <mt-button icon="back">返回</mt-button>
+    <mt-header class="Loginhead"
+      :title="$t('loginMsg.bindLogin')">
+      <router-link to="/"
+        slot="left">
+        <mt-button icon="back">{{$t('loginMsg.back')}}</mt-button>
       </router-link>
-      <mt-button icon="more" slot=""></mt-button>
+      <mt-button icon="more"
+        slot=""></mt-button>
     </mt-header>
-    <p class="Logintitle">绑定登录</p>
+    <p class="Logintitle">{{$t('loginMsg.bindLogin')}}</p>
     <div class="iptPhone">
-      <img src="../../../static/phone.svg" class="icon" alt="">
-      <mt-field class="phone" label="" placeholder="请输入手机号" type="tel" v-model="phone"></mt-field>
+      <img src="../../../static/phone.svg"
+        class="icon"
+        alt="">
+      <mt-field class="phone"
+        label=""
+        :placeholder="$t('loginMsg.phone')"
+        type="tel"
+        v-model="phone"></mt-field>
     </div>
     <div class="iptYzm">
-      <img src="../../../static/yanzheng.svg" class="icon" alt="">
+      <img src="../../../static/yanzheng.svg"
+        class="icon"
+        alt="">
 
-      <mt-field class="yzm" label="" placeholder="请输入验证码" v-model="captcha"></mt-field>
-      <div class="VerButton" @click="getSmsCode" type="primary">{{smsMsg}}</div>
+      <mt-field class="yzm"
+        label=""
+        :placeholder="$t('loginMsg.smsCode')"
+        v-model="captcha"></mt-field>
+      <div class="VerButton"
+        @click="getSmsCode"
+        type="primary">{{smsMsg}}</div>
     </div>
-    <mt-button @click="login" class="Loginbutton" type="primary">登录</mt-button>
-    <mt-button @click="testlogin" class="Loginbutton" type="primary">登录</mt-button>
+    <mt-button @click="login"
+      class="Loginbutton"
+      type="primary">{{$t('loginMsg.loginBtn')}}</mt-button>
+    <mt-button @click="testlogin"
+      class="Loginbutton"
+      type="primary">登录</mt-button>
   </div>
 </template>
 
@@ -26,14 +46,16 @@
 import utils from "@/utils/utils";
 import { Toast } from "mint-ui";
 import isWeixin from "@/utils/checkBrowser";
-const AppId = "wxee1c1e26121022f2";
+import t from "@/utils/translate";
+
+// const AppId = "wxee1c1e26121022f2";
 export default {
   name: "Login",
-  data() {
+  data () {
     return {
       phone: "",
       captcha: "",
-      smsMsg: "获取验证码",
+      smsMsg: t('loginMsg.getSmsCode'), // "获取验证码",
       openid: "",
       setDown: "",
       wechatCode: "",
@@ -43,13 +65,13 @@ export default {
       hasGetSms: false
     };
   },
-  mounted() {
+  mounted () {
     this.openid = this.$route.query.openid;
   },
   methods: {
-    getSmsCode() {
+    getSmsCode () {
       if (this.hasGetSms) {
-        Toast("操作过于频繁");
+        // Toast("操作过于频繁");
         return;
       }
       if (/^1[3|4|5|7|8][0-9]\d{8}$/.test(this.phone)) {
@@ -60,27 +82,27 @@ export default {
             this.hasGetSms = true;
             let Timer = setInterval(() => {
               conut--;
-              this.smsMsg = `重新获取${conut}s`;
+              this.smsMsg = `${conut}s`;
               if (conut < 1) {
-                this.smsMsg = "获取验证码";
+                this.smsMsg = t('loginMsg.getSmsCode'); // "获取验证码";
                 this.hasGetSms = false;
                 clearInterval(Timer);
               }
             }, 1000);
-            Toast("发送成功");
+            Toast(t('loginMsg.smsSuccess')); // ("发送成功");
           }
         });
       } else {
-        Toast("手机号格式有误");
+        Toast(t('loginMsg.errorMsg.checkPhone')); // ("手机号格式有误");
       }
     },
-    login() {
+    login () {
       if (!/^1[3|4|5|7|8][0-9]\d{8}$/.test(this.phone)) {
-        Toast("手机号有误");
+        Toast(t('loginMsg.errorMsg.checkPhone')); // ("手机号有误");
         return;
       }
       if (!this.captcha) {
-        Toast("验证码不能为空");
+        Toast(t('loginMsg.errorMsg.smsCodeErr')); // ("验证码不能为空");
         return;
       }
       let phoneObj = {
@@ -108,30 +130,28 @@ export default {
                   });
               }
             });
+          } else if (isWeixin()) {
+            Toast(t('connectErr')); // ("网络请求失败，请稍后重试");
           } else {
-            if (isWeixin()) {
-              Toast("网络请求失败，请稍后重试");
-            } else {
-              this.$axios
-                .get(`/user/permissions/${login.data.data.id}`)
-                .then(opts => {
-                  if (opts.data && opts.data.code === 0) {
-                    utils.setStorage(
-                      "userRoles",
-                      JSON.stringify(opts.data.data)
-                    );
-                    this.$router.push("/index");
-                  }
-                });
-            }
+            this.$axios
+              .get(`/user/permissions/${login.data.data.id}`)
+              .then(opts => {
+                if (opts.data && opts.data.code === 0) {
+                  utils.setStorage(
+                    "userRoles",
+                    JSON.stringify(opts.data.data)
+                  );
+                  this.$router.push("/index");
+                }
+              });
           }
         }
       });
     },
-    testlogin() {
+    testlogin () {
       let person = {
-        account: "plat",
-        password: "plat"
+        account: "demo001",
+        password: "demo001"
       };
       this.$axios.post(`/login`, person).then(res => {
         console.log(res);
@@ -154,7 +174,7 @@ export default {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style lang="scss">
+<style lang="scss" scoped>
 .icon {
   margin-right: 10px;
 }
@@ -175,9 +195,9 @@ export default {
     font-size: 14px;
     border-left: 1px #aaa solid;
     float: right;
-    padding-left: 20px;
+    padding-left: 10px;
     margin-top: 16px;
-    margin-right: 20px;
+    margin-right: 10px;
   }
   .Loginbutton {
     width: 217px;
@@ -223,7 +243,8 @@ export default {
       margin-top: 16px;
     }
     .yzm {
-      width: 50%;
+      width: 40%;
+      font-size: 14px;
       float: left;
     }
   }

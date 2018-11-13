@@ -1,48 +1,49 @@
 export default {
   title: {
-    text: "",
-    subtext: "监测数据变化",
+    text: '',
+    subtext: '',
     textStyle: {
-      color: "#484848"
+      color: '#484848'
     },
     subtextStyle: {
-      color: "#484848"
+      color: '#484848'
     }
   },
   tooltip: {
-    trigger: "axis",
+    trigger: 'axis',
     axisPointer: {
       animation: false
     }
   },
   grid: {
-    left: "3%",
-    right: "4%",
-    bottom: "14%",
+    left: '3%',
+    right: '4%',
+    bottom: '14%',
     containLabel: true
   },
   /* eslint-disable */
-  dataZoom: [{
+  dataZoom: [
+    {
       // show: true,
-      type: "slider",
+      type: 'slider',
       start: 0,
       realtime: true,
       end: 100,
-      fillerColor: "rgba(167,183,204,0.4)",
-      backgroundColor: "rgba(0,0,0,0)"
+      fillerColor: 'rgba(167,183,204,0.4)',
+      backgroundColor: 'rgba(0,0,0,0)'
     },
     {
-      type: "inside",
+      type: 'inside',
       start: 0,
       realtime: true,
       end: 100
     }
   ],
   xAxis: {
-    type: "time",
+    type: 'time',
     // type: "category",
     boundaryGap: false,
-    data: "",
+    data: '',
     axisLine: {
       show: false
     },
@@ -51,7 +52,7 @@ export default {
     },
     axisLabel: {
       fontSize: 11,
-      color: "#484848"
+      color: '#484848'
     },
     splitLine: {
       show: false
@@ -59,9 +60,9 @@ export default {
   },
   animation: false,
   yAxis: {
-    type: "value",
+    type: 'value',
     axisLabel: {
-      formatter: ""
+      formatter: ''
     },
     axisLine: {
       show: false
@@ -73,22 +74,24 @@ export default {
       show: false
     }
   },
-  series: [{
-    name: '',
-    type: 'line',
-    smooth: true,
-    showSymbol: false, // 是否显示 symbol, 如果 false 则只有在 tooltip hover 的时候显示。
-    // hoverAnimation: true, // 是否开启 hover 在拐点标志上的提示动画效果。
-    lineStyle: {
-      normal: {
-        color: '#71bfdb'
-      }
-    },
-    areaStyle: {
-      normal: {
-        color: "rgba(36,145,252,0.25)"
-      }
-    },
-    data: []
-  }]
+  series: [
+    {
+      name: '',
+      type: 'line',
+      smooth: true,
+      showSymbol: false, // 是否显示 symbol, 如果 false 则只有在 tooltip hover 的时候显示。
+      // hoverAnimation: true, // 是否开启 hover 在拐点标志上的提示动画效果。
+      lineStyle: {
+        normal: {
+          color: '#71bfdb'
+        }
+      },
+      areaStyle: {
+        normal: {
+          color: 'rgba(36,145,252,0.25)'
+        }
+      },
+      data: []
+    }
+  ]
 };

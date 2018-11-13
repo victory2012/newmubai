@@ -1,13 +1,15 @@
 <template>
   <div class="RealMaps">
-    <div id="mapContainers" class="realMapContainer"></div>
-    <div class="localBtn" @click="gobackLocal"><img :src="ImgSrc" alt=""></div>
+    <div id="mapContainers"
+      class="realMapContainer"></div>
+    <div class="localBtn"
+      @click="gobackLocal"><img :src="ImgSrc"
+        alt=""></div>
   </div>
 </template>
 <script>
+/* eslint-disable */
 import AMap from "AMap";
-import { Toast } from "mint-ui";
-import utils from "@/utils/utils";
 import lnglatTrabsofor from "@/utils/longlatTransfor";
 
 let map;
@@ -18,16 +20,16 @@ export default {
   props: ["mapCenter"],
   watch: {
     mapCenter: {
-      handler: function(param) {
+      handler: function (param) {
         this.positionData(param);
       },
       deep: true
     }
   },
-  data() {
+  data () {
     return {
       markerArr: [],
-      ImgSrc: require("../../../static/local_normal.png"),
+      ImgSrc: import("../../../static/local_normal.png"),
       IdObj: {},
       address: "",
       hostId: "",
@@ -37,7 +39,7 @@ export default {
       mapCenterPointer: ""
     };
   },
-  mounted() {
+  mounted () {
     this.hostId = this.$route.query.hostId;
     this.deviceId = this.$route.query.deviceId;
     this.deviceCode = this.$route.query.deviceCode;
@@ -51,10 +53,10 @@ export default {
     this.init();
   },
   methods: {
-    init() {
+    init () {
       map = new AMap.Map("mapContainers");
     },
-    positionData(data) {
+    positionData (data) {
       if (data && data.gcjLongitude) {
         let position = new AMap.LngLat(data.gcjLongitude, data.gcjLatitude);
         if (this.markerArr.length > 0) {
@@ -74,7 +76,7 @@ export default {
         lnglatTrabsofor(position, res => {
           let sendAddress = `${res.addressComponent.province}-${
             res.addressComponent.city
-          }`;
+            }`;
           if (this.address !== sendAddress) {
             this.hasSend = false;
             this.address = sendAddress;
@@ -86,13 +88,13 @@ export default {
         });
       }
     },
-    gobackLocal() {
+    gobackLocal () {
       if (this.mapCenterPointer) {
         map.setCenter(this.mapCenterPointer);
       }
     },
     /* 发送地址给后台 */
-    addressCallBack(data) {
+    addressCallBack (data) {
       let param = {
         id: this.IdObj.id,
         province: data.province ? data.province : data.city,

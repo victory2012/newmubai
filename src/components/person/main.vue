@@ -1,48 +1,81 @@
 <template>
   <div class="main">
     <div class="headNav">
-      <mt-header class="Loginhead" title="个人信息">
-        <router-link v-show="!isAddPt" to="/index" slot="left">
+      <mt-header class="Loginhead"
+        title="个人信息">
+        <router-link v-show="!isAddPt"
+          to="/index"
+          slot="left">
           <mt-button icon=""></mt-button>
         </router-link>
-        <mt-button icon="" slot="left" @click="doCancelSaveData" v-show="isAddPt">取消</mt-button>
-        <mt-button icon="" slot="right" @click="doSaveData" v-show="isAddPt">保存</mt-button>
-        <mt-button icon="" slot="right" @click="editBattery" v-show="!isAddPt">编辑</mt-button>
+        <!-- 取消 -->
+        <mt-button icon=""
+          slot="left"
+          @click="doCancelSaveData"
+          v-show="isAddPt">{{$t('timeBtn.cancle')}}</mt-button>
+        <!-- 保存 -->
+        <mt-button icon=""
+          slot="right"
+          @click="doSaveData"
+          v-show="isAddPt">{{$t('timeBtn.sure')}}</mt-button>
+        <!-- 编辑 -->
+        <mt-button icon=""
+          slot="right"
+          @click="editBattery"
+          v-show="!isAddPt">{{$t('user.edit')}}</mt-button>
       </mt-header>
     </div>
     <ul>
       <li>
-        <div class="fl">用户名</div>
-        <div v-show="!isAddPt" class="fr">{{userArr.nickName}}</div>
-        <div v-show="isAddPt" class="fr itmeValue">
-          <input type="text" placeholder="请输入额定电压" v-model="userArr.nickName">
+        <!-- 用户名 -->
+        <div class="fl">{{$t('user.userName')}}</div>
+        <div v-show="!isAddPt"
+          class="fr">{{userArr.nickName}}</div>
+        <div v-show="isAddPt"
+          class="fr itmeValue">
+          <input type="text"
+            v-model="userArr.nickName">
         </div>
       </li>
       <li>
-        <div class="fl">账户身份</div>
-        <div :class="{'colorGray': isAddPt}" class="fr">{{userArr.accountType}}</div>
+        <!-- 账户身份 -->
+        <div class="fl">{{$t('user.userRole')}}</div>
+        <div :class="{'colorGray': isAddPt}"
+          class="fr">{{userArr.accountType}}</div>
       </li>
       <li>
-        <div class="fl">企业身份</div>
-        <div :class="{'colorGray': isAddPt}" class="fr">{{userArr.layerName}}</div>
+        <!-- 企业身份 -->
+        <div class="fl">{{$t('user.enterpriseRole')}}</div>
+        <div :class="{'colorGray': isAddPt}"
+          class="fr">{{userArr.layerName}}</div>
       </li>
       <li>
-        <div class="fl">企业名称</div>
-        <div :class="{'colorGray': isAddPt}" class="fr">{{userArr.companyName}}</div>
+        <!-- 企业名称 -->
+        <div class="fl">{{$t('user.enterpriseName')}}</div>
+        <div :class="{'colorGray': isAddPt}"
+          class="fr">{{userArr.companyName}}</div>
 
       </li>
       <li>
-        <div class="fl">手机号码</div>
-        <div v-show="!isAddPt" class="fr">{{userArr.phone}}</div>
-        <div v-show="isAddPt" class="fr itmeValue">
-          <input type="text" v-model="userArr.phone">
+        <!-- 手机号码 -->
+        <div class="fl">{{$t('user.phone')}}</div>
+        <div v-show="!isAddPt"
+          class="fr">{{userArr.phone}}</div>
+        <div v-show="isAddPt"
+          class="fr itmeValue">
+          <input type="text"
+            v-model="userArr.phone">
         </div>
       </li>
       <li>
-        <div class="fl">邮箱</div>
-        <div v-show="!isAddPt" class="fr">{{userArr.email}}</div>
-        <div v-show="isAddPt" class="fr itmeValue">
-          <input type="text" v-model="userArr.email">
+        <!-- 邮箱 -->
+        <div class="fl">{{$t('user.email')}}</div>
+        <div v-show="!isAddPt"
+          class="fr">{{userArr.email}}</div>
+        <div v-show="isAddPt"
+          class="fr itmeValue">
+          <input type="text"
+            v-model="userArr.email">
         </div>
       </li>
     </ul>
@@ -52,32 +85,35 @@
 <script>
 import { Toast, Indicator } from "mint-ui";
 import utils from "@/utils/utils";
+import t from "@/utils/translate";
+
 export default {
   name: "warning",
-  data() {
+  data () {
     return {
       userArr: "",
       isAddPt: false
     };
   },
   methods: {
-    doCancelSaveData() {
+    doCancelSaveData () {
       this.isAddPt = false;
       this.getSelf();
     },
-    doSaveData() {
+    doSaveData () {
       const phone = /^[1][3,4,5,7,8][0-9]{9}$/;
       const email = /^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+(.[a-zA-Z0-9_-])+/;
       console.log(this.userArr);
-      // if(this.userArr.phone) {
-      //   Toast('手机号不能为空');
-      // }
+      if (!this.userArr.phone) {
+        Toast(t('useMsg.warn.phone')); // 请输入手机号码
+        return;
+      }
       if (!phone.test(this.userArr.phone)) {
-        Toast("手机号格式有误");
+        Toast(t('useMsg.warn.phoneCheck')); // ("手机号格式有误");
         return;
       }
       if (this.userArr.email && !email.test(this.userArr.email)) {
-        Toast("邮箱格式有误");
+        Toast(t('useMsg.warn.emailCheck')); // ("邮箱格式有误");
         return;
       }
       let userObj = {};
@@ -89,15 +125,15 @@ export default {
         console.log(res);
         Indicator.close();
         if (res.data && res.data.code === 0) {
-          Toast("修改成功");
+          Toast(t('successTips.changeSuccess')); // ("修改成功");
           this.doCancelSaveData();
         }
       });
     },
-    editBattery() {
+    editBattery () {
       this.isAddPt = true;
     },
-    getSelf() {
+    getSelf () {
       Indicator.open();
       this.$axios.get("/user/current").then(res => {
         console.log(res);
@@ -105,7 +141,7 @@ export default {
         if (res.data && res.data.code === 0) {
           this.userArr = res.data.data;
           this.userArr.accountType = utils.accountType(this.userArr.type);
-          this.userArr.email = res.data.data.email || "暂无";
+          this.userArr.email = res.data.data.email || "";
           // this.InfoForm.email = this.userArr.email;
           // this.InfoForm.phones = res.data.data.phone;
           // this.InfoForm.userName = res.data.data.nickName;
@@ -113,7 +149,7 @@ export default {
       });
     }
   },
-  mounted() {
+  mounted () {
     this.getSelf();
   }
 };

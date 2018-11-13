@@ -6,13 +6,32 @@
     <div v-if="!isShowSpinner" class="loadEnd">没有更多了</div>
   </mt-loadmore> -->
   <div class="listwapper">
-    <div ref="wrapper" class="wrapper" v-infinite-scroll="loadMoress" infinite-scroll-disabled="loading" infinite-scroll-distance="20">
+    <div ref="wrapper"
+      class="wrapper"
+      v-infinite-scroll="loadMoress"
+      infinite-scroll-disabled="loading"
+      infinite-scroll-distance="20">
       <!-- <warningListItem :itemData="item"></warningListItem> -->
-      <div class="warningItem" v-for="item in tableData" :key="item.id + new Date()" @click="lockDetails(item)">
-        <div class="main-top">
+      <div class="warningItem"
+        v-for="item in tableData"
+        :key="item.id + Math.random()"
+        @click="lockDetails(item)">
+        <div class="item">
+          <p class="time">告警时间：{{item.createTime}}</p>
+          <p>电池ID：{{item.hostCode}}</p>
+        </div>
+        <div class="item">
+          <p class="time">告警项：<span class="light">{{item.item}}</span></p>
+          <p>告警层级：<span class="light">{{item.hierarchy}}</span></p>
+        </div>
+        <div class="item">
+          告警内容：{{item.content}}
+        </div>
+        <!-- <div class="main-top">
           <div class="fl mta">
             <h2>{{item.items}}</h2>
-            <p>告警项目</p>
+            告警项目
+            <p>{{$t('alarmList.alarmItem')}}</p>
           </div>
           <div class="fl mtb">
             <div class="timedata">{{item.createTime}}</div>
@@ -24,43 +43,38 @@
         </div>
         <div class="main-bottom">
           <div class="mba fl">
-            <h3 class="fl">电池编号&nbsp;&nbsp;</h3>
+            电池编号
+            <h3 class="fl">{{$t('alarmList.batteryCode')}}</h3>
             <p class="fl">{{item.hostCode}}</p>
           </div>
           <div class="mbb fl">
-            <h3 class="fl">告警描述&nbsp;&nbsp;</h3>
+            告警描述
+            <h3 class="fl">{{$t('alarmList.content')}}</h3>
             <p class="fl">{{item.content}}</p>
           </div>
-        </div>
+        </div> -->
       </div>
     </div>
-    <p v-show='loadingDom' class='loading'>没有更多数据</p>
-    <mt-popup v-model="popupVisible" :modal="false" position="right">
-      <mt-detail @closeIt="closeModel" :warnData="warnIngData"></mt-detail>
+    <p v-show='loadingDom'
+      class='loading'>{{$t('noMoreData')}}</p>
+    <!-- 没有更多数据 -->
+    <mt-popup v-model="popupVisible"
+      :modal="false"
+      position="right">
+      <mt-detail @closeIt="closeModel"
+        :warnData="warnIngData"></mt-detail>
       <!-- <button>123456</button> -->
     </mt-popup>
   </div>
-
-  <!-- <mt-loadmore :bottom-method="loadMoress" :auto-fill="false" :bottomDistance='40' @bottom-status-change="handleBottomChange">
-    <div ref="wrapper" class="wrapper">
-      <warningListItem v-for="(item, index) in tableData" :key="index" :itemData="item"></warningListItem>
-    </div>
-    <div slot="bottom" class="mint-loadmore-bottom">
-      <span v-show="bottomStatus === 'drop'" :class="{ 'is-rotate': bottomStatus === 'drop' }">↑</span>
-      <span v-show="bottomStatus === 'loading'">
-        <mt-spinner type="snake"></mt-spinner>
-      </span>
-    </div>
-  </mt-loadmore> -->
-
 </template>
 
 <script>
 
-import { Toast, InfiniteScroll,Indicator, Spinner, Popup } from "mint-ui";
-import detail from "./detail";
+import { Indicator, Spinner, Popup } from "mint-ui";
+import lnglatTrabsofor from "@/utils/longlatTransfor";
 import utils from "@/utils/utils";
-import lnglatTrabsofor from "../../utils/longlatTransfor";
+import t from "@/utils/translate";
+import detail from "./detail";
 
 export default {
   name: "warningList",
@@ -69,7 +83,7 @@ export default {
     "mt-Popup": Popup,
     "mt-detail": detail
   },
-  data() {
+  data () {
     return {
       warnIngData: {},
       popupVisible: false,
@@ -86,16 +100,16 @@ export default {
     };
   },
   methods: {
-    loadMoress() {
+    loadMoress () {
       this.loading = true;
       this.nowpage++;
       this.getListData();
       // this.isShowSpinner = true;
     },
-    handleBottomChange(status) {
+    handleBottomChange (status) {
       this.bottomStatus = status;
     },
-    getListData() {
+    getListData () {
       Indicator.open();
       let pageObj = {
         pageSize: 15,
@@ -115,11 +129,11 @@ export default {
             result.pageData.forEach(key => {
               // key.alarmtime = utils.fomats(key.time);
               key.levels = utils.level(key.level);
-              key.hierarchy = key.hierarchy === "Group" ? "整组" : "单体";
+              key.hierarchy = key.hierarchy === "Group" ? t('group.allGroup') : t('group.single');// "整组" : "单体";
               key.items = utils.item(key.item);
               if (key.item === "Fluid") {
                 key.thresholdValue = "-";
-                key.actualValue = "异常";
+                key.actualValue = t('realTime.abnormal'); // "异常";
               }
               this.tableData.push(key);
             });
@@ -130,7 +144,7 @@ export default {
         }
       });
     },
-    lockDetails(item) {
+    lockDetails (item) {
       console.log(item);
       this.$axios.get(`/battery_group_event/${item.dataId}`).then(res => {
         console.log(res);
@@ -141,7 +155,7 @@ export default {
             lnglatTrabsofor(position, callRes => {
               this.warnIngData = item;
               this.warnIngData.fluidLevel =
-                result.fluidLevel === 0 ? "正常" : "异常";
+                result.fluidLevel === 0 ? t('realTime.normal') : t('realTime.abnormal');// "正常" : "异常";
               this.warnIngData.temperature = result.temperature;
               this.warnIngData.voltage = result.voltage;
               this.warnIngData.current = result.current;
@@ -152,13 +166,13 @@ export default {
         }
       });
     },
-    closeModel(data) {
+    closeModel (data) {
       if (data.closed) {
         this.popupVisible = false;
       }
     }
   },
-  mounted() {
+  mounted () {
     this.getListData();
   }
 };
@@ -168,25 +182,6 @@ export default {
 .listwapper {
   padding-top: 40px;
 }
-// .warning-list {
-//   padding-bottom: 20px;
-//   overflow: hidden;
-//   margin-top: 42.6px;
-//   background: #f2f2f2;
-//   min-height: 520px;
-//   .loadEnd {
-//     width: 100%;
-//     text-align: center;
-//     color: #ccc;
-//     font-size: 12px;
-//   }
-//   .mint-spinner-snake {
-//     margin-left: 47%;
-//   }
-//   .wrapper {
-//     padding: 40px 0 53px;
-//   }
-// }
 .main {
   border-bottom: 1px solid #f2f2f2;
   .fl {
@@ -194,11 +189,25 @@ export default {
   }
   background: #f2f2f2;
   .warningItem {
-    height: 104px;
     margin-top: 10px;
     margin-bottom: 10px;
+    font-size: 13px;
     background: #fff;
     padding: 15px 10px 5px;
+    .item {
+      padding: 5px 10px;
+      display: flex;
+      p {
+        flex: 1;
+        text-align: left;
+        .light {
+          color: #71bfdb;
+        }
+        &.time {
+          flex: 0 0 60%;
+        }
+      }
+    }
     .main-top {
       height: 65px;
       .mta {

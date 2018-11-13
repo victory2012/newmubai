@@ -1,68 +1,115 @@
 <template>
   <div class="indexHis">
-    <div v-if="isShowMain" class="index">
+    <div v-if="isShowMain"
+      class="index">
       <nav>
-        <mt-header title="运行状况" class="realTimeHead">
-          <router-link to="/index" slot="left">
+        <!-- 运行状况 -->
+        <mt-header :title="$t('menu.runStatus')"
+          class="realTimeHead">
+          <router-link to="/index"
+            slot="left">
             <mt-button icon="back"></mt-button>
           </router-link>
-          <mt-button icon="more" slot=""></mt-button>
+          <mt-button icon="more"
+            slot=""></mt-button>
         </mt-header>
         <div class="itmeMenu">
-          <div @click="torealTime" class="realTime demo1">
-            实时数据
+          <!-- 实时数据 -->
+          <div @click="torealTime"
+            class="realTime demo1">
+            {{$t('runState.realData')}}
           </div>
+          <!-- 历史数据 -->
           <div class="histroyTime demo1">
-            历史数据
+            {{$t('runState.historyData')}}
           </div>
         </div>
         <div class="checkTime">
-          <p class="fl">从</p>
-          <div class="fl ctime" @click="openPicker">{{showStartTime}}</div>
-          <p class="fl">到</p>
-          <div class="fl ctime" @click="openPicker1">{{showEndTime}}</div>
-          <mt-button @click="getChartData" class="TimeButton fl" type="primary">确认</mt-button>
-          <div class="fl popDownBtn" @click="HandletopShow">
-            <img v-show="topShow" style="width: 20px;height: 20px;" src="../../../static/jiantoufff.svg" alt="">
-            <img v-show="!topShow" style="width: 20px;height: 20px;" src="../../../static/xiajiantoufff.svg" alt="">
+          <!-- 从 -->
+          <p class="fl">{{$t('history.from')}}</p>
+          <div class="fl ctime"
+            @click="openPicker">{{showStartTime}}</div>
+          <!-- 至 -->
+          <p class="fl">{{$t('history.to')}}</p>
+          <div class="fl ctime"
+            @click="openPicker1">{{showEndTime}}</div>
+          <!-- 确认 -->
+          <mt-button @click="getChartData"
+            class="TimeButton fl"
+            type="primary">{{$t('timeBtn.confirm')}}</mt-button>
+          <div class="fl popDownBtn"
+            @click="HandletopShow">
+            <img v-show="topShow"
+              style="width: 20px;height: 20px;"
+              src="../../../static/jiantoufff.svg"
+              alt="">
+            <img v-show="!topShow"
+              style="width: 20px;height: 20px;"
+              src="../../../static/xiajiantoufff.svg"
+              alt="">
           </div>
         </div>
       </nav>
-      <mt-datetime-picker ref="picker" type="date" v-model="pickerValue" :endDate="endDate" @confirm="handleConfirm">
+      <mt-datetime-picker ref="picker"
+        type="date"
+        v-model="pickerValue"
+        :endDate="endDate"
+        :cancelText="$t('timeBtn.cancle')"
+        :confirmText="$t('timeBtn.sure')"
+        @confirm="handleConfirm">
       </mt-datetime-picker>
-      <mt-datetime-picker ref="picker1" type="date" v-model="pickerValue1" :endDate="endDate" @confirm="handleConfirm1">
+      <mt-datetime-picker ref="picker1"
+        type="date"
+        v-model="pickerValue1"
+        :endDate="endDate"
+        :cancelText="$t('timeBtn.cancle')"
+        :confirmText="$t('timeBtn.sure')"
+        @confirm="handleConfirm1">
       </mt-datetime-picker>
-      <div class="smzq" v-if="!topShow">
-        <div>时间范围</div>
+      <div class="smzq"
+        v-if="!topShow">
+        <!-- 时间范围 -->
+        <div>{{$t('alarmList.timeRange')}}</div>
         <ul>
-          <li @click="ChoiceTime(item)" :class="{timeStyle2:item.isShow}" class="fl" v-for="item in TimeTap" :key="item.item">{{item.item}}</li>
+          <li @click="ChoiceTime(item)"
+            :class="{timeStyle2:item.isShow}"
+            class="fl"
+            v-for="item in TimeTap"
+            :key="item.item">{{item.item}}</li>
         </ul>
       </div>
       <!-- <div class="mask"></div> -->
-      <div class="message" :class="{messageNo:!topShow}" v-if="topShow">
+      <div class="message"
+        :class="{messageNo:!topShow}"
+        v-if="topShow">
         <ul class="dataUser">
           <li>
-            <img src="../../../static/p1.jpg" alt="">
+            <img src="../../../static/p1.jpg"
+              alt="">
             <p>{{companyInfo.companyName}}</p>
           </li>
           <li>
-            <img src="../../../static/p2.jpg" alt="">
+            <img src="../../../static/p2.jpg"
+              alt="">
             <p>{{address}}</p>
           </li>
           <li>
-            <img src="../../../static/p3.jpg" alt="">
+            <img src="../../../static/p3.jpg"
+              alt="">
             <p>{{companyInfo.code}}</p>
           </li>
           <li>
-            <img src="../../../static/p4.jpg" alt="">
+            <img src="../../../static/p4.jpg"
+              alt="">
             <p>{{companyInfo.deviceCode}}</p>
           </li>
         </ul>
       </div>
-      <div class="MMwrap" :class="{MMwrapNo:!topShow}"></div>
+      <div class="MMwrap"
+        :class="{MMwrapNo:!topShow}"></div>
       <div class="chartsLine">
-        <line-echart :chartData="dataObj" :loading="loading" @timeZoom="timeZoom"></line-echart>
-        <!-- <echart-map :chartData="dataObj" :loading="loading" @timeZoom="timeZoom"></echart-map> -->
+        <line-echart :chartData="dataObj"
+          :loading="loading"></line-echart>
       </div>
 
       <div class="timeWarrp">
@@ -70,57 +117,83 @@
           <ul class="DataTop">
             <li>
               <div class="Data1">{{summary.cycle}}</div>
-              <div class="Data2">电池循环次数</div>
+              <!-- 电池循环次数 -->
+              <div class="Data2">{{$t('history.cycle')}}</div>
             </li>
             <li>
               <div class="Data1">{{summary.chargeDuration}}h</div>
-              <div class="Data2">充电时间</div>
+              <!-- 充电时间 -->
+              <div class="Data2">{{$t('history.chargeDuration')}}</div>
             </li>
             <li>
               <div class="Data1">{{summary.dischargeDuration}}h</div>
-              <div class="Data2">放电时间</div>
+              <!-- 放电时间 -->
+              <div class="Data2">{{$t('history.dischargeDuration')}}</div>
             </li>
           </ul>
           <ul class="DataDown">
             <li>
               <div class="Data1">{{summary.avgChargeDuration}}h</div>
-              <div class="Data2">平均充电时间</div>
+              <!-- 平均充电时间 -->
+              <div class="Data2">{{$t('history.avgChargeDuration')}}</div>
             </li>
             <li>
               <div class="Data1">{{summary.avgDischargeDuration}}h</div>
-              <div class="Data2">平均放电时间</div>
+              <!-- 平均放电时间 -->
+              <div class="Data2">{{$t('history.avgDischargeDuration')}}</div>
             </li>
             <li>
               <div class="Data1">{{summary.fluidSupplementTimes}}</div>
-              <div class="Data2">补水次数</div>
+              <!-- 补水次数 -->
+              <div class="Data2">{{$t('history.fluidTimes')}}</div>
             </li>
             <li>
               <div class="Data1">{{summary.avgFluidSupplementDuration}}h</div>
-              <div class="Data2">平均补水时长</div>
+              <!-- 平均补水时长 -->
+              <div class="Data2">{{$t('history.avgFluidDuration')}}</div>
             </li>
           </ul>
         </div>
       </div>
 
       <div class="timeWarrp">
-        <chart-pie :loading="loading" :summary="summary" :eventSummary="eventSummary"></chart-pie>
+        <chart-pie :loading="loading"
+          :summary="summary"
+          :eventSummary="eventSummary"></chart-pie>
       </div>
 
       <div class="list-title">
-        <div class="fl1" :class="{C484848:isA,CACACAC:!isA}" @click="getAlarmData">告警事件列表</div>
-        <div class="fl1" :class="{CACACAC:isA,C484848:!isA}" @click="getliquidData">补水列表</div>
+        <!-- 告警事件列表 -->
+        <div class="fl1"
+          :class="{C484848:isA,CACACAC:!isA}"
+          @click="getAlarmData">{{$t('history.historyWarn')}}</div>
+        <!-- 补水列表 -->
+        <div class="fl1"
+          :class="{CACACAC:isA,C484848:!isA}"
+          @click="getliquidData">{{$t('history.historyfluid')}}</div>
+
       </div>
-      <his-alarm v-if="alarm" :alaData="alarmData"></his-alarm>
-      <fluid-Alarm v-if="alarmFluid" :fliudData="liquidData"></fluid-Alarm>
+      <his-alarm v-if="alarm"
+        :alaData="alarmData"></his-alarm>
+      <fluid-Alarm v-if="alarmFluid"
+        :fliudData="liquidData"></fluid-Alarm>
       <div class="page">
-        <span>当前第{{pages}}页</span>
-        <mt-button @click="prevPage" size="small" class="fenyeBtn" type="primary">上一页</mt-button>
-        <mt-button @click="nextPage" size="small" class="fenyeBtn" type="primary">下一页</mt-button>
-        <span>共{{totalPage}}页</span>
+        <span>{{$t('pageBtn.current')}}:{{pages}}</span>
+        <!-- 上一页 -->
+        <mt-button @click="prevPage"
+          size="small"
+          class="fenyeBtn"
+          type="primary">{{$t('pageBtn.previous')}}</mt-button>
+        <!-- 下一页 -->
+        <mt-button @click="nextPage"
+          size="small"
+          class="fenyeBtn"
+          type="primary">{{$t('pageBtn.next')}}</mt-button>
+        <span>{{$t('pageBtn.total')}}: {{totalPage}}</span>
       </div>
       <div class="wrap-map">
-        <p>监测位置变化趋势</p>
-        <div class="dami2"></div>
+        <!-- <p>监测位置变化趋势</p>
+        <div class="dami2"></div> -->
       </div>
       <travel-map :travelData="positions"></travel-map>
     </div>
@@ -129,14 +202,18 @@
 
 
 <script>
-import { Toast, Indicator } from "mint-ui";
-import utils from "@/utils/utils";
-import lineEchart from "./historyChart";
+/* eslint-disable */
+import AMap from "AMap";
+import { Indicator } from "mint-ui";
 import lnglatTrabsofor from "@/utils/longlatTransfor";
+import utils from "@/utils/utils";
+import t from "@/utils/translate";
+import lineEchart from "./historyChart";
 import chartPie from "./echartPie";
 import travelMap from "./map";
 
-let address;
+
+// let address;
 export default {
   name: "histime",
   components: {
@@ -146,7 +223,7 @@ export default {
     hisAlarm: () => import("./HisWarning.vue"),
     fluidAlarm: () => import("./HisBushui.vue")
   },
-  data() {
+  data () {
     return {
       pageSize: 4,
       pages: 1,
@@ -156,12 +233,12 @@ export default {
       hisOrFluid: "hisAlarm",
       loading: false,
       TimeTap: [
-        { item: "最近一周", isShow: false, index: 1 },
-        { item: "最近一个月", isShow: false, index: 2 },
-        { item: "最近三个月", isShow: false, index: 3 },
-        { item: "最近六个月", isShow: false, index: 4 },
-        { item: "最近一年", isShow: false, index: 5 },
-        { item: "全生命周期", isShow: false, index: 6 }
+        { item: t('history.week'), isShow: false, index: 1 },
+        { item: t('history.mounth'), isShow: false, index: 2 },
+        { item: t('history.threemonth'), isShow: false, index: 3 },
+        { item: t('history.sixmounth'), isShow: false, index: 4 },
+        { item: t('history.year'), isShow: false, index: 5 },
+        { item: t('history.all'), isShow: false, index: 6 }
       ],
       companyInfo: {},
       markerArr: [],
@@ -174,11 +251,10 @@ export default {
       isShowMain: "true",
       startTime: "",
       endTime: "",
-      pickerValue: "",
-      pickerValue1: "",
+      pickerValue: '',
+      pickerValue1: '',
       dataObj: {},
       alarmData: [],
-      liquidData: [],
       heatData: [],
       summary: {},
       eventSummary: {},
@@ -193,7 +269,7 @@ export default {
     };
   },
 
-  mounted() {
+  mounted () {
     this.hostObj = {
       deviceId: this.$route.query.deviceId,
       hostId: this.$route.query.hostId,
@@ -205,20 +281,20 @@ export default {
   },
   methods: {
     /* 确认按钮 */
-    getChartData() {
+    getChartData () {
       let startTime = utils.toUTCTime(utils.startTime(this.showStartTime));
       let endTime = utils.toUTCTime(utils.endTime(this.showEndTime));
       this.getChartDatafun(startTime, endTime);
     },
     /* 获取Echart相关数据 以及 地图坐标 */
-    getChartDatafun(startTime, endTime) {
+    getChartDatafun (startTime, endTime) {
       this.loading = true;
       Indicator.open();
       // Toast("开始请求数据");
       this.$axios
         .get(
           `/battery_group/${this.hostObj.hostId}/${
-            this.hostObj.deviceId
+          this.hostObj.deviceId
           }/data2?startTime=${startTime}&endTime=${endTime}`
         )
         .then(res => {
@@ -239,7 +315,7 @@ export default {
               heatmap: []
             }; // 轨迹点集合
             this.resultList = result.list;
-            this.resultList.forEach((key, index) => {
+            this.resultList.forEach((key) => {
               let timeStr = utils.TimeSconds(key.time); // 时间
               // console.log(timeStr);
               // console.log("key.time", key.time);
@@ -313,23 +389,23 @@ export default {
         });
       this.getAlarmData();
     },
-    openPicker() {
+    openPicker () {
       this.$refs.picker.open();
     },
-    openPicker1() {
+    openPicker1 () {
       this.$refs.picker1.open();
     },
-    handleConfirm(res) {
+    handleConfirm (res) {
       // console.log(res);
       // this.startTime = this.getTime(res);
       this.showStartTime = utils.sortTime2(res);
     },
-    handleConfirm1(res) {
+    handleConfirm1 (res) {
       // this.endTime = this.getTime(res);
       this.showEndTime = utils.sortTime2(res);
     },
     /* 获取公司信息 */
-    getCompanyInfo(hostObj) {
+    getCompanyInfo (hostObj) {
       Indicator.open();
       this.$axios.get(`/battery_group/${hostObj.hostId}/info`).then(res => {
         console.log(res);
@@ -342,7 +418,7 @@ export default {
             gcjLatitude: result.gcjLatitude
           };
           this.companyInfo = result;
-          this.companyInfo.fluid = result.fluidLevel === 0 ? "正常" : "异常";
+          this.companyInfo.fluid = result.fluidLevel === 0 ? t('realTime.normal') : t('realTime.abnormal'); // "正常" : "异常";
           this.companyInfo.yyddmm = utils.yyyymmdd(new Date());
           this.companyInfo.hhmmss = utils.hhmmss(new Date());
           this.positionData(position);
@@ -351,41 +427,23 @@ export default {
     },
 
     /* 根据经纬度 用高德查询详细地址 */
-    positionData(data) {
+    positionData (data) {
       if (data && data.gcjLongitude) {
         let position = new AMap.LngLat(data.gcjLongitude, data.gcjLatitude);
         /* 根据经纬度 用高德查询详细地址 */
         lnglatTrabsofor(position, res => {
           let sendAddress = `${res.addressComponent.province}-${
             res.addressComponent.city
-          }`;
+            }`;
           if (this.address !== sendAddress) {
             this.hasSend = false;
             this.address = sendAddress;
           }
-          // if (!this.hasSend) {
-          //   this.addressCallBack(sendAddress);
-          // }
         });
       }
     },
-
-    // addressCallBack(data) {
-    //   let param = {
-    //     id: this.hostObj.id,
-    //     address: data
-    //   };
-    //   this.$axios.put(`battery_group/address`, param).then(res => {
-    //     console.log(res);
-    //     if (res.data && res.data.code === 0) {
-    //       this.hasSend = true;
-    //     }
-    //   });
-    // },
-
-    timeZoom() {},
     /* 历史告警 */
-    getAlarmDataFun() {
+    getAlarmDataFun () {
       Indicator.open();
       let startTime = utils.toUTCTime(utils.startTime(this.showStartTime));
       let endTime = utils.toUTCTime(utils.endTime(this.showEndTime));
@@ -396,7 +454,7 @@ export default {
       this.$axios
         .get(
           `/battery_group_event?hostId=${
-            this.hostObj.hostId
+          this.hostObj.hostId
           }&startTime=${startTime}&endTime=${endTime}`,
           pageObj
         )
@@ -413,11 +471,11 @@ export default {
                 result.pageData.forEach((key, index) => {
                   // key.alarmtime = utils.fomats(key.time);
                   key.levels = utils.level(key.level);
-                  key.hierarchy = key.hierarchy === "Group" ? "整组" : "单体";
+                  key.hierarchy = key.hierarchy === "Group" ? t('group.allGroup') : t('group.single'); // "整组" : "单体";
                   key.items = utils.item(key.item);
                   if (key.item === "Fluid") {
                     key.thresholdValue = "-";
-                    key.actualValue = "异常";
+                    key.actualValue = t('realTime.abnormal'); // "异常";
                   }
                   key.index = index + 1;
                   this.alarmData.push(key);
@@ -427,18 +485,18 @@ export default {
           }
         });
     },
-    getAlarmData() {
+    getAlarmData () {
       this.isA = true;
       this.alarm = true;
       this.alarmFluid = false;
       this.getAlarmDataFun();
     },
-    getliquidData() {
+    getliquidData () {
       this.isA = false;
       this.getliquidDataFun();
     },
     /* 历史补水 */
-    getliquidDataFun() {
+    getliquidDataFun () {
       Indicator.open();
       let startTime = utils.toUTCTime(utils.startTime(this.showStartTime));
       let endTime = utils.toUTCTime(utils.endTime(this.showEndTime));
@@ -451,7 +509,7 @@ export default {
       this.$axios
         .get(
           `/battery_group/${this.hostObj.hostId}/${
-            this.hostObj.deviceId
+          this.hostObj.deviceId
           }/fluid`,
           pageObj
         )
@@ -475,7 +533,7 @@ export default {
                   if (index + 1 < result.pageData.length) {
                     key.updateWater = utils.Days(
                       currentTime -
-                        utils.TimeSconds(result.pageData[index + 1].time)
+                      utils.TimeSconds(result.pageData[index + 1].time)
                     );
                   } else {
                     key.updateWater = "-";
@@ -483,7 +541,7 @@ export default {
                   key.index = index + 1;
                   key.temperature = `${key.temperature}°C`;
                   key.Replenishing = utils.UTCTime(key.time);
-                  key.address = "查看地址";
+                  key.address = t('history.address'); // "查看地址";
                   key.disabled = false;
                   key.hasAdress = false;
                   if (index < this.pageSize) {
@@ -498,7 +556,7 @@ export default {
           }
         });
     },
-    nextPage() {
+    nextPage () {
       this.pages++;
       if (this.pages > this.totalPage) {
         this.pages = this.totalPage;
@@ -510,7 +568,7 @@ export default {
         this.getliquidData();
       }
     },
-    prevPage() {
+    prevPage () {
       this.pages--;
 
       if (this.pages < 1) {
@@ -523,7 +581,7 @@ export default {
         this.getliquidData();
       }
     },
-    torealTime() {
+    torealTime () {
       this.$router.push({
         path: "/realTime",
         query: {
@@ -535,37 +593,37 @@ export default {
       });
     },
 
-    HandletopShow() {
+    HandletopShow () {
       this.topShow = !this.topShow;
     },
-    ChoiceTime(item) {
+    ChoiceTime (item) {
       for (let i = 0; i < this.TimeTap.length; i++) {
         this.TimeTap[i].isShow = false;
       }
       item.isShow = !item.isShow;
       this.topShow = !this.topShow;
       let startTimes;
-      if (item.index == 1) {
+      if (item.index === 1) {
         startTimes = utils.getWeek();
         this.startTime = utils.sortTime2(startTimes);
       }
-      if (item.index == 2) {
+      if (item.index === 2) {
         startTimes = utils.getMouth();
         this.startTime = utils.sortTime2(startTimes);
       }
-      if (item.index == 3) {
+      if (item.index === 3) {
         startTimes = utils.getThreeMounth();
         this.startTime = utils.sortTime2(startTimes);
       }
-      if (item.index == 4) {
+      if (item.index === 4) {
         startTimes = utils.getSixMounth();
         this.startTime = utils.sortTime2(startTimes);
       }
-      if (item.index == 5) {
+      if (item.index === 5) {
         startTimes = utils.getYear();
         this.startTime = utils.sortTime2(startTimes);
       }
-      if (item.index == 6) {
+      if (item.index === 6) {
         this.startTime = "2017-01-01";
       }
       this.showStartTime = this.startTime;
@@ -591,7 +649,7 @@ export default {
 .indexHis {
   .fl {
     float: left;
-    margin-left: 10px;
+    margin-left: 8px;
   }
   .fl1 {
     float: left;

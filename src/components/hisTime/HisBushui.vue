@@ -1,17 +1,22 @@
 <template>
   <div class="warrps">
-    <div v-if="listData.length>0" class="wraningItem" v-for="item in listData" :key="item.time">
+    <div v-if="listData.length>0"
+      class="wraningItem"
+      v-for="item in listData"
+      :key="item.time">
       <ul class="WItop">
         <li class="fl">{{item.index}}</li>
         <li class="fl"></li>
         <li class="fl">
           <div>{{item.Replenishing}}</div>
-          <p>距上次补水: {{item.updateWater}}</p>
+          <!-- 距上次补水 -->
+          <p>{{$t('history.LengthOfYime')}}: {{item.updateWater}}</p>
 
         </li>
         <li class="fl">
           <h2>{{item.temperature}}°</h2>
-          <p>补水温度</p>
+          <!-- 补水温度 -->
+          <p>{{$t('history.fluidTemp')}}</p>
         </li>
       </ul>
       <ul>
@@ -20,7 +25,9 @@
         </li>
       </ul>
     </div>
-    <p class="tipmsg" v-if="listData.length == 0">暂无数据</p>
+    <!-- 暂无数据 -->
+    <p class="tipmsg"
+      v-if="listData.length == 0">{{$t('noData')}}</p>
   </div>
 
 </template>
@@ -36,25 +43,25 @@ export default {
       default: () => []
     }
   },
-  data() {
+  data () {
     return {
       listData: this.fliudData
     };
   },
   watch: {
     fliudData: {
-      handler: function(val) {
+      handler: function (val) {
         console.log(val);
         this.listData = val;
       },
       deep: true
     }
   },
-  mounted() {
+  mounted () {
     console.log(this.listData);
   },
   methods: {
-    getAddress(item) {
+    getAddress (item) {
       console.log(item);
       if (!item.hasAdress) {
         let postion = [item.gcjLongitude, item.gcjLatitude];

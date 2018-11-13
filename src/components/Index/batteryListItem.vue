@@ -2,17 +2,24 @@
   <div class="battery-list-item">
     <div class="top-wrapper">
       <!-- <div class="bliLeft" v-for="item in listData" :key="item.code"> -->
-      <div class="top-wrapper" @click="sssj">
-        <div class="bliright" @click.stop.prevent="handleBindButton(listData)">
-          <img v-show="!listData.bindVisible" src="../../../static/jiantou2.svg" alt="">
-          <img v-show="listData.bindVisible" src="../../../static/jiantou1.svg" alt="">
+      <div class="top-wrapper"
+        @click="sssj">
+        <div class="bliright"
+          @click.stop.prevent="handleBindButton(listData)">
+          <img v-show="!listData.bindVisible"
+            src="../../../static/jiantou2.svg"
+            alt="">
+          <img v-show="listData.bindVisible"
+            src="../../../static/jiantou1.svg"
+            alt="">
         </div>
         <div class="left common">
           <span class="number">
             {{listData.code}}
           </span>
+          <!-- 电池组编号 -->
           <span class="sub">
-            电池组编号
+            {{$t('batteryList.batteryCode')}}
           </span>
         </div>
         <div class="binds">
@@ -20,38 +27,54 @@
         </div>
         <div class="right common">
           <span class="number">
-            {{listData.deviceCode || "无"}}
+            {{listData.deviceCode}}
           </span>
+          <!-- 设备编号 -->
           <span class="sub">
-            设备编号
+            {{$t('batteryList.deviceCode')}}
           </span>
         </div>
       </div>
       <div class="bottom-wrapper clearfix">
+        <!-- 电池组型号 -->
         <div class="item">
-          电池组型号
+          {{$t('batteryList.model')}}
           <span>{{listData.model}}</span>
         </div>
+        <!-- 电池组规格 -->
         <div class="item">
-          电池组规格
+          {{$t('batteryList.specif')}}
           <span>{{listData.norm}}</span>
         </div>
+        <!-- 额定电压 -->
         <div class="item item1">
-          额定电压
+          {{$t('batteryList.batteryVoltage')}}
           <span>{{listData.voltage}}v</span>
         </div>
       </div>
-      <div v-show="listData.visitBtn" class="bind-menu">
-        <div v-if="listData.deviceId === null" class="is-bind bind">
-          <div @click.stop="scanBind(listData)" class="bind-menu-item">扫码绑定</div>
-          <div @click.stop="handBind(listData)" class="bind-menu-item">手动绑定</div>
+      <div v-show="listData.visitBtn"
+        class="bind-menu">
+        <div v-if="listData.deviceId === null"
+          class="is-bind bind">
+          <!-- 扫码绑定 -->
+          <div @click.stop="scanBind(listData)"
+            class="bind-menu-item">{{$t('batteryList.scanBind')}}</div>
+          <!-- 手动绑定 -->
+          <div @click.stop="handBind(listData)"
+            class="bind-menu-item">{{$t('batteryList.handBind')}}</div>
           <!-- <div @click.stop="scanQRbind('0457100d131b', listData)" class="bind-menu-item">手动绑定</div> -->
-          <div @click.stop="detailInfo(listData)" class="bind-menu-item">详情</div>
+          <!-- 详情 -->
+          <div @click.stop="detailInfo(listData)"
+            class="bind-menu-item">{{$t('useMsg.detail')}}</div>
         </div>
-        <div v-else class="not-bind bind">
-          <div @click.stop="cancelBind(listData)" class="bind-menu-item">解绑</div>
-
-          <div @click.stop="detailInfo(listData)" class="bind-menu-item">详情</div>
+        <div v-else
+          class="not-bind bind">
+          <!-- 解绑 -->
+          <div @click.stop="cancelBind(listData)"
+            class="bind-menu-item">{{$t('batteryList.unBind')}}</div>
+          <!-- 详情 -->
+          <div @click.stop="detailInfo(listData)"
+            class="bind-menu-item">{{$t('useMsg.detail')}}</div>
         </div>
       </div>
     </div>
@@ -65,16 +88,17 @@ import WX from "wx";
 import isWeixin from "@/utils/checkBrowser";
 import utils from "@/utils/utils";
 import roles from "@/utils/role";
+import t from "@/utils/translate";
 
 export default {
   props: {
     listData: {
       type: Object,
       required: true,
-      default: () => {}
+      default: () => { }
     }
   },
-  data() {
+  data () {
     return {
       bindVisible: false,
       jiantou: 1,
@@ -82,10 +106,10 @@ export default {
       chooseObj: {}
     };
   },
-  mounted() {},
+  mounted () { },
   methods: {
     //打开实时数据
-    sssj() {
+    sssj () {
       // if (!checkPermisstion(19)) {
       //   Toast({
       //     message: "您无此操作权限!",
@@ -104,11 +128,11 @@ export default {
           }
         });
       } else {
-        Toast("请先绑定设备");
+        Toast(t('batteryList.bindFirst')); // ("请先绑定设备");
       }
     },
     //打开详情
-    detailInfo(item) {
+    detailInfo (item) {
       console.log(item);
       // if (!checkPermisstion(18)) {
       //   Toast({
@@ -123,19 +147,21 @@ export default {
       });
     },
     //绑定操作visible
-    handleBindButton(item) {
+    handleBindButton (item) {
       item.visitBtn = !item.visitBtn;
       item.bindVisible = !item.bindVisible;
     },
     //解绑操作
-    cancelBind(row) {
+    cancelBind (row) {
       console.log(row);
       let loginData = JSON.parse(utils.getStorage("loginData"));
       if (loginData.type === 1) {
-        Toast("权限不足");
+        Toast(t('responseCode.permissions')); // ("权限不足");
         return;
       }
       MessageBox({
+        confirmButtonText: t('timeBtn.confirm'),
+        cancelButtonText: t('timeBtn.cancle'),
         title: "设备解绑",
         message: "是否将电池与设备解绑",
         showCancelButton: true
@@ -145,7 +171,7 @@ export default {
             if (res.data && res.data.code === 0) {
               // console.log(res);
               Toast({
-                message: res.data.msg
+                message: t('successTips.bindSuccess')
               });
               this.$emit("unbindSuc", { unbind: true });
             }
@@ -153,40 +179,15 @@ export default {
         }
       });
     },
-    edit(dId) {
-      this.httpRequest
-        .batteryBind({
-          id: this.itemData.id,
-          device_id: dId
-        })
-        .then(res => {
-          Toast({
-            message: res["message"],
-            position: "bottom"
-          });
-
-          this.$router.push({
-            path: "/index",
-            query: { id: ~~(Math.random() * 1000) }
-          });
-        })
-        .catch(err => {
-          Toast({
-            message: err["response"]["data"]["message"],
-            position: "",
-            duration: 3000
-          });
-        });
-    },
     //扫码绑定
-    scanBind(listData) {
+    scanBind (listData) {
       let loginData = JSON.parse(utils.getStorage("loginData"));
       if (loginData.type === 1 || loginData.type === 3) {
-        Toast("权限不足");
+        Toast(t('responseCode.permissions')); // ("权限不足");
         return;
       }
       if (!isWeixin()) {
-        Toast("此功能仅在微信中使用");
+        Toast(t('batteryList.warn.ability')); // ("此功能仅在微信中使用");
         return;
       } // 如果不是在微信中打开 则禁止二维码
       this.chooseObj = listData;
@@ -211,7 +212,7 @@ export default {
             WX.ready(() => {
               WX.checkJsApi({
                 jsApiList: ["scanQRCode"],
-                success: function(res) {
+                success: function (res) {
                   console.log("checkJsApi", res);
                   // Toast(JSON.stringify(res));
                 }
@@ -220,8 +221,8 @@ export default {
                 needResult: 1,
                 desc: "scanQRCode desc",
                 scanType: ["qrCode", "barCode"], // 可以指定扫二维码还是一维码，默认二者都有
-                success: function(res) {
-                  console.log("scanQRCode", res);
+                success: function (res) {
+                  // console.log("scanQRCode", res);
                   that.scanQRbind(res.resultStr);
                 }
               });
@@ -233,7 +234,7 @@ export default {
           }
         });
     },
-    scanQRbind(str) {
+    scanQRbind (str) {
       if (!str) return;
       // this.chooseObj = listData;
       this.$axios.post(`/device/${str}/check`).then(res => {
@@ -241,9 +242,15 @@ export default {
         if (res.data && res.data.code === 0) {
           let result = res.data.data;
           if (result.hostId) {
-            Toast("该设备已绑定");
+            Toast(t('batteryList.warn.deviceHasBind')); // ("该设备已绑定");
           } else {
-            MessageBox.confirm(`确定与设备(编号：${str})绑定吗?`).then(
+            MessageBox({
+              confirmButtonText: t('timeBtn.confirm'),
+              cancelButtonText: t('timeBtn.cancle'),
+              title: "提示",
+              message: `确定与设备(编号：${str})绑定吗?`,
+              showCancelButton: true
+            }).then(
               action => {
                 if (action === "confirm") {
                   this.chooseObj.deviceBianhao = str;
@@ -257,10 +264,10 @@ export default {
       });
     },
     //手动绑定
-    handBind(item) {
+    handBind (item) {
       let loginData = JSON.parse(utils.getStorage("loginData"));
       if (loginData.type === 1 || loginData.type === 3) {
-        Toast("权限不足");
+        Toast(t('responseCode.permissions')); // ("权限不足");
         return;
       }
       this.$router.push({

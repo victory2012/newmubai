@@ -1,35 +1,60 @@
 <template>
   <div class="maps">
     <div class="date">
-      <mt-button v-show="!trajectory" :class="{'active': active === 'start'}" size="small" @click="startOnclick" title="开始">
+      <mt-button v-show="!trajectory"
+        :class="{'active': active === 'start'}"
+        size="small"
+        @click="startOnclick">
         <i class="iconfont icon-ic_song_next"></i>
       </mt-button>
-      <mt-button v-show="!trajectory" :class="{'active': active === 'pause'}" size="small" @click="pauseOnclick" title="暂停">
+      <mt-button v-show="!trajectory"
+        :class="{'active': active === 'pause'}"
+        size="small"
+        @click="pauseOnclick">
         <i class="iconfont icon-artboard25copy"></i>
       </mt-button>
-      <mt-button v-show="!trajectory" :class="{'active': active === 'resume'}" size="small" @click="resumeOnclick" title="继续">
+      <mt-button v-show="!trajectory"
+        :class="{'active': active === 'resume'}"
+        size="small"
+        @click="resumeOnclick">
         <i class="iconfont icon-icons-resume_button"></i>
       </mt-button>
-      <mt-button v-show="!trajectory" :class="{'active': active === 'stop'}" size="small" @click="stopOnclick" title="停止">
+      <mt-button v-show="!trajectory"
+        :class="{'active': active === 'stop'}"
+        size="small"
+        @click="stopOnclick">
         <i class="iconfont icon-stop"></i>
       </mt-button>
-      <mt-button v-show="!trajectory" size="small" type="danger" @click="heat">活动热区</mt-button>
-      <mt-button v-show="trajectory" size="small" type="primary" @click="posi">轨迹回放</mt-button>
+      <!-- 活动热区 -->
+      <mt-button v-show="!trajectory"
+        size="small"
+        type="danger"
+        @click="heat">{{$t('history.heatActive')}}</mt-button>
+      <!-- 轨迹回放 -->
+      <mt-button v-show="trajectory"
+        size="small"
+        type="primary"
+        @click="posi">{{$t('history.TrackReplay')}}</mt-button>
     </div>
-    <div id="map-container" class="historyContent" ref="mapChoice"></div>
+    <div id="map-container"
+      class="historyContent"
+      ref="mapChoice"></div>
   </div>
 </template>
 <script>
+/* eslint-disable */
 import AMap from "AMap";
 import AMapUI from "AMapUI";
+import utils from "@/utils/utils";
+import t from "@/utils/translate";
 
 let map;
 let pathSimplifierIns;
 let navg;
 let infoWindow;
 let heatmap;
-let address;
-let marker;
+// let address;
+// let marker;
 export default {
   props: {
     travelData: {
@@ -44,7 +69,7 @@ export default {
   },
   watch: {
     travelData: {
-      handler: function(vals) {
+      handler: function (vals) {
         // console.log("component map", vals);
         if (this.trajectory) {
           this.heatMapFun(vals.heatmap);
@@ -55,7 +80,7 @@ export default {
       deep: true
     }
   },
-  data() {
+  data () {
     return {
       active: "",
       trajectory: true,
@@ -64,14 +89,14 @@ export default {
       alldistance: 0
     };
   },
-  activated() {
+  activated () {
     this.mapInit();
   },
-  mounted() {
+  mounted () {
     this.mapInit();
   },
   methods: {
-    mapInit() {
+    mapInit () {
       map = new AMap.Map("map-container");
       AMap.plugin(["AMap.Heatmap"], () => {
         // 初始化heatmap对象
@@ -82,15 +107,15 @@ export default {
         this.heatMapFun(this.travelData.heatmap);
       });
     },
-    heat() {
+    heat () {
       this.heatMapFun(this.travelData.heatmap);
     },
-    posi() {
+    posi () {
       this.active = "";
       this.positionChange(this.travelData.travel);
     },
     /* 热力图 方法 */
-    heatMapFun(heatdata) {
+    heatMapFun (heatdata) {
       this.trajectory = true;
       if (!heatdata || heatdata.length < 1) {
         return;
@@ -106,7 +131,7 @@ export default {
       });
     },
     /* 轨迹相关方法 */
-    positionChange(travels) {
+    positionChange (travels) {
       this.trajectory = false;
       heatmap && heatmap.setDataSet({ data: [] });
       if (!travels || travels.length < 1) {
@@ -132,16 +157,12 @@ export default {
         }
       }
       AMapUI.load(["ui/misc/PathSimplifier"], PathSimplifier => {
-        if (!PathSimplifier.supportCanvas) {
-          alert("当前环境不支持 Canvas！");
-          return;
-        }
         AMapUI.loadUI(["misc/PositionPicker"], PositionPicker => {
           let positionPicker = new PositionPicker({
             mode: "dragMarker",
             map: map,
             iconStyle: {
-              url: "http://pfsm46mq4.bkt.clouddn.com/iocna.png",
+              url: '',// "http://pfsm46mq4.bkt.clouddn.com/iocna.png",
               size: [1, 1],
               ancher: [1, 1]
             }
@@ -149,12 +170,14 @@ export default {
           pathSimplifierIns = new PathSimplifier({
             zIndex: 100,
             map: map,
-            getHoverTitle: function(pathData, pathIndex, pointIndex) {
+            getHoverTitle: function (pathData, pathIndex, pointIndex) {
               if (pointIndex >= 0) {
-                return "第" + pointIndex + "个点";
+                return `${t("history.No")} ${pointIndex} ${t(
+                  "history.point"
+                )}`;
               }
             },
-            getPath: function(pathData, pathIndex) {
+            getPath: function (pathData) {
               return pathData.path;
             },
             renderOptions: {
@@ -170,7 +193,7 @@ export default {
               }
             }
           });
-          pathSimplifierIns.on("pointClick", function(e, info) {
+          pathSimplifierIns.on("pointClick", (e, info) => {
             let pointIndex = info.pointIndex;
             let pathData = info.pathData;
             let point = pathData.path[pointIndex];
@@ -179,11 +202,13 @@ export default {
             positionPicker.on("success", result => {
               let infoAddress = [];
               infoAddress.push(
-                `<div><div>时间：${utils.dateFomat(point[2])}</div>`
+                `<div><div>${t("history.times")}：${utils.dateFomat(
+                  point[2]
+                )}</div>`
               );
               infoAddress.push(
-                `<div style="font-size:14px;">地址 :${
-                  result.address
+                `<div style="font-size:14px;">${t("positions.address")} :${
+                result.address
                 }</div></div>`
               );
               infoWindow = new AMap.InfoWindow({
@@ -198,7 +223,7 @@ export default {
           window.pathSimplifierIns = pathSimplifierIns;
           pathSimplifierIns.setData([
             {
-              name: "轨迹",
+              name: t("history.track"), // "轨迹",
               path: travels
             }
           ]);
@@ -210,13 +235,13 @@ export default {
             loop: true,
             speed: speeds,
             pathNavigatorStyle: {
-              width: 12,
-              height: 18,
+              width: 30,
+              height: 30,
               strokeStyle: null,
               fillStyle: null,
               // 使用图片
               content: PathSimplifier.Render.Canvas.getImageContent(
-                "http://pfsm46mq4.bkt.clouddn.com/car.png"
+                "../../../static/0181102120349.png"
               )
             }
           });
@@ -240,27 +265,27 @@ export default {
       });
     },
     // 开始运动
-    startOnclick() {
+    startOnclick () {
       navg && navg.start();
       this.active = "start";
     },
     // 暂停运动
-    pauseOnclick() {
+    pauseOnclick () {
       navg && navg.pause();
       this.active = "pause";
     },
     // 继续运动
-    resumeOnclick() {
+    resumeOnclick () {
       navg && navg.resume();
       this.active = "resume";
     },
     // 停止运动
-    stopOnclick() {
+    stopOnclick () {
       navg && navg.stop();
       this.active = "stop";
     },
     /* 设置速度 */
-    speedChange() {
+    speedChange () {
       if (this.timeSeconds < 1) {
         this.timeSeconds = 1;
       }

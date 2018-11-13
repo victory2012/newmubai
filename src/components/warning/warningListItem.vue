@@ -1,5 +1,6 @@
 <template>
-  <div class="main" @click="toItem">
+  <div class="main"
+    @click="toItem">
     <div class="warningItem">
       <div class="main-top">
         <div class="fl mta">
@@ -29,7 +30,7 @@
 </template>
 
 <script>
-import { MessageBox, Toast, Popup } from "mint-ui";
+import { Popup } from "mint-ui";
 import detail from "./detail";
 
 export default {
@@ -38,11 +39,11 @@ export default {
     "mt-popup": Popup,
     "mt-detail": detail
   },
-  data() {
+  data () {
     return {};
   },
   methods: {
-    toItem() {
+    toItem () {
       console.log(this.itemData.id);
       this.$router.push({
         path: "/warningDetail",

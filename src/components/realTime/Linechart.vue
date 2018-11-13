@@ -1,18 +1,23 @@
 <template>
   <div class="bgFFF">
-    <div class="chartInfo" id="echart1"></div>
-    <div class="chartInfo" id="echart2"></div>
-    <div class="chartInfo" id="echart3"></div>
-    <div class="chartInfo" id="echart4"></div>
+    <div class="chartInfo"
+      id="echart1"></div>
+    <div class="chartInfo"
+      id="echart2"></div>
+    <div class="chartInfo"
+      id="echart3"></div>
+    <div class="chartInfo"
+      id="echart4"></div>
   </div>
 </template>
 
 <script>
 /* eslint-disable */
-import echarts from "echarts"; /* eslint-disable */
+import echarts from "echarts";
 import _ from "lodash";
 import utils from "@/utils/utils";
 import options from "@/config/echartOptions";
+import t from "@/utils/translate";
 
 export default {
   props: {
@@ -24,10 +29,10 @@ export default {
     },
     mqttData: {
       type: Object,
-      default: () => {}
+      default: () => { }
     }
   },
-  data() {
+  data () {
     return {
       timeArr: [],
       singleVoltage: [],
@@ -38,18 +43,18 @@ export default {
       isOptionAbnormal: false
     };
   },
-  mounted() {
+  mounted () {
     this.init();
   },
   watch: {
     mqttData: {
-      handler: function(val) {
+      handler: function (val) {
         this.formatter(val);
       },
       deep: true
     },
     chartData: {
-      handler: function(val) {
+      handler: function (val) {
         // console.log("chartData changes", val);
         this.dataChange(val);
       },
@@ -57,7 +62,7 @@ export default {
     }
   },
   methods: {
-    init() {
+    init () {
       let $echartsDOM1 = document.getElementById("echart1");
       let $echartsDOM2 = document.getElementById("echart2");
       let $echartsDOM3 = document.getElementById("echart3");
@@ -83,64 +88,70 @@ export default {
       };
       this.dataChange(this.chartData);
     },
-    dataChange(datas) {
+    dataChange (datas) {
       // console.log("datas.current1", datas.current);
       // console.log("datas.current2", -datas.current);
       let voltageOptions = _.cloneDeep(options);
-      voltageOptions.title.text = "电压";
+      voltageOptions.title.text = t("realTime.voltage"); // "电压";
       voltageOptions.yAxis.axisLabel.formatter = "{value} v";
       voltageOptions.series[0].data = datas.voltage;
       voltageOptions.tooltip.formatter = p => {
         let item = "";
         p.forEach(v => {
-          item += `${utils.dateFomat(v.value[0])}<br/>电压:${v.value[1]}V<br/>`;
+          item += `${utils.dateFomat(v.value[0])}<br/>${t(
+            "realTime.voltage"
+          )}:${v.value[1]}V<br/>`;
         });
         return item;
       };
       this.myEcharts1.setOption(voltageOptions);
 
       let singleVoltageOptions = _.cloneDeep(options);
-      singleVoltageOptions.title.text = "单体电压";
+      singleVoltageOptions.title.text = t("realTime.singleVoltage");// "单体电压";
       singleVoltageOptions.yAxis.axisLabel.formatter = "{value} v";
       singleVoltageOptions.series[0].data = datas.singleVoltage;
       singleVoltageOptions.tooltip.formatter = p => {
         let item = "";
         p.forEach(v => {
-          item += `${utils.dateFomat(v.value[0])}<br/>单体电压:${
-            v.value[1]
-          }V<br/>`;
+          item += `${utils.dateFomat(v.value[0])}<br/>${t(
+            "realTime.singleVoltage"
+          )}:${v.value[1]}V<br/>`;
         });
         return item;
       };
       this.myEcharts2.setOption(singleVoltageOptions);
 
       let currentOptions = _.cloneDeep(options);
-      currentOptions.title.text = "电流";
+      currentOptions.title.text = t("realTime.current"); //"电流";
       currentOptions.yAxis.axisLabel.formatter = "{value} A";
       currentOptions.series[0].data = datas.current;
       currentOptions.tooltip.formatter = p => {
         let item = "";
         p.forEach(v => {
-          item += `${utils.dateFomat(v.value[0])}<br/>电流:${v.value[1]}A<br/>`;
+          item += `${utils.dateFomat(v.value[0])}<br/>${t(
+            "realTime.current"
+          )}:${v.value[1]}A<br/>`;
         });
         return item;
       };
       this.myEcharts3.setOption(currentOptions);
 
       let temperatureOptions = _.cloneDeep(options);
-      temperatureOptions.title.text = "温度";
+      temperatureOptions.title.text = t("realTime.temperature"); // "温度";
       temperatureOptions.yAxis.axisLabel.formatter = "{value} ℃";
       temperatureOptions.series[0].data = datas.temperature;
       temperatureOptions.tooltip.formatter = p => {
         let item = "";
         p.forEach(v => {
-          item += `${utils.dateFomat(v.value[0])}<br/>温度:${v.value[1]}℃<br/>`;
+          item += `${utils.dateFomat(v.value[0])}<br/>${t(
+            "realTime.temperature"
+          )}:${v.value[1]}℃<br/>`;
         });
         return item;
       };
       this.myEcharts4.setOption(temperatureOptions);
     },
-    formatter(data) {
+    formatter (data) {
       // console.log('实时数据', data);
       // console.log("data.current1", data.current);
       // console.log("data.current2", -data.current);

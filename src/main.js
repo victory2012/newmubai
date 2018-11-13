@@ -4,6 +4,7 @@ import Vue from 'vue';
 import MintUI from 'mint-ui';
 import FastClick from 'fastclick';
 import 'mint-ui/lib/style.css';
+import i18n from '@/i18n';
 import router from './router';
 import App from './App';
 import api from './api';
@@ -20,6 +21,7 @@ FastClick.attach(document.body);
 new Vue({
   el: '#app',
   router,
+  i18n,
   components: {
     App
   },

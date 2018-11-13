@@ -2,12 +2,16 @@
   <!--listData.data-->
   <div class="warrps">
 
-    <div v-if="alarmData.length !== 0" class="wraningItem" v-for="item in alarmData" :key="item.time">
+    <div v-if="alarmData.length !== 0"
+      class="wraningItem"
+      v-for="item in alarmData"
+      :key="item.time">
       <ul class="WItop">
         <li class="fl">{{item.index}}</li>
         <li class="fl">
           <h2>{{item.hostCode}}</h2>
-          <div>电池编号</div>
+          <!-- 电池编号 -->
+          <div>{{$t('alarmList.batteryCode')}}</div>
         </li>
         <li class="fl">
           <div>{{item.createTime}}</div>
@@ -18,19 +22,21 @@
         </li>
       </ul>
       <ul class="WIbottom">
+        <!-- 告警内容： -->
         <li>
-          告警内容：{{item.content}}
+          {{$t('alarmList.content')}}：{{item.content}}
         </li>
 
       </ul>
     </div>
-    <p class="tipmsg" v-if="alarmData.length == 0">暂无数据</p>
+    <!-- 暂无数据 -->
+    <p class="tipmsg"
+      v-if="alarmData.length == 0">{{$t('noData')}}</p>
   </div>
 
 </template>
 
 <script>
-// import AMap from "AMap";
 
 export default {
   name: "HisWarning",
@@ -40,7 +46,7 @@ export default {
       default: () => []
     }
   },
-  data() {
+  data () {
     return {
       alarmData: "",
       listData: {},
@@ -50,20 +56,18 @@ export default {
   },
   watch: {
     alaData: {
-      handler: function(val) {
+      handler: function (val) {
         console.log("告警次数", val);
         this.alarmData = val;
       }
     }
   },
-  mounted() {
+  mounted () {
     this.alarmData = this.alaData;
     console.log("告警次数", this.alarmData.length);
   }
 };
 </script>
-
-
 <style scoped="" lang="scss">
 .tipmsg {
   font-size: 14px;

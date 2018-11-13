@@ -1,66 +1,85 @@
 <template>
   <div class="warning-detail">
     <div class="headNav">
-      <mt-header class="Loginhead" title="告警详情">
-        <mt-button @click="colosePruop" slot="left" icon="back"></mt-button>
-        <mt-button icon="" slot="right"></mt-button>
+      <!-- 告警详情 -->
+      <mt-header class="Loginhead"
+        :title="$t('alarmList.alarmDetail')">
+        <mt-button @click="colosePruop"
+          slot="left"
+          icon="back"></mt-button>
+        <mt-button icon=""
+          slot="right"></mt-button>
       </mt-header>
     </div>
     <ul>
-      <li>
+      <!-- <li>
+        告警事件
         <div class="fl">告警事件</div>
-        <div class="fr">{{warnData.actualValue}}</div>
-      </li>
+        <div class="fr">{{warnData.item}}</div>
+      </li> -->
       <li>
-        <div class="fl">告警发生时间</div>
+        <!-- 告警发生时间 -->
+        <div class="fl">{{$t('alarmList.time')}}</div>
         <div class="fr">{{warnData.createTime}}</div>
       </li>
       <li>
-        <div class="fl">电池组型号</div>
+        <!-- 电池组型号 -->
+        <div class="fl">{{$t('batteryList.model')}}</div>
         <div class="fr">{{warnData.normls}}</div>
       </li>
       <li>
-        <div class="fl">电池编号</div>
+        <!-- 电池编号 -->
+        <div class="fl">{{$t('batteryList.batteryCode')}}</div>
         <div class="fr">{{warnData.hostCode}}</div>
       </li>
       <li>
-        <div class="fl">告警层级</div>
+        <!-- 告警层级 -->
+        <div class="fl">{{$t('alarmList.alarmHierarchy')}}</div>
         <div class="fr">{{warnData.hierarchy}}</div>
       </li>
       <li>
-        <div class="fl">告警项目</div>
+        <!-- 告警项目 -->
+        <div class="fl">{{$t('alarmList.alarmItem')}}</div>
         <div class="fr">{{warnData.items}}</div>
       </li>
       <li>
-        <div class="fl">告警级别</div>
+        <!-- 告警级别 -->
+        <div class="fl">{{$t('alarmList.alarmLevel')}}</div>
         <div class="fr">{{warnData.levels}}</div>
       </li>
       <li>
-        <div class="fl">告警内容</div>
+        <!-- 告警内容 -->
+        <div class="fl">{{$t('alarmList.content')}}</div>
         <div class="fr">{{warnData.content}}</div>
       </li>
       <li>
-        <div class="fl">客户</div>
+        <!-- 客户 -->
+        <div class="fl">{{$t('alarmList.customer')}}</div>
         <div class="fr">{{warnData.companyName}}</div>
       </li>
       <li>
-        <div class="fl">位置（城市）</div>
+        <!-- 位置 -->
+        <div class="fl">{{$t('alarmList.latLng')}}</div>
         <div class="fr">{{warnData.address}}</div>
       </li>
       <li>
-        <div class="fl">温度</div>
+        <!-- 温度 -->
+        <div class="fl">{{$t('realTime.temperature')}}</div>
         <div class="fr">{{warnData.temperature}}℃</div>
       </li>
       <li>
-        <div class="fl">液位</div>
+        <!-- 液位 -->
+        <div class="fl">{{$t('realTime.fluid')}}</div>
         <div class="fr">{{warnData.fluidLevel}}</div>
       </li>
       <li>
-        <div class="fl">电压</div>
+        <!-- 电压 -->
+        <div class="fl">{{$t('realTime.voltage')}}</div>
         <div class="fr">{{warnData.voltage}}V</div>
       </li>
       <li>
-        <div class="fl">电流</div>
+        <!-- 电流 -->
+        <div class="fl">{{$t('realTime.current')}}</div>
         <div class="fr">{{warnData.current}}A</div>
       </li>
 
@@ -74,7 +93,7 @@ export default {
   props: {
     warnData: {
       type: Object,
-      default: () => {}
+      default: () => { }
     }
   },
   // watch: {
@@ -84,13 +103,13 @@ export default {
   //     deep: true
   //   }
   // },
-  data() {
+  data () {
     return {
       warnIng: this.warnData
     };
   },
   methods: {
-    colosePruop() {
+    colosePruop () {
       this.$emit("closeIt", {
         closed: true
       });

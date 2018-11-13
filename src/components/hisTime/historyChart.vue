@@ -1,10 +1,15 @@
 <template>
   <div class="bgFFF">
-    <div class="chartInfo" id="echartV"></div>
-    <div class="chartInfo" id="echartSv"></div>
-    <div class="chartInfo" id="echartA"></div>
-    <div class="chartInfo" id="echartC"></div>
-    <div class="chartInfo" id="echartT"></div>
+    <div class="chartInfo"
+      id="echartV"></div>
+    <div class="chartInfo"
+      id="echartSv"></div>
+    <div class="chartInfo"
+      id="echartA"></div>
+    <div class="chartInfo"
+      id="echartC"></div>
+    <div class="chartInfo"
+      id="echartT"></div>
   </div>
 </template>
 
@@ -12,7 +17,7 @@
 /* eslint-disable */
 import echarts from "echarts";
 import _ from "lodash";
-// import { Toast } from "mint-ui";
+import t from "@/utils/translate";
 import utils from "@/utils/utils";
 import options from "@/config/echartOptions";
 
@@ -20,18 +25,18 @@ export default {
   props: {
     chartData: {
       type: Object,
-      default() {
+      default () {
         return {};
       }
     },
     loading: {
       type: Boolean,
-      default() {
+      default () {
         return false;
       }
     }
   },
-  data() {
+  data () {
     return {
       myEcharts: null,
       isOptionAbnormal: false
@@ -39,14 +44,14 @@ export default {
   },
   watch: {
     loading: {
-      handler: function(curVal) {
+      handler: function (curVal) {
         // console.log(curVal);
         this.showLoading(curVal);
       },
       deep: true
     },
     chartData: {
-      handler: function(curVal) {
+      handler: function (curVal) {
         // Toast("数据已更新");
         // console.log("chartData", curVal);
         this.dataChange(curVal);
@@ -54,14 +59,14 @@ export default {
       deep: true
     }
   },
-  mounted() {
+  mounted () {
     this.init();
   },
   // created() {
   //   this.init();
   // },
   methods: {
-    init() {
+    init () {
       let $echartsDOM1 = document.getElementById("echartV");
       let $echartsDOM2 = document.getElementById("echartSv");
       let $echartsDOM3 = document.getElementById("echartA");
@@ -79,32 +84,6 @@ export default {
         this.myEcharts5,
         this.myEcharts4
       ]);
-
-      // this.myEcharts1.on("datazoom", param => {
-      //   // console.log(param);
-      //   let opt = this.myEcharts1.getOption();
-      //   let dz = opt.dataZoom[0];
-      //   let tstart = opt.xAxis[0].rangeStart;
-      //   let tend = opt.xAxis[0].rangeEnd;
-      //   let barStart;
-      //   let barEnd;
-      //   if (param.batch) {
-      //     barStart = param.batch[0].start;
-      //     barEnd = param.batch[0].end;
-      //   } else {
-      //     barStart = param.start;
-      //     barEnd = param.end;
-      //   }
-      //   clearTimeout(this.timeoutId);
-      //   this.timeoutId = setTimeout(() => {
-      //     this.$emit("timeZoom", {
-      //       tstart: tstart,
-      //       tend: tend,
-      //       batchStart: barStart,
-      //       batchEnd: barEnd
-      //     });
-      //   }, 500);
-      // });
       window.onresize = () => {
         this.myEcharts1.resize();
         this.myEcharts2.resize();
@@ -115,7 +94,7 @@ export default {
       this.showLoading();
       this.dataChange(this.chartData);
     },
-    showLoading(curVal) {
+    showLoading (curVal) {
       if (curVal) {
         this.myEcharts1.showLoading();
         this.myEcharts2.showLoading();
@@ -130,18 +109,24 @@ export default {
         this.myEcharts5.hideLoading();
       }
     },
-    dataChange(datas) {
+    dataChange (datas) {
       console.log("chartData", datas);
       let voltageOptions = _.cloneDeep(options);
-      voltageOptions.title.text = "电压";
+      voltageOptions.title.text = t('realTime.voltage'); // "电压";
       voltageOptions.yAxis.axisLabel.formatter = "{value} v";
       voltageOptions.series[0].data = datas.voltage;
       // voltageOptions.series[0].seriesName = "电压";
-      voltageOptions.tooltip.formatter = this.formatter;
+      voltageOptions.tooltip.formatter = p => {
+        let item = "";
+        p.forEach(v => {
+          item += `${utils.dateFomat(v.value[0])}<br/>${t('realTime.voltage')}:${v.value[1]}V<br/>`;
+        });
+        return item;
+      };
       this.myEcharts1.setOption(voltageOptions);
 
       let singleVoltageOptions = _.cloneDeep(options);
-      singleVoltageOptions.title.text = "单体电压";
+      singleVoltageOptions.title.text = t('realTime.singleVoltage'); // "单体电压";
       singleVoltageOptions.yAxis.axisLabel.formatter = "{value} V";
       singleVoltageOptions.series[0].data = datas.singleVoltage;
       singleVoltageOptions.tooltip.formatter = p => {
@@ -150,7 +135,7 @@ export default {
           item +=
             utils.dateFomat(v.value[0]) +
             "<br/>" +
-            "单体电压" +
+            `${t('realTime.singleVoltage')}` +
             " : " +
             v.value[1] +
             "V<br/>";
@@ -160,17 +145,16 @@ export default {
       this.myEcharts2.setOption(singleVoltageOptions);
 
       let currentOptions = _.cloneDeep(options);
-      currentOptions.title.text = "电流";
+      currentOptions.title.text = t('realTime.current'); // "电流";
       currentOptions.yAxis.axisLabel.formatter = "{value} A";
       currentOptions.series[0].data = datas.current;
       currentOptions.tooltip.formatter = p => {
         let item = "";
         p.forEach(v => {
-          // console.log(v);
           item +=
             utils.dateFomat(v.value[0]) +
             "<br/>" +
-            "电流" +
+            `${t('realTime.current')}` +
             " : " +
             v.value[1] +
             "A<br/>";
@@ -180,7 +164,7 @@ export default {
       this.myEcharts3.setOption(currentOptions);
 
       let temperatureOptions = _.cloneDeep(options);
-      temperatureOptions.title.text = "温度";
+      temperatureOptions.title.text = t('realTime.temperature'); // "温度";
       temperatureOptions.yAxis.axisLabel.formatter = "{value} ℃";
       temperatureOptions.series[0].data = datas.temperature;
       temperatureOptions.tooltip.formatter = p => {
@@ -189,7 +173,7 @@ export default {
           item +=
             utils.dateFomat(v.value[0]) +
             "<br/>" +
-            "温度" +
+            `${t('realTime.temperature')}` +
             " : " +
             v.value[1] +
             "℃<br/>";
@@ -199,7 +183,7 @@ export default {
       this.myEcharts4.setOption(temperatureOptions);
 
       let capacity = _.cloneDeep(options);
-      capacity.title.text = "电量";
+      capacity.title.text = t('realTime.quantity'); // "电量";
       capacity.yAxis.axisLabel.formatter = "{value} %";
       capacity.series[0].data = datas.capacity;
       capacity.tooltip.formatter = p => {
@@ -208,7 +192,7 @@ export default {
           item +=
             utils.dateFomat(v.value[0]) +
             "<br/>" +
-            "电量" +
+            `${t('realTime.quantity')}` +
             " : " +
             v.value[1] +
             "%<br/>";
@@ -216,14 +200,6 @@ export default {
         return item;
       };
       this.myEcharts5.setOption(capacity);
-    },
-    formatter(p, str) {
-      // console.log(p);
-      let item = "";
-      p.forEach(v => {
-        item += `${utils.dateFomat(v.value[0])}<br/>电压:${v.value[1]}V<br/>`;
-      });
-      return item;
     }
   }
 };

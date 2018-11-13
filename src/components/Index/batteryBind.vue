@@ -1,39 +1,54 @@
 <template>
   <div class="bind-content">
     <div class="headNav">
-      <mt-header class="Loginhead" title="绑定设备">
-        <router-link to="/index" slot="left">
+      <!-- 绑定设备 -->
+      <mt-header class="Loginhead"
+        :title="$t('batteryList.bindTitle')">
+        <router-link to="/index"
+          slot="left">
           <mt-button icon="back"></mt-button>
         </router-link>
-        <mt-button icon="" slot="right"></mt-button>
+        <mt-button icon=""
+          slot="right"></mt-button>
       </mt-header>
     </div>
-    <mt-field placeholder="请输入需要绑定的设备号" v-model="no"></mt-field>
+    <!-- 请输入需要绑定的设备号 -->
+    <mt-field :placeholder="$t('batteryList.warn.deviceCode')"
+      v-model="no"></mt-field>
     <div class="dp-content">
-      <div v-show="!showList" v-for="item in deviceIdOpts" :key="item.id" @click.stop="selectItem(item)" class="select-item">
+      <div v-show="!showList"
+        v-for="item in deviceIdOpts"
+        :key="item.id"
+        @click.stop="selectItem(item)"
+        class="select-item">
         <div class="select-item_value">{{item.code}}</div>
-        <div class="select-item_title">绑定</div>
+        <!-- 绑定 -->
+        <div class="select-item_title">{{$t('batteryList.bind')}}</div>
       </div>
-      <div v-show="showList" class="select-item">
-        <p class="textCenter">暂无数据</p>
+      <div v-show="showList"
+        class="select-item">
+        <!-- 暂无数据 -->
+        <p class="textCenter">{{$t('noData')}}</p>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { MessageBox, Toast } from "mint-ui";
+import { Toast } from "mint-ui";
+/* eslint-disable */
 import Paho from "Paho";
-import mqtt from "../../api/mqtt.config";
+import t from "@/utils/translate";
+import mqtt from "@/api/mqtt.config";
 
 export default {
   name: "batteryBind",
 
-  data() {
+  data () {
     return {
       mqttClient: {},
       id: "", // 电池id
-      no: "", //输入no
+      no: "", // 输入no
       bindHostId: "",
       selectOptions: [],
       filterOptions: [],
@@ -42,7 +57,7 @@ export default {
     };
   },
   methods: {
-    selectItem(data) {
+    selectItem (data) {
       console.log(data);
       let bindObj = {
         hostId: this.hostId,
@@ -66,7 +81,7 @@ export default {
         }
       });
     },
-    connectMqtt() {
+    connectMqtt () {
       this.mqttClient = mqtt.mqttClient();
       this.mqttClient.connect({
         onSuccess: this.onConnect,
@@ -85,7 +100,7 @@ export default {
         console.log("message", message);
       };
     },
-    onConnect() {
+    onConnect () {
       if (
         typeof this.mqttClient === "object" &&
         typeof this.mqttClient.subscribe === "function"
@@ -93,7 +108,7 @@ export default {
         console.log("mqtt is connected");
       }
     },
-    getDeviceList() {
+    getDeviceList () {
       this.$axios
         .get(`/device/code?status=0&bindingStatus=0&code=${this.code}`)
         .then(res => {
@@ -111,7 +126,7 @@ export default {
     }
   },
   watch: {
-    no: function(val) {
+    no: function (val) {
       if (!val) {
         this.deviceIdOpts = [];
       } else {
@@ -120,13 +135,13 @@ export default {
       }
     }
   },
-  mounted() {
+  mounted () {
     this.hostId = this.$route.query.hostId;
     this.hostCode = this.$route.query.code;
     this.batteryCode = this.$route.query.batteryCode;
     this.connectMqtt();
   },
-  destroyed() {
+  destroyed () {
     if (typeof this.mqttClient === "object" && this.mqttClient.isConnected()) {
       // console.log(mqttClient);
       this.mqttClient.disconnect();
