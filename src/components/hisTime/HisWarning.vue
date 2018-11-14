@@ -2,7 +2,7 @@
   <!--listData.data-->
   <div class="warrps">
 
-    <div v-if="alarmData.length !== 0"
+    <div v-show="alarmData.length !== 0"
       class="wraningItem"
       v-for="item in alarmData"
       :key="item.time">
@@ -31,7 +31,7 @@
     </div>
     <!-- 暂无数据 -->
     <p class="tipmsg"
-      v-if="alarmData.length == 0">{{$t('noData')}}</p>
+      v-show="alarmData.length == 0">{{$t('noData')}}</p>
   </div>
 
 </template>
@@ -94,8 +94,7 @@ export default {
 
 .wraningItem {
   height: 100px;
-  width: 90%;
-  margin-left: 5%;
+  width: 100%;
   border-left: 1px #f4f4f4 solid;
   border-right: 1px #f4f4f4 solid;
   border-top: 1px #fafafa solid;
@@ -140,9 +139,9 @@ export default {
       }
     }
     li:nth-child(4) {
-      font-size: 20px;
+      font-size: 16px;
       color: #71bfdb;
-      margin-left: 20px;
+      margin-left: 10px;
     }
   }
   .WIbottom {

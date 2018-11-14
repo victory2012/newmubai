@@ -383,7 +383,7 @@ module.exports = {
     warnData: 'Alarm Data',
     endTime: 'End Time',
     startTime: 'Start Time',
-    timeRange: '时间范围.'
+    timeRange: 'Range of time'
   },
   useMsg: {
     serial: 'No.',

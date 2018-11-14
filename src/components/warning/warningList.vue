@@ -17,15 +17,27 @@
         :key="item.id + Math.random()"
         @click="lockDetails(item)">
         <div class="item">
-          <p class="time">告警时间：{{item.createTime}}</p>
-          <p>电池ID：{{item.hostCode}}</p>
+          <!-- 电池ID： -->
+          <p class="time">{{$t('alarmList.batteryCode')}}：{{item.hostCode}}</p>
+          <!-- 告警项 -->
+          <p>{{$t('alarmList.alarmItem')}}：<span class="light">{{item.item}}</span></p>
         </div>
         <div class="item">
-          <p class="time">告警项：<span class="light">{{item.item}}</span></p>
-          <p>告警层级：<span class="light">{{item.hierarchy}}</span></p>
+          <!-- 告警时间 -->
+          <p class="time">{{$t('alarmList.time')}}：{{item.createTime}}</p>
+          <!-- 告警层级 -->
+          <p>{{$t('alarmList.alarmHierarchy')}}：<span class="light">{{item.hierarchy}}</span></p>
+
         </div>
         <div class="item">
-          告警内容：{{item.content}}
+          <!-- 公司名称 -->
+          <!-- <p class="content">{{$t('alarmList.customer')}}：{{item.companyName}}</p> -->
+          <p>{{$t('alarmList.customer')}}：{{item.companyName}}</p>
+        </div>
+        <div class="item">
+          <!-- 告警内容 -->
+          <p class="content">{{$t('alarmList.content')}}：</p>
+          <p>{{item.content}}</p>
         </div>
         <!-- <div class="main-top">
           <div class="fl mta">
@@ -195,8 +207,9 @@ export default {
     background: #fff;
     padding: 15px 10px 5px;
     .item {
-      padding: 5px 10px;
+      padding: 8px 0;
       display: flex;
+      justify-content: space-between;
       p {
         flex: 1;
         text-align: left;
@@ -204,7 +217,10 @@ export default {
           color: #71bfdb;
         }
         &.time {
-          flex: 0 0 60%;
+          flex: 0 0 58%;
+        }
+        &.content {
+          flex: 0 0 120px;
         }
       }
     }

@@ -21,13 +21,13 @@ export default {
     let str = type.toString();
     switch (str) {
       case '1':
-        return '平台管理员';
+        return t('platform');
       case '2':
-        return '管理员';
+        return t('administrator');
       case '3':
-        return '用户';
+        return t('adminIden');
       default:
-        return '未知';
+        return '';
     }
   },
   fomats: str => {
@@ -72,7 +72,23 @@ export default {
     let hours = parseInt((str % 86400000) / 3600000);
     let minutes = parseInt((str % 3600000) / 60000);
     let seconds = str % 60;
-    return `${days}天${hours}小时${minutes}分钟${seconds}秒`;
+    let result;
+    if (!days) {
+      result = `${hours}${t('time.hour')} ${minutes}${t(
+        'time.mins'
+      )} ${seconds}${t('time.sec')}`;
+      if (!hours) {
+        result = `${minutes}${t('time.mins')} ${seconds}${t('time.sec')}`;
+        if (!minutes) {
+          result = `${seconds}${t('time.sec')}`;
+        }
+      }
+    } else {
+      result = `${days}${t('time.day')} ${hours}${t('time.hour')} ${minutes}${t(
+        'time.mins'
+      )} ${seconds}${t('time.sec')}`;
+    }
+    return result;
   },
   setStorage: (key, data) => {
     sessionStorage.setItem(key, data);

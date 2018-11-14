@@ -11,7 +11,6 @@
           <div>{{item.Replenishing}}</div>
           <!-- 距上次补水 -->
           <p>{{$t('history.LengthOfYime')}}: {{item.updateWater}}</p>
-
         </li>
         <li class="fl">
           <h2>{{item.temperature}}°</h2>
@@ -19,11 +18,15 @@
           <p>{{$t('history.fluidTemp')}}</p>
         </li>
       </ul>
-      <ul>
+      <div class="GetAddress"
+        @click="getAddress(item)">
+        {{item.address}}
+      </div>
+      <!-- <ul>
         <li @click="getAddress(item)">
           <div>{{item.address}}</div>
         </li>
-      </ul>
+      </ul> -->
     </div>
     <!-- 暂无数据 -->
     <p class="tipmsg"
@@ -100,23 +103,29 @@ export default {
 }
 
 .wraningItem {
-  height: 110px;
-  width: 90%;
-  margin-left: 5%;
+  // height: 110px;
+  width: 100%;
   border-left: 1px #f4f4f4 solid;
   border-right: 1px #f4f4f4 solid;
   border-top: 1px #fafafa solid;
   margin-top: 15px;
   box-shadow: 1px 1px 1px #e3e3e3;
   margin-bottom: 15px;
-
+  padding: 0 5px;
+  .GetAddress {
+    color: #71bfdb;
+    text-align: center;
+    padding: 5px;
+    margin: 5px 0;
+  }
   .WItop {
     width: 100%;
     height: 60px;
     padding-top: 15px;
+    overflow: hidden;
     margin-top: 20px;
     li:nth-child(1) {
-      width: 5%;
+      width: 10%;
       color: #71bfdb;
       font-size: 25px;
       margin-top: 5px;
@@ -139,7 +148,6 @@ export default {
     li:nth-child(4) {
       font-size: 12px;
       width: 20%;
-      border-right: 1px #aaaaaa solid;
       h2 {
         font-size: 16px;
       }

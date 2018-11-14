@@ -649,7 +649,7 @@ export default {
 .indexHis {
   .fl {
     float: left;
-    margin-left: 8px;
+    margin-left: 6px;
   }
   .fl1 {
     float: left;
@@ -775,7 +775,7 @@ export default {
   .DataTop {
     width: 84%;
     margin-left: 7%;
-    height: 80px;
+    overflow: hidden;
     border-bottom: 1px #bfbfbf solid;
     li {
       float: left;
@@ -795,7 +795,7 @@ export default {
   .DataDown {
     width: 84%;
     margin-left: 7%;
-    height: 80px;
+    overflow: hidden;
     li {
       float: left;
       width: 25%;
@@ -900,7 +900,7 @@ export default {
   }
   .smzq {
     width: 100%;
-    height: 130px;
+    // height: 130px;
     background: #484848;
     padding: 15px;
     font-size: 14px;
