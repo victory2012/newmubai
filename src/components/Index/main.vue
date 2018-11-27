@@ -6,8 +6,8 @@
         :title="$t('batteryList.information')">
         <mt-button icon=""
           slot="left"></mt-button>
-        <mt-button icon=""
-          slot="right"></mt-button>
+        <!-- <mt-button slot="right"
+          @click="sheetVisible=true">{{localLanguge}}</mt-button> -->
       </mt-header>
       <nav>
         <div class="search">
@@ -42,7 +42,8 @@
       </nav>
       <div class="showIsBind"
         v-show="isShowbind">
-        <div>状态</div>
+        <!-- 状态 -->
+        <div>{{$t('batteryList.binding')}}</div>
         <ul>
           <!-- 已绑定 -->
           <li :class="{'active': choosed == 'hasbind'}"
@@ -57,18 +58,34 @@
     <mt-popup v-model="selectone"
       position="bottom">
       <mt-picker valueKey="name"
-        v-if="selectone"
+        v-show="selectone"
         class="enterprise"
         :slots="batterySlot"
-        @change="onBatteryChange"></mt-picker>
+        :show-toolbar="true"
+        @change="onBatteryChange">
+        <!-- 取消 -->
+        <div class="mint-datetime-action mint-datetime-cancel"
+          @click.stop="BatteryCancel">{{$t('timeBtn.cancle')}}</div>
+        <!-- 确定 -->
+        <div class="mint-datetime-action mint-datetime-confirm"
+          @click="BatterySureBtn">{{$t('timeBtn.sure')}}</div>
+      </mt-picker>
     </mt-popup>
     <mt-popup v-model="selecttwo"
       position="bottom">
       <mt-picker valueKey="name"
-        v-if="selecttwo"
+        v-show="selecttwo"
         class="enterprise"
         :slots="companySlots"
-        @change="onCompanyChange"></mt-picker>
+        :show-toolbar="true"
+        @change="onCompanyChange">
+        <!-- 取消 -->
+        <div class="mint-datetime-action mint-datetime-cancel"
+          @click.stop="CompanyCancel">{{$t('timeBtn.cancle')}}</div>
+        <!-- 确定 -->
+        <div class="mint-datetime-action mint-datetime-confirm"
+          @click="CompanySureBtn">{{$t('timeBtn.sure')}}</div>
+      </mt-picker>
     </mt-popup>
 
     <div class="tableBody"
@@ -87,21 +104,15 @@
           class='loading'>{{$t('noMoreData')}}</p>
       </div>
     </div>
-    <!-- <div> -->
-    <!-- <mt-loadmore :bottom-method="loadBottom" ref="loadmore">
-        <battery-list-item v-for="item in tableData" :key="item.code + new Date().getTime()" :listData="item" @bindDevice="selectItem" @unbindSuc="ifUnbind"></battery-list-item>
-      </mt-loadmore> -->
-    <!-- <div slot="top" class="mint-loadmore-top">
-        <span v-show="topStatus !== 'loading'" :class="{ 'rotate': topStatus === 'drop' }">↓</span>
-        <span v-show="topStatus === 'loading'">Loading...</span>
-      </div> -->
-    <!-- <div v-show="isShowSpinner" class="loadEnd">没有更多了</div> -->
-    <!-- </div> -->
     <div class="pb"
       :class="{'animation': activeBtn}"
       @click="batteryAdd">
       {{$t('regBattery')}}
     </div>
+    <mt-actionsheet :actions="actions"
+      v-model="sheetVisible"
+      :cancelText="$t('user.cancel')">
+    </mt-actionsheet>
   </div>
 </template>
 
@@ -132,12 +143,20 @@ export default {
   },
   data () {
     return {
+      localLanguge: t("Language"),
+      sheetVisible: false,
+      actions: [
+        { name: "中文", method: this.languageChange, id: "cn" },
+        { name: "English", method: this.languageChange, id: "en" }
+      ],
       topStatus: "",
       activeBtn: false,
       mqttClient: {},
       choosed: "",
       isShowSpinner: false,
       pageSize: 8,
+      companyObj: {}, // 选择企业
+      batteryNameObj: {}, // 选择电池型号
       currentPage: 1,
       loadingDom: true,
       wrapperHeight: 0,
@@ -146,6 +165,7 @@ export default {
       company: t('batteryList.company'), // "企业",
       batteryName: t('batteryList.model'), // "电池型号",
       searchContent: {},
+
       selectone: false,
       selecttwo: false,
       isShowbind: false,
@@ -168,16 +188,15 @@ export default {
       ]
     };
   },
+  created () {
+
+  },
   mounted () {
-    this.loginData = JSON.parse(utils.getStorage("loginData")).data;
+    this.loginData = JSON.parse(utils.getStorage("loginData"));
     this.connectMqtt();
     this.getBatteryList();
-    console.log("this.loginData", this.loginData);
     this.getBatteryModelList();
-    if (
-      this.loginData.type === 1 ||
-      (this.loginData.type === 3 && this.loginData.layerName === "平台")
-    ) {
+    if (this.loginData.layerName === "平台") {
       this.getCompanyManufacturer(); // 查询生产企业
     } else {
       this.getCompanyId();
@@ -188,7 +207,43 @@ export default {
       60;
   },
   methods: {
+    BatteryCancel () {
+      this.selectone = false;
+    },
+    BatterySureBtn () {
+      this.selectone = false;
+      this.batteryName = this.batteryNameObj.name;
+      this.tableData = [];
+      this.currentPage = 1;
+      this.getBatteryList();
+    },
+    CompanyCancel () {
+      this.selecttwo = false;
+    },
+    CompanySureBtn () {
+      this.selecttwo = false;
+      this.company = this.companyObj.name;
+      this.tableData = [];
+      this.currentPage = 1;
+      this.getBatteryList();
+    },
+    languageChange (str) {
+      if (str.id === "en") {
+        this.$i18n.locale = "en";
+        localStorage.setItem("locale", "en");
+      } else {
+        this.$i18n.locale = "zh";
+        localStorage.setItem("locale", "zh");
+      }
+      this.company = t('batteryList.company'), // "企业",
+        this.batteryName = t('batteryList.model'), // "电池型号",
+        this.localLanguge = t("Language");
+    },
     batteryAdd () {
+      if (this.loginData.type !== 2) {
+        Toast(t('responseCode.permissions')); // ("权限不足");
+        return;
+      }
       this.activeBtn = !this.activeBtn;
       this.$router.push("/batteryEdit");
     },
@@ -212,20 +267,11 @@ export default {
       this.getBatteryList();
     },
     onCompanyChange (picker, values) {
-      this.company = values[0].name;
-      this.searchContent.companyId = values[0].id;
-      this.tableData = [];
-      this.currentPage = 1;
-      this.getBatteryList();
+      this.companyObj = values[0];
     },
     onBatteryChange (picker, values) {
-      if (values[0].id !== "noData") {
-        this.batteryName = values[0].name;
-        this.searchContent.batteryId = values[0].id;
-        this.tableData = [];
-        this.currentPage = 1;
-        this.getBatteryList();
-      }
+      this.batteryNameObj = values[0];
+      // }
     },
     searchInput () {
       this.tableData = [];
@@ -270,27 +316,23 @@ export default {
       this.currentPage = 1;
       this.company = t('batteryList.company');// "企业";
       this.batteryName = t('batteryList.model');// "电池型号";
-      this.searchContent.companyId = null;
-      this.searchContent.batteryId = null;
+      this.companyObj = {};
+      this.batteryNameObj = {};
+      this.searchContent = {}
       this.isShowbind = false;
-      this.searchContent.bindStatus = "";
-      this.searchContent.content = "";
       this.tableData = [];
       this.choosed = "";
       this.getBatteryList();
     },
     getBatteryList () {
       Indicator.open();
+      console.log(' pageSize', this.companyObj)
       let options = {
         pageSize: this.pageSize,
         pageNum: this.currentPage,
-        companyName: this.searchContent.companyId ? `${this.company}` : "",
-        batteryGroupOrDeviceCode: this.searchContent.content
-          ? this.searchContent.content
-          : "",
-        modelId: this.searchContent.batteryId
-          ? this.searchContent.batteryId
-          : "",
+        companyName: this.companyObj && this.companyObj.id ? this.companyObj.name : '',
+        batteryGroupOrDeviceCode: this.searchContent.content,
+        modelId: this.batteryNameObj && this.batteryNameObj.id ? this.batteryNameObj.id : '',
         status: 0
       };
       if (
@@ -305,7 +347,7 @@ export default {
         options.bindingStatus = 1;
       }
       this.$axios.get("/battery_group", options).then(res => {
-        console.log(res);
+        console.log('getBatteryList', res);
         Indicator.close();
         if (res.data && res.data.code === 0) {
           let result = res.data.data;
@@ -356,7 +398,7 @@ export default {
             this.companySlots[0].values = [
               {
                 name: t('stock.noData'), // "暂无数据",
-                id: "noData"
+                id: ""
               }
             ];
           }
@@ -389,7 +431,7 @@ export default {
               this.companySlots[0].values = [
                 {
                   name: t('stock.noData'), // "暂无数据",
-                  id: "noData"
+                  id: ""
                 }
               ];
             }

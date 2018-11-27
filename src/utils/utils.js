@@ -1,4 +1,4 @@
-import t from '@/utils/translate';
+import t from './translate';
 
 const daysInMonth = [
   [0],
@@ -245,11 +245,11 @@ export default {
   checkDate: data => {
     let res = data.toString();
     if (
-      res.indexOf('年') > 0 ||
-      res.indexOf('月') > 0 ||
-      res.indexOf('日') > 0 ||
-      res.length < 7 ||
-      res.length > 11
+      res.indexOf('年') > 0
+      || res.indexOf('月') > 0
+      || res.indexOf('日') > 0
+      || res.length < 7
+      || res.length > 11
     ) {
       return false;
     }

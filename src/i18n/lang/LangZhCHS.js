@@ -10,6 +10,7 @@ module.exports = {
   noData: '暂无数据',
   noMoreData: '没有更多数据',
   regBattery: '登记',
+  Language: '语言',
   responseCode: {
     timeOut: '登录超时，请重新登录',
     sessionOut: '会话过期', // 1
@@ -63,7 +64,6 @@ module.exports = {
     errorMsg: {
       account: '请输入账号',
       password: '请输入密码',
-
       phoneNub: '请输入手机号',
       checkPhone: '手机号格式错误',
       smsCodeErr: '请输入短信验证码'
@@ -75,7 +75,7 @@ module.exports = {
     getSmsCode: '获取验证码',
     smsSuccess: '发送成功',
     back: '返回',
-    bindLogin: '绑定登录'
+    bindLogin: '验证码登录'
   },
   userInfo: {
     userMsg: '个人信息',
@@ -247,6 +247,8 @@ module.exports = {
     }
   },
   batteryList: {
+    scanQRbindTip: '确定将电池与设备绑定吗？，设备id：',
+    UnBound: '是否将电池与设备解绑？',
     bindTitle: '绑定设备',
     information: '基本信息',
     bindFirst: '请先绑定设备',

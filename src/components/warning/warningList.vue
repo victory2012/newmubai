@@ -16,33 +16,32 @@
         v-for="item in tableData"
         :key="item.id + Math.random()"
         @click="lockDetails(item)">
-        <div class="item">
-          <!-- 电池ID： -->
+        <!-- <div class="item">
+          电池ID：
           <p class="time">{{$t('alarmList.batteryCode')}}：{{item.hostCode}}</p>
-          <!-- 告警项 -->
+          告警项
           <p>{{$t('alarmList.alarmItem')}}：<span class="light">{{item.item}}</span></p>
         </div>
         <div class="item">
-          <!-- 告警时间 -->
+          告警时间
           <p class="time">{{$t('alarmList.time')}}：{{item.createTime}}</p>
-          <!-- 告警层级 -->
+          告警层级
           <p>{{$t('alarmList.alarmHierarchy')}}：<span class="light">{{item.hierarchy}}</span></p>
 
         </div>
         <div class="item">
-          <!-- 公司名称 -->
-          <!-- <p class="content">{{$t('alarmList.customer')}}：{{item.companyName}}</p> -->
+          公司名称
           <p>{{$t('alarmList.customer')}}：{{item.companyName}}</p>
         </div>
         <div class="item">
-          <!-- 告警内容 -->
+          告警内容
           <p class="content">{{$t('alarmList.content')}}：</p>
           <p>{{item.content}}</p>
-        </div>
-        <!-- <div class="main-top">
+        </div> -->
+        <div class="main-top">
           <div class="fl mta">
             <h2>{{item.items}}</h2>
-            告警项目
+            <!-- 告警项目 -->
             <p>{{$t('alarmList.alarmItem')}}</p>
           </div>
           <div class="fl mtb">
@@ -54,17 +53,17 @@
           </div>
         </div>
         <div class="main-bottom">
-          <div class="mba fl">
-            电池编号
+          <div class="mba">
+            <!-- 电池编号 -->
             <h3 class="fl">{{$t('alarmList.batteryCode')}}</h3>
             <p class="fl">{{item.hostCode}}</p>
           </div>
-          <div class="mbb fl">
-            告警描述
+          <div class="mbb">
+            <!-- 告警描述 -->
             <h3 class="fl">{{$t('alarmList.content')}}</h3>
             <p class="fl">{{item.content}}</p>
           </div>
-        </div> -->
+        </div>
       </div>
     </div>
     <p v-show='loadingDom'
@@ -225,12 +224,12 @@ export default {
       }
     }
     .main-top {
-      height: 65px;
+      overflow: hidden;
       .mta {
-        width: 30%;
+        width: 34%;
         margin-top: 5px;
         h2 {
-          font-size: 20px;
+          font-size: 16px;
           color: #71bfdb;
         }
         p {
@@ -240,7 +239,7 @@ export default {
         }
       }
       .mtb {
-        width: 43%;
+        width: 40%;
         font-size: 12px;
         .timedata {
           border-bottom: 1px #bfbfbf solid;
@@ -251,31 +250,27 @@ export default {
         }
       }
       .mtc {
-        font-size: 23px;
+        // width: 23%;
+        font-size: 18px;
         color: #71bfdb;
         line-height: 60px;
-        margin-left: 22px;
+        margin-left: 10px;
       }
     }
     .main-bottom {
-      height: 20px;
       font-size: 12px;
-      padding-left: 20px;
+      padding-left: 10px;
       margin-top: 5px;
       .mba {
-        width: 40%;
+        overflow: hidden;
+        margin-bottom: 5px;
       }
       h3 {
         color: #a0a0a0;
+        margin-right: 8px;
       }
       .mbb {
-        p {
-          width: 120px;
-          text-overflow: ellipsis;
-          overflow: hidden;
-          white-space: nowrap;
-          text-align: left;
-        }
+        overflow: hidden;
       }
     }
   }

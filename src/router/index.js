@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import Vue from 'vue';
 import Router from 'vue-router';
 import isWeixin from '@/utils/checkBrowser';

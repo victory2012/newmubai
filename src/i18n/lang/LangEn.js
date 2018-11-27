@@ -10,6 +10,7 @@ module.exports = {
   noMoreData: 'No more data',
   noData: 'No Data',
   regBattery: 'Register',
+  Language: 'Language',
   responseCode: {
     timeOut: 'Login timed out, please log in again.',
     sessionOut: 'The current session has expired.', // 1
@@ -79,7 +80,7 @@ module.exports = {
     smsSuccess: 'The verification code was sent successfully.',
     tips: 'Tips: ',
     back: 'Back',
-    bindLogin: '绑定登录.'
+    bindLogin: 'Verification code login'
   },
   successTips: {
     addSuccess: 'Successfully added.',
@@ -253,11 +254,13 @@ module.exports = {
     }
   },
   batteryList: {
-    bindTitle: '绑定设备.',
-    information: '基本信息.',
-    bindFirst: '请先绑定设备.',
+    scanQRbindTip: 'Are you sure to bind the battery to device which id is ',
+    UnBound: 'Are you sure to unbound the battery to device?',
+    bindTitle: 'Device Binding',
+    information: 'Battery information',
+    bindFirst: 'Please bind the device first.',
     scanBind: '扫码绑定.',
-    handBind: '手动绑定.',
+    handBind: 'Manually Bound',
     batteryVoltage: 'Rated Voltage',
     batteryCapacity: 'Rated Capacity',
     singleBattery: 'Unit Specification',
@@ -289,8 +292,8 @@ module.exports = {
     cancel: 'Cancel',
     sure: 'Confirm',
     warn: {
-      deviceHasBind: '该设备已绑定',
-      ability: '此功能仅在微信中使用.',
+      deviceHasBind: 'The device is bound.',
+      ability: 'This function is only used in WeChat.',
       enterprise: 'Please enter manufacturer id.',
       customerCom: 'Please enter Customer id.',
       batteryCode: 'Please enter battery id.',
@@ -355,7 +358,7 @@ module.exports = {
     totalWarn: 'Total Alarms'
   },
   alarmList: {
-    alarmDetail: '告警详情',
+    alarmDetail: 'Alarm',
     serial: 'No.',
     time: 'Alarm Time',
     batteryCode: 'Battery Id',

@@ -6,8 +6,8 @@
         slot="left">
         <mt-button icon="back">{{$t('loginMsg.back')}}</mt-button>
       </router-link>
-      <mt-button icon="more"
-        slot=""></mt-button>
+      <mt-button slot="right"
+        @click="sheetVisible=true">{{localLanguge}}</mt-button>
     </mt-header>
     <p class="Logintitle">{{$t('loginMsg.bindLogin')}}</p>
     <div class="iptPhone">
@@ -36,23 +36,32 @@
     <mt-button @click="login"
       class="Loginbutton"
       type="primary">{{$t('loginMsg.loginBtn')}}</mt-button>
-    <mt-button @click="testlogin"
+    <!-- <mt-button @click="testlogin"
       class="Loginbutton"
-      type="primary">登录</mt-button>
+      type="primary">登录</mt-button> -->
+    <mt-actionsheet :actions="actions"
+      v-model="sheetVisible"
+      :cancelText="$t('user.cancel')">
+    </mt-actionsheet>
   </div>
 </template>
 
 <script>
+/* eslint-disable */
 import utils from "@/utils/utils";
 import { Toast } from "mint-ui";
-import isWeixin from "@/utils/checkBrowser";
 import t from "@/utils/translate";
 
-// const AppId = "wxee1c1e26121022f2";
 export default {
   name: "Login",
   data () {
     return {
+      localLanguge: t("Language"),
+      sheetVisible: false,
+      actions: [
+        { name: "中文", method: this.languageChange, id: "cn" },
+        { name: "English", method: this.languageChange, id: "en" }
+      ],
       phone: "",
       captcha: "",
       smsMsg: t('loginMsg.getSmsCode'), // "获取验证码",
@@ -69,9 +78,25 @@ export default {
     this.openid = this.$route.query.openid;
   },
   methods: {
+    languageChange (str) {
+      console.log("languageChange", str);
+      if (str.id === "en") {
+        this.$i18n.locale = "en";
+        localStorage.setItem("locale", "en");
+      } else {
+        this.$i18n.locale = "zh";
+        localStorage.setItem("locale", "zh");
+      }
+      this.localLanguge = t("Language");
+      this.smsMsg = t('loginMsg.getSmsCode');
+    },
     getSmsCode () {
       if (this.hasGetSms) {
         // Toast("操作过于频繁");
+        return;
+      }
+      if (!this.phone) {
+        Toast(t('loginMsg.errorMsg.phoneNub'));
         return;
       }
       if (/^1[3|4|5|7|8][0-9]\d{8}$/.test(this.phone)) {
@@ -112,7 +137,7 @@ export default {
       this.$axios.post("/login/sms/verify", phoneObj).then(login => {
         console.log(login);
         if (login.data && login.data.code === 0) {
-          utils.setStorage("loginData", JSON.stringify(login.data));
+          utils.setStorage("loginData", JSON.stringify(login.data.data));
           utils.setToken(login.headers.token);
           if (this.openid) {
             this.$axios.put(`/user/${this.openid}/wx`).then(data => {
@@ -130,8 +155,6 @@ export default {
                   });
               }
             });
-          } else if (isWeixin()) {
-            Toast(t('connectErr')); // ("网络请求失败，请稍后重试");
           } else {
             this.$axios
               .get(`/user/permissions/${login.data.data.id}`)
@@ -145,29 +168,47 @@ export default {
                 }
               });
           }
+          // if (isWeixin() && !this.openid) {
+
+          //   // Toast(t('connectErr')); // ("网络请求失败，请稍后重试");
+          // }
+          // if (!isWeixin()) {
+          //   this.$axios
+          //     .get(`/user/permissions/${login.data.data.id}`)
+          //     .then(opts => {
+          //       if (opts.data && opts.data.code === 0) {
+          //         utils.setStorage(
+          //           "userRoles",
+          //           JSON.stringify(opts.data.data)
+          //         );
+          //         this.$router.push("/index");
+          //       }
+          //     });
+          // }
         }
       });
     },
     testlogin () {
       let person = {
-        account: "demo001",
-        password: "demo001"
+        account: "plat",
+        password: "plat"
       };
-      this.$axios.post(`/login`, person).then(res => {
-        console.log(res);
-        if (res.data && res.data.code === 0) {
-          utils.setStorage("loginData", JSON.stringify(res.data));
-          utils.setToken(res.headers.token);
-          this.$axios
-            .get(`/user/permissions/${res.data.data.id}`)
-            .then(opts => {
-              if (opts.data && opts.data.code === 0) {
-                utils.setStorage("userRoles", JSON.stringify(opts.data.data));
-                this.$router.push("/index");
-              }
-            });
-        }
-      });
+      this.$axios.post(`/login`, person)
+        .then(res => {
+          console.log(res);
+          if (res.data && res.data.code === 0) {
+            utils.setStorage("loginData", JSON.stringify(res.data.data));
+            utils.setToken(res.headers.token);
+            this.$axios
+              .get(`/user/permissions/${res.data.data.id}`).then(opts => {
+                console.log(opts);
+                if (opts.data && opts.data.code === 0) {
+                  utils.setStorage("userRoles", JSON.stringify(opts.data.data));
+                  this.$router.push("/index");
+                }
+              });
+          }
+        });
     }
   }
 };

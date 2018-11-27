@@ -1,8 +1,8 @@
 // mqtt相关配置， 详情文档 在下方链接
 // http://www.eclipse.org/paho/files/jsdoc/Paho.MQTT.Client.html
 // let env = window.location.host === "www.myriadiot.net";
-
-import Paho from "Paho";
+/* eslint-disable */
+import Paho from 'Paho';
 
 // let locationHost = window.location.host;
 // let env = locationHost.indexOf('myriadiot');
@@ -10,7 +10,7 @@ import Paho from "Paho";
 const mqtt = {
   // hostname: env > 0 ? 'www.myriadiot.net' : '47.96.8.239',
   // port: env > 0 ? 443 : 8083,
-  hostname: "www.myriadiot.net",
+  hostname: 'www.myriadiot.net',
   port: 443,
   clientId: `wechat`,
   timeout: 30,

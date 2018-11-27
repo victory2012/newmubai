@@ -1,7 +1,6 @@
 <template>
   <div class="battery-list-item">
     <div class="top-wrapper">
-      <!-- <div class="bliLeft" v-for="item in listData" :key="item.code"> -->
       <div class="top-wrapper"
         @click="sssj">
         <div class="bliright"
@@ -133,14 +132,6 @@ export default {
     },
     //打开详情
     detailInfo (item) {
-      console.log(item);
-      // if (!checkPermisstion(18)) {
-      //   Toast({
-      //     message: "您无此操作权限!",
-      //     position: "bottom"
-      //   });
-      //   return;
-      // }
       this.$router.push({
         path: "/batteryDetail",
         query: { code: item.id, deviceCode: item.deviceCode }
@@ -155,15 +146,15 @@ export default {
     cancelBind (row) {
       console.log(row);
       let loginData = JSON.parse(utils.getStorage("loginData"));
-      if (loginData.type === 1) {
+      if (loginData.type === 1 || loginData.type === 3) {
         Toast(t('responseCode.permissions')); // ("权限不足");
         return;
       }
       MessageBox({
         confirmButtonText: t('timeBtn.confirm'),
         cancelButtonText: t('timeBtn.cancle'),
-        title: "设备解绑",
-        message: "是否将电池与设备解绑",
+        title: t('history.tips'),
+        message: t('batteryList.UnBound'),
         showCancelButton: true
       }).then(action => {
         if (action === "confirm") {
@@ -247,8 +238,8 @@ export default {
             MessageBox({
               confirmButtonText: t('timeBtn.confirm'),
               cancelButtonText: t('timeBtn.cancle'),
-              title: "提示",
-              message: `确定与设备(编号：${str})绑定吗?`,
+              title: t('loginMsg.tips'),
+              message: `${t('batteryList.scanQRbindTip')}${str}`,
               showCancelButton: true
             }).then(
               action => {
@@ -312,7 +303,7 @@ export default {
       background: #71bfdb;
       border-radius: 20px;
       height: 24px;
-      width: 60px;
+      width: 66px;
       font-size: 14px;
       line-height: 24px;
       padding: 0 5px 0;

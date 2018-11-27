@@ -1,14 +1,13 @@
-'use strict'
+'use strict';
 // Template version: 1.3.1
 // see http://vuejs-templates.github.io/webpack for documentation.
 
-const path = require('path')
+const path = require('path');
 // const apiPath = "http://192.168.1.112:8000";
-const apiPath = "http://47.96.8.239:8000";
-// const apiPath = "http://smart.wx.myriadiot.net/api";
+const apiPath = 'http://47.96.8.239:8000';
+// const apiPath = 'http://smart.wx.myriadiot.net/api';
 module.exports = {
   dev: {
-
     // Paths
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
@@ -30,7 +29,7 @@ module.exports = {
     errorOverlay: true,
     notifyOnErrors: true,
     poll: false, // https://webpack.js.org/configuration/dev-server/#devserver-watchoptions-
-
+    useEslint: false,
 
     /**
      * Source Maps
@@ -77,4 +76,4 @@ module.exports = {
     // Set to `true` or `false` to always turn it on or off
     bundleAnalyzerReport: process.env.npm_config_report
   }
-}
+};

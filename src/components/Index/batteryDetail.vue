@@ -363,7 +363,12 @@ export default {
       }
     },
     editBattery () {
-      this.isAddPt = true;
+      let loginData = JSON.parse(utils.getStorage("loginData"));
+      if (loginData.typa === 2) {
+        this.isAddPt = true;
+      } else {
+        Toast(t('responseCode.permissions')); // ("权限不足");
+      }
     },
     /* 根据电池编号获取电池组 */
     queryDetail () {

@@ -15,13 +15,13 @@
   </div>
 </template>
 <script>
+/* eslint-disable */
 import utils from "@/utils/utils";
 import WX from "wx";
-import { Toast } from "mint-ui";
 
 export default {
   methods: {
-    getQueryString() {
+    getQueryString () {
       let qs = window.location.search.substr(1); // 获取url中"?"符后的字串
       let args = {}; // 保存参数数据的对象
       let items = qs.length ? qs.split("&") : []; // 取得每一个参数项,
@@ -39,8 +39,23 @@ export default {
       return args;
     }
   },
-  mounted() {
-    sessionStorage.setItem("URl", window.location.href.split("#")[0]);
+  created () {
+    let locallanguage = localStorage.getItem("locale");
+    if (!locallanguage) {
+      let currentLang = navigator.language || navigator.browserLanguage; // 判断除IE外其他浏览器使用语言
+      if (currentLang === "zh-CN") {
+        localStorage.setItem("locale", "zh");
+        this.$i18n.locale = "zh";
+      } else {
+        localStorage.setItem("locale", "en");
+        this.$i18n.locale = "en";
+      }
+    } else {
+      this.$i18n.locale = locallanguage;
+    }
+  },
+  mounted () {
+    // sessionStorage.setItem("URl", window.location.href.split("#")[0]);
     let codes = this.getQueryString();
     console.log(codes.code);
     if (codes.code) {

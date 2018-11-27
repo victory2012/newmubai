@@ -205,6 +205,7 @@ export default {
       customer: false,
       model: false,
       specif: false,
+      /* eslint-disable */
       ImgSrc: require("../../../static/down.png"),
       deviceIdOpts: "", // 设备编号
       batCustomOpts: "", // 客户企业
