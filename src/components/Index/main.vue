@@ -12,18 +12,18 @@
       <nav>
         <div class="search">
           <input :placeholder="$t('batteryList.searchContent')"
-            v-model="searchContent.content"
+            v-model="cacheParam.content"
             type="text">
           <button @click="searchInput"><img src="../../../static/search.jpg"
               alt=""></button>
         </div>
         <button class="searchBtn2 fr"
           @click="showMore">
-          <img v-if="isShowbind"
+          <img v-show="isShowbind"
             style="width: 20px;height: 20px;"
             src="../../../static/xiajiantoufff.svg"
             alt="">
-          <img v-else
+          <img v-show='!isShowbind'
             style="width: 20px;height: 20px;"
             src="../../../static/jiantoufff.svg"
             alt="">
@@ -165,7 +165,6 @@ export default {
       company: t('batteryList.company'), // "企业",
       batteryName: t('batteryList.model'), // "电池型号",
       searchContent: {},
-
       selectone: false,
       selecttwo: false,
       isShowbind: false,
@@ -185,14 +184,33 @@ export default {
           className: "slot2",
           textAlign: "center"
         }
-      ]
+      ],
+      cacheParam: {
+        content: '',
+        modelId: '',
+        parentCompanyId: '',
+        companyName: '',
+        bindStatus: '',
+        cacheName: '',
+        modelName: ''
+      }
     };
   },
   created () {
 
   },
   mounted () {
-    this.loginData = JSON.parse(utils.getStorage("loginData"));
+    this.loginData = JSON.parse(sessionStorage.getItem("loginData"));
+    const params = sessionStorage.getItem('cacheParam');
+    if (params) {
+      this.cacheParam = JSON.parse(params);
+      if (this.cacheParam.cacheName) {
+        this.company = this.cacheParam.cacheName;
+      }
+      if (this.cacheParam.modelName) {
+        this.batteryName = this.cacheParam.modelName;
+      }
+    }
     this.connectMqtt();
     this.getBatteryList();
     this.getBatteryModelList();
@@ -215,18 +233,30 @@ export default {
       this.batteryName = this.batteryNameObj.name;
       this.tableData = [];
       this.currentPage = 1;
+      this.cacheParam.modelId = this.batteryNameObj.id;
+      this.cacheParam.modelName = this.batteryNameObj.name;
       this.getBatteryList();
     },
+    /* 选择企业 取消按钮 */
     CompanyCancel () {
       this.selecttwo = false;
     },
+    /* 选中公司确认按钮 */
     CompanySureBtn () {
       this.selecttwo = false;
       this.company = this.companyObj.name;
       this.tableData = [];
+      if (this.loginData.layerName === "平台") {
+        this.cacheParam.parentCompanyId = this.companyObj.id;
+      } else {
+        this.cacheParam.companyName = this.companyObj.name;
+      }
+      this.cacheParam.cacheName = this.companyObj.name;
+      console.log('CompanySureBtn cacheParam', this.cacheParam);
       this.currentPage = 1;
       this.getBatteryList();
     },
+    /* 改变语言 */
     languageChange (str) {
       if (str.id === "en") {
         this.$i18n.locale = "en";
@@ -239,6 +269,7 @@ export default {
         this.batteryName = t('batteryList.model'), // "电池型号",
         this.localLanguge = t("Language");
     },
+    /* 添加电池 */
     batteryAdd () {
       if (this.loginData.type !== 2) {
         Toast(t('responseCode.permissions')); // ("权限不足");
@@ -247,6 +278,7 @@ export default {
       this.activeBtn = !this.activeBtn;
       this.$router.push("/batteryEdit");
     },
+    /* 加载更多 */
     loadBottom () {
       // this.$refs.loadmore.onBottomLoaded();
       setTimeout(() => {
@@ -258,21 +290,20 @@ export default {
         }
       }, 500);
     },
-    handleBottomChange (status) {
-      this.bottomStatus = status;
-    },
     ifUnbind () {
       this.tableData = [];
       this.currentPage = 1;
       this.getBatteryList();
     },
+    /* 改变公司选项 */
     onCompanyChange (picker, values) {
       this.companyObj = values[0];
     },
+    /* 改变电池选项 */
     onBatteryChange (picker, values) {
       this.batteryNameObj = values[0];
-      // }
     },
+    /* 搜索按钮 */
     searchInput () {
       this.currentPage = 1;
       this.tableData = [];
@@ -287,66 +318,80 @@ export default {
     showMore () {
       this.isShowbind = !this.isShowbind;
     },
+    /* 所搜已经绑定的电池 */
     searchBind () {
       this.isShowbind = false;
       if (this.choosed === "hasbind") {
         this.choosed = "";
-        this.searchContent.bindStatus = "";
+        this.cacheParam.bindStatus = "";
       } else {
         this.choosed = "hasbind";
-        this.searchContent.bindStatus = 1;
+        this.cacheParam.bindStatus = 1;
       }
       this.currentPage = 1;
       this.tableData = [];
       this.getBatteryList();
     },
+    /* 搜索未绑定的电池 */
     searchNoBind () {
       if (this.choosed === "nobind") {
         this.choosed = "";
-        this.searchContent.bindStatus = "";
+        this.cacheParam.bindStatus = "";
       } else {
         this.choosed = "nobind";
-        this.searchContent.bindStatus = 2;
+        this.cacheParam.bindStatus = 2;
       }
       this.isShowbind = false;
       this.tableData = [];
       this.currentPage = 1;
       this.getBatteryList();
     },
+    /* 清空搜索条件 */
     clearAll () {
       this.currentPage = 1;
       this.company = t('batteryList.company');// "企业";
       this.batteryName = t('batteryList.model');// "电池型号";
-      this.companyObj = {};
-      this.batteryNameObj = {};
-      this.searchContent = {}
+      this.companyObj = {}; // 公司 对象
+      this.batteryNameObj = {}; // 电池型号对象
       this.isShowbind = false;
-      this.tableData = [];
-      this.choosed = "";
+      this.tableData = []; // 请求数据的
+      this.choosed = ""; // 选择绑定状态
+      this.cacheParam = {
+        content: '',
+        modelId: '',
+        parentCompanyId: '',
+        companyName: '',
+        bindStatus: '',
+        cacheName: '',
+        modelName: ''
+      }
+      sessionStorage.removeItem('cacheParam');
       this.getBatteryList();
     },
+    /* 获取电池列表 */
     getBatteryList () {
       Indicator.open();
-      console.log(' pageSize', this.companyObj)
       let options = {
         pageSize: this.pageSize,
         pageNum: this.currentPage,
-        companyName: this.companyObj && this.companyObj.id ? this.companyObj.name : '',
-        batteryGroupOrDeviceCode: this.searchContent.content,
-        modelId: this.batteryNameObj && this.batteryNameObj.id ? this.batteryNameObj.id : '',
-        status: 0
+        parentCompanyId: this.cacheParam.parentCompanyId,
+        companyName: this.cacheParam.companyName,
+        batteryGroupOrDeviceCode: this.cacheParam.content,
+        modelId: this.cacheParam.modelId,
+        status: 0,
       };
-      if (
-        this.searchContent.bindStatus &&
-        this.searchContent.bindStatus === 2
-      ) {
+      // if (this.loginData.layerName === "平台") {
+      //   options.parentCompanyId = this.companyObj && this.companyObj.id ? this.companyObj.id : '';
+      // } else {
+      //   options.companyName = this.companyObj && this.companyObj.id ? this.companyObj.name : '';
+      // }
+      if (this.cacheParam.bindStatus && this.cacheParam.bindStatus === 2) {
         options.bindingStatus = 0;
-      } else if (
-        this.searchContent.bindStatus &&
-        this.searchContent.bindStatus === 1
-      ) {
+      }
+      if (this.cacheParam.bindStatus && this.cacheParam.bindStatus === 1) {
         options.bindingStatus = 1;
       }
+      sessionStorage.setItem('cacheParam', JSON.stringify(this.cacheParam));
       this.$axios.get("/battery_group", options).then(res => {
         console.log('getBatteryList', res);
         Indicator.close();
@@ -382,62 +427,49 @@ export default {
         if (res.data && res.data.code === 0) {
           this.batCustomOpts = res.data.data;
           if (this.batCustomOpts.length > 0) {
-            this.companySlots[0].values = [
-              {
-                id: "",
-                name: t('timeBtn.all')// "全部"
-              }
-            ];
+            this.companySlots[0].values = [{
+              id: "",
+              name: t('timeBtn.all')// "全部"
+            }];
             res.data.data.forEach(key => {
-              let obj = {
+              this.companySlots[0].values.push({
                 id: key.id,
                 name: key.name
-              };
-              this.companySlots[0].values.push(obj);
+              });
             });
           } else {
-            this.companySlots[0].values = [
-              {
-                name: t('stock.noData'), // "暂无数据",
-                id: ""
-              }
-            ];
+            this.companySlots[0].values = [{
+              name: t('stock.noData'), // "暂无数据",
+              id: ""
+            }];
           }
         }
       });
     },
     /* 获取生产企业列表 */
     getCompanyManufacturer () {
-      this.$axios
-        .get(`company/manufacturer_names?t=${new Date().getTime()}`)
-        .then(res => {
-          if (res.data && res.data.code === 0) {
-            this.batCustomOpts = res.data.data;
-            // this.companySlots[0].values = [...this.batCustomOpts];
-            if (this.batCustomOpts.length > 0) {
-              this.companySlots[0].values = [
-                {
-                  id: "",
-                  name: t('timeBtn.all')// "全部"
-                }
-              ];
-              res.data.data.forEach(key => {
-                let obj = {
-                  id: key.id,
-                  name: key.name
-                };
-                this.companySlots[0].values.push(obj);
+      this.$axios.get(`company/manufacturer_names?t=${Math.random()}`).then(res => {
+        if (res.data && res.data.code === 0) {
+          this.batCustomOpts = res.data.data;
+          if (this.batCustomOpts.length > 0) {
+            this.companySlots[0].values = [{
+              id: "",
+              name: t('timeBtn.all')// "全部"
+            }];
+            res.data.data.forEach(key => {
+              this.companySlots[0].values.push({
+                id: key.id,
+                name: key.name
               });
-            } else {
-              this.companySlots[0].values = [
-                {
-                  name: t('stock.noData'), // "暂无数据",
-                  id: ""
-                }
-              ];
-            }
+            });
+          } else {
+            this.companySlots[0].values = [{
+              name: t('stock.noData'), // "暂无数据",
+              id: ""
+            }];
           }
-        });
+        }
+      });
     },
     /* 获取电池型号列表 */
     getBatteryModelList () {

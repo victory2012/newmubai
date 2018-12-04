@@ -33,28 +33,6 @@ const loading = () =>
 Vue.use(Router);
 
 let routeOptions = [
-  // {
-  //   path: '/',
-  //   redirect: '/loading'
-  // },
-  // {
-  //   path: '/loading',
-  //   name: 'loading',
-  //   routeSets: {
-  //     bottomNavVisible: false,
-  //     bottomId: 'loading'
-  //   },
-  //   component: loading
-  // },
-  // {
-  //   path: '/login',
-  //   name: 'login',
-  //   routeSets: {
-  //     bottomNavVisible: false,
-  //     bottomId: 'login'
-  //   },
-  //   component: Login
-  // },
   {
     path: '/index',
     name: 'index',

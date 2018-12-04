@@ -9,6 +9,7 @@
 </template>
 
 <script>
+/* eslint-disable */
 import bottomNav from "./bottomNav";
 
 export default {

@@ -61,32 +61,24 @@ export default {
     if (codes.code) {
       this.$axios.post("/wechat/login", { code: codes.code }).then(res => {
         console.log(res);
-        if (res.data && res.data !== null) {
-          if (res.data.code === 0) {
-            utils.setStorage("loginData", JSON.stringify(res.data));
-            utils.setToken(res.headers.token);
-            this.$axios
-              .get(`/user/permissions/${res.data.data.id}`)
-              .then(opts => {
-                if (opts.data && opts.data !== null) {
-                  utils.setStorage("userRoles", JSON.stringify(opts.data.data));
-                  this.$router.push("/index");
-                }
-              });
-          } else if (res.data.code === 106001) {
-            this.$router.push({
-              path: "/login"
-            });
-          }
-        } else {
-          this.$router.push({
-            path: "/login"
+        if (res.data.code === 0) {
+          utils.setStorage("loginData", JSON.stringify(res.data.data));
+          utils.setToken(res.headers.token);
+          this.$axios.get(`/user/permissions/${res.data.data.id}`).then(opts => {
+            if (opts.data && opts.data !== null) {
+              utils.setStorage("userRoles", JSON.stringify(opts.data.data));
+              this.$router.push("/index");
+            }
           });
         }
-      });
-    } else {
-      this.$router.push({
-        path: "/login"
+        if (res.data.code === 106001) {
+          this.$router.push({
+            path: "/login",
+            query: {
+              openid: res.data.data
+            }
+          });
+        }
       });
     }
   }

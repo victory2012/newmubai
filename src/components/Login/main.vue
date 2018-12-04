@@ -139,34 +139,31 @@ export default {
         if (login.data && login.data.code === 0) {
           utils.setStorage("loginData", JSON.stringify(login.data.data));
           utils.setToken(login.headers.token);
+          console.log('openid', this.openid);
           if (this.openid) {
             this.$axios.put(`/user/${this.openid}/wx`).then(data => {
               if (data.data.code === 0) {
-                this.$axios
-                  .get(`/user/permissions/${login.data.data.id}`)
-                  .then(opts => {
-                    if (opts.data && opts.data.code === 0) {
-                      utils.setStorage(
-                        "userRoles",
-                        JSON.stringify(opts.data.data)
-                      );
-                      this.$router.push("/index");
-                    }
-                  });
+                this.$axios.get(`/user/permissions/${login.data.data.id}`).then(opts => {
+                  if (opts.data && opts.data.code === 0) {
+                    utils.setStorage(
+                      "userRoles",
+                      JSON.stringify(opts.data.data)
+                    );
+                    this.$router.push("/index");
+                  }
+                });
               }
             });
           } else {
-            this.$axios
-              .get(`/user/permissions/${login.data.data.id}`)
-              .then(opts => {
-                if (opts.data && opts.data.code === 0) {
-                  utils.setStorage(
-                    "userRoles",
-                    JSON.stringify(opts.data.data)
-                  );
-                  this.$router.push("/index");
-                }
-              });
+            this.$axios.get(`/user/permissions/${login.data.data.id}`).then(opts => {
+              if (opts.data && opts.data.code === 0) {
+                utils.setStorage(
+                  "userRoles",
+                  JSON.stringify(opts.data.data)
+                );
+                this.$router.push("/index");
+              }
+            });
           }
           // if (isWeixin() && !this.openid) {
 
