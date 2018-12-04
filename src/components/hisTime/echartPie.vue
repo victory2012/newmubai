@@ -59,9 +59,9 @@ export default {
           right: "15%"
         },
         legend: {
-          right: 5,
-          top: "center",
-          orient: "vertical",
+          bottom: 0,
+          left: "center",
+          // orient: "vertical",
           itemWidth: 12,
           itemHeight: 12,
           itemGap: 25,
@@ -74,7 +74,7 @@ export default {
           {
             type: "pie",
             radius: ["30%", "50%"],
-            center: ["35%", "50%"],
+            center: ["50%", "38%"],
             data: [],
             itemStyle: {
               emphasis: {
@@ -193,12 +193,12 @@ export default {
   border: 1px solid #e5e5e5;
   border-radius: 5px;
   .circelInfo {
-    height: 200px;
+    height: 230px;
     display: flex;
     padding: 0 10px;
     .pei {
       flex: 1;
-      height: 200px;
+      height: 230px;
     }
     .msg {
       text-align: center;

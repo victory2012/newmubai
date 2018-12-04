@@ -4,19 +4,17 @@
 /* eslint-disable */
 import Paho from 'Paho';
 
-// let locationHost = window.location.host;
-// let env = locationHost.indexOf('myriadiot');
+let locationHost = window.location.host;
+let env = locationHost.indexOf('myriadiot');
 
 const mqtt = {
-  // hostname: env > 0 ? 'www.myriadiot.net' : '47.96.8.239',
-  // port: env > 0 ? 443 : 8083,
-  hostname: 'www.myriadiot.net',
-  port: 443,
+  hostname: env > 0 ? 'www.myriadiot.net' : '47.96.8.239',
+  port: env > 0 ? 443 : 8083,
+  useSSL: env > 0 ? true : false,
   clientId: `wechat`,
   timeout: 30,
   keepAliveInterval: 100,
   cleanSession: false,
-  useSSL: true,
   reconnect: true // 断开后 是否重连
 };
 export default {
@@ -24,7 +22,7 @@ export default {
     return new Paho.MQTT.Client(
       mqtt.hostname,
       mqtt.port,
-      `${mqtt.clientId}${new Date().getTime()}`
+      `${mqtt.clientId}${Math.random()}`
     );
   },
   mqttConfig: () => mqtt

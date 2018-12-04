@@ -95,7 +95,7 @@
         v-infinite-scroll="loadBottom"
         infinite-scroll-distance="30">
         <battery-list-item v-for="item in tableData"
-          :key="item.code + new Date().getTime()"
+          :key="item.code + Math.random()"
           :listData="item"
           @bindDevice="selectItem"
           @unbindSuc="ifUnbind"></battery-list-item>
@@ -274,6 +274,7 @@ export default {
       // }
     },
     searchInput () {
+      this.currentPage = 1;
       this.tableData = [];
       this.getBatteryList();
     },

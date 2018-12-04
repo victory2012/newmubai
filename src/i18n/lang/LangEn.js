@@ -292,6 +292,8 @@ module.exports = {
     cancel: 'Cancel',
     sure: 'Confirm',
     warn: {
+      voltageNumber: 'Voltage can only be digital',
+      capacityNuber: 'Rated capacity can only be digital',
       deviceHasBind: 'The device is bound.',
       ability: 'This function is only used in WeChat.',
       enterprise: 'Please enter manufacturer id.',
@@ -307,7 +309,11 @@ module.exports = {
       batteryVoltage: 'Please enter the rated voltage.',
       batteryCapacity: 'Please enter the rated capacity.',
       singleBattery: 'Please choose battery unit specification.',
-      deviceCode: 'Please enter device id.'
+      deviceCode: 'Please enter device id.',
+      CheckmanufactureDate:
+        'The date of production must before the date of manufacture.',
+      CheckWarrantyDate:
+        'The date of manufacture must before the date of warranty.'
     },
     batteries: 'New Battery',
     batchImport: 'Batch Import.',

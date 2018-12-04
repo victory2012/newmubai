@@ -45,10 +45,10 @@ function checkStatus(response) {
     return response;
   } else {
     // 异常状态下，把错误信息返回去
-    Toast(`${i18n.t('internetErr')}`);
+    Toast(`${t('internetErr')}`);
     return {
       status: 500,
-      msg: `${i18n.t('internetErr')}`
+      msg: `${t('internetErr')}`
     };
   }
 }

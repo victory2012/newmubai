@@ -191,6 +191,7 @@ export default {
 
   data () {
     return {
+      cacheDate: {},
       battery: {}, // item data
       date: new Date(), // picker model
       showVal: "", // show val
@@ -254,16 +255,32 @@ export default {
         Toast(t('batteryList.warn.singleBattery'));// ("单体型号不能为空");
         return;
       }
-      if (!this.battery.productTime) {
+      if (!this.cacheDate.productTime) {
         Toast(t('batteryList.warn.createDate'));// ("生产日期不能为空");
         return;
       }
-      if (!this.battery.factoryTime) {
+      if (!this.cacheDate.factoryTime) {
         Toast(t('batteryList.warn.manufactureDate'));// ("出厂日期不能为空");
         return;
       }
-      if (!this.battery.qualityTime) {
+      if (!this.cacheDate.qualityTime) {
         Toast(t('batteryList.warn.warrantyDate'));// ("质保期不能为空");
+        return;
+      }
+      if (new Date(this.cacheDate.factoryTime) < new Date(this.cacheDate.productTime)) {
+        Toast(t('batteryList.warn.CheckmanufactureDate'));// ("质保期不能为空");
+        return;
+      }
+      if (new Date(this.cacheDate.qualityTime) < new Date(this.cacheDate.factoryTime)) {
+        Toast(t('batteryList.warn.CheckWarrantyDate'));// ("质保期不能为空");
+        return;
+      }
+      if (isNaN(Number(this.battery.voltage))) {
+        Toast(t('batteryList.warn.voltageNumber'));// ("额定电压不能为空");
+        return;
+      }
+      if (isNaN(Number(this.battery.capacity))) {
+        Toast(t('batteryList.warn.capacityNuber'));// ("额定容量不能为空");
         return;
       }
       let params = {
@@ -274,13 +291,13 @@ export default {
         norm: this.battery.specif,
         companyId: this.battery.customerId,
         companyName: this.battery.customer,
-        voltage: this.battery.voltage,
-        capacity: this.battery.capacity,
+        voltage: Number(this.battery.voltage),
+        capacity: Number(this.battery.capacity),
         singleModelId: this.battery.singleModelId,
         singleModel: this.battery.singleModel,
-        productionDate: this.battery.productTime,
-        manufacturerDate: this.battery.factoryTime,
-        qualityGuaranteeDate: this.battery.qualityTime
+        productionDate: utils.yyyymmdd(this.battery.productTime),// this.battery.productTime,
+        manufacturerDate: utils.yyyymmdd(this.battery.factoryTime),// this.battery.factoryTime,
+        qualityGuaranteeDate: utils.yyyymmdd(this.battery.qualityTime),// this.battery.qualityTime
       };
       if (this.battery.deviceCode && this.battery.deviceId) {
         params.deviceId = this.battery.deviceId;
@@ -313,17 +330,20 @@ export default {
     },
     dateChange (value) {
       let data = utils.yyyymmdd(value);
-      console.log(data);
+      // console.log(data);
       if (this.Timetype === "porduct") {
         this.$set(this.battery, "productTime", data);
+        this.cacheDate.productTime = value;
         this.prodHasData = true;
       }
       if (this.Timetype === "factory") {
         this.$set(this.battery, "factoryTime", data);
         this.factoryTime = true;
+        this.cacheDate.factoryTime = value;
       }
       if (this.Timetype === "quality") {
         this.$set(this.battery, "qualityTime", data);
+        this.cacheDate.qualityTime = value;
         this.qualityTime = true;
       }
     },
@@ -513,10 +533,11 @@ export default {
     height: calc(100vh - 40px);
     overflow: auto;
     padding: 0 10px 20px;
+    background: #ffffff;
     li {
       line-height: 50px;
       display: flex;
-      // border-bottom: 1px dashed #e5e5e5;
+      background: #ffffff;
       div {
         flex: 1;
         font-size: 14px;
@@ -541,7 +562,7 @@ export default {
           span {
             color: #858585;
             display: inline-block;
-            width: 140px;
+            width: 180px;
           }
           input {
             height: 28px;

@@ -73,15 +73,20 @@ export default {
                   this.$router.push("/index");
                 }
               });
-          } else if (res.data.code === 2) {
+          } else if (res.data.code === 106001) {
             this.$router.push({
-              path: "/login",
-              query: {
-                openid: res.data.msg
-              }
+              path: "/login"
             });
           }
+        } else {
+          this.$router.push({
+            path: "/login"
+          });
         }
+      });
+    } else {
+      this.$router.push({
+        path: "/login"
       });
     }
   }

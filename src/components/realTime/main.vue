@@ -98,7 +98,7 @@
               alt="">
           </dt>
           <dd>
-            <p class="testdata">{{companyInfo.singleVoltage}}A</p>
+            <p class="testdata">{{companyInfo.singleVoltage}}V</p>
             <!-- 单体电压 -->
             <p class="category">{{$t('realTime.singleVoltage')}}</p>
           </dd>
@@ -149,10 +149,12 @@
         @addressCallback="addressBack"></map-container>
     </div>
     <div class="version">
-      <p class="verId"><img :src="iconSrc.verison"
-          alt="">：{{version}}</p>
-      <p class="ccid"><img :src="iconSrc.ccid"
-          alt="">：{{CCID}}</p>
+      <p class="verId">
+        <img src="../../../static/iconfont-version.png">：{{version}}
+      </p>
+      <p class="ccid">
+        <img src="../../../static/device-flesh.png">：{{CCID}}
+      </p>
     </div>
     <div class="updateTime">
       <div class="updateTimeShow">
@@ -282,6 +284,7 @@ export default {
         this.$axios
           .get(`/battery_group/${this.IdObj.deviceCode}/capacity`)
           .then(res => {
+            console.log('getQuantity', res);
             if (res.data && res.data.code === 0) {
               this.interval = true;
               this.quantity = `${Math.round(res.data.data * 100)}%`;
@@ -419,6 +422,7 @@ export default {
       });
     },
     activeQuery () {
+      console.log('activeQuery');
       if (this.mqttClient.isConnected() && !this.queryData) {
         this.queryData = true;
         clearInterval(this.decriseTime);
@@ -609,7 +613,7 @@ export default {
 <style scoped lang="scss">
 .version {
   text-align: left;
-  // margin-top: 10px;
+  background: #ffffff;
   display: flex;
   padding: 0 20px;
   font-size: 14px;
@@ -781,7 +785,7 @@ nav {
       p {
         font-size: 9px;
         color: #484848;
-        width: 80%;
+        width: 90%;
       }
     }
   }
@@ -790,7 +794,7 @@ nav {
 .dataDisplay {
   width: 100%;
   overflow: hidden;
-  // height: 18%;
+  background: #ffffff;
   margin-top: 200px;
   li:nth-child(1) {
     p {
@@ -835,6 +839,7 @@ nav {
   padding: 0 10% 0;
   margin-top: 5px;
   overflow: hidden;
+  background: #ffffff;
   margin-bottom: 20px;
   .updateTimeShow {
     width: 60%;

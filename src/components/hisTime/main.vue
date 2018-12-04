@@ -173,9 +173,9 @@
           @click="getliquidData">{{$t('history.historyfluid')}}</div>
 
       </div>
-      <his-alarm v-if="alarm"
+      <his-alarm v-show="isA"
         :alaData="alarmData"></his-alarm>
-      <fluid-Alarm v-if="alarmFluid"
+      <fluid-Alarm v-show="!isA"
         :fliudData="liquidData"></fluid-Alarm>
       <div class="page">
         <span>{{$t('pageBtn.current')}}:{{pages}}</span>
@@ -204,7 +204,7 @@
 <script>
 /* eslint-disable */
 import AMap from "AMap";
-import { Indicator } from "mint-ui";
+import { Indicator, Toast } from "mint-ui";
 import lnglatTrabsofor from "@/utils/longlatTransfor";
 import utils from "@/utils/utils";
 import t from "@/utils/translate";
@@ -227,7 +227,7 @@ export default {
     return {
       pageSize: 4,
       pages: 1,
-      totalPage: 0,
+      totalPage: 1,
       alarmFluid: false,
       alarm: false,
       hisOrFluid: "hisAlarm",
@@ -396,12 +396,21 @@ export default {
       this.$refs.picker1.open();
     },
     handleConfirm (res) {
-      // console.log(res);
-      // this.startTime = this.getTime(res);
+      const start = new Date(res);
+      const end = new Date(this.showEndTime);
+      if (end < start) {
+        Toast(t('history.checkErr'))
+        return;
+      }
       this.showStartTime = utils.sortTime2(res);
     },
     handleConfirm1 (res) {
-      // this.endTime = this.getTime(res);
+      const start = new Date(this.showStartTime);
+      const end = new Date(res);
+      if (end < start) {
+        Toast(t('history.checkErr'))
+        return;
+      }
       this.showEndTime = utils.sortTime2(res);
     },
     /* 获取公司信息 */
@@ -451,6 +460,7 @@ export default {
         pageSize: this.pageSize,
         pageNum: this.pages
       };
+      this.totalPage = 1;
       this.$axios
         .get(
           `/battery_group_event?hostId=${
@@ -498,6 +508,7 @@ export default {
     /* 历史补水 */
     getliquidDataFun () {
       Indicator.open();
+      this.totalPage = 1;
       let startTime = utils.toUTCTime(utils.startTime(this.showStartTime));
       let endTime = utils.toUTCTime(utils.endTime(this.showEndTime));
       let pageObj = {

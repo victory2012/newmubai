@@ -5,7 +5,7 @@
     <div v-show="alarmData.length !== 0"
       class="wraningItem"
       v-for="item in alarmData"
-      :key="item.time">
+      :key="item.id + Math.random()">
       <ul class="WItop">
         <li class="fl">{{item.index}}</li>
         <li class="fl">
@@ -57,7 +57,7 @@ export default {
   watch: {
     alaData: {
       handler: function (val) {
-        console.log("告警次数", val);
+        // console.log("告警次数", val);
         this.alarmData = val;
       }
     }
@@ -125,7 +125,7 @@ export default {
       }
     }
     li:nth-child(3) {
-      width: 38%;
+      width: 32%;
       font-size: 12px;
       div {
         height: 18px;

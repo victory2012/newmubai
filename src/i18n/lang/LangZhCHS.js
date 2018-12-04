@@ -284,6 +284,8 @@ module.exports = {
     cancel: '取消',
     sure: '确认',
     warn: {
+      voltageNumber: '电压只能为数字',
+      capacityNuber: '额定容量只能为数字',
       deviceHasBind: '该设备已绑定',
       ability: '此功能仅在微信中使用',
       enterprise: '请填写生产商',
@@ -299,7 +301,9 @@ module.exports = {
       batteryVoltage: '请输入电池组额定电压',
       batteryCapacity: '请输入电池组额定容量',
       singleBattery: '请选择电池单体型号',
-      deviceCode: '请输入设备编号'
+      deviceCode: '请输入设备编号',
+      CheckmanufactureDate: '出厂日期应大于生产日期',
+      CheckWarrantyDate: '质保期应大于出厂日期'
     },
     batteries: '电池',
     batchImport: '批量导入',

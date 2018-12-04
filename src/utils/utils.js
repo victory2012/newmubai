@@ -365,7 +365,7 @@ export default {
     let day = timeDate.getDate();
     mounth = mounth < 10 ? `0${mounth}` : mounth;
     day = day < 10 ? `0${day}` : day;
-    return `${year}-${mounth}-${day}`;
+    return `${year}/${mounth}/${day}`;
   },
   zoomTime: (start, end) => {
     let startTime = new Date(start).getTime();

@@ -34,7 +34,7 @@
         <div v-show="isAddPt"
           class="fr itmeValue">
           <input type="text"
-            v-model="userArr.nickName">
+            v-model="editData.nickName">
         </div>
       </li>
       <li>
@@ -64,7 +64,7 @@
         <div v-show="isAddPt"
           class="fr itmeValue">
           <input type="text"
-            v-model="userArr.phone">
+            v-model="editData.phone">
         </div>
       </li>
       <li>
@@ -75,7 +75,7 @@
         <div v-show="isAddPt"
           class="fr itmeValue">
           <input type="text"
-            v-model="userArr.email">
+            v-model="editData.email">
         </div>
       </li>
     </ul>
@@ -92,6 +92,7 @@ export default {
   data () {
     return {
       userArr: "",
+      editData: {},
       isAddPt: false
     };
   },
@@ -117,9 +118,13 @@ export default {
         return;
       }
       let userObj = {};
-      userObj.phone = this.userArr.phone;
-      userObj.nickName = this.userArr.nickName;
-      userObj.email = this.userArr.email;
+      if (this.editData.phone !== this.userArr.phone) {
+        userObj.phone = this.editData.phone;
+      }
+      if (this.editData.email !== this.userArr.email) {
+        userObj.email = this.editData.email;
+      }
+      userObj.nickName = this.editData.nickName;
       Indicator.open();
       this.$axios.put("user/info", userObj).then(res => {
         console.log(res);
@@ -132,6 +137,7 @@ export default {
     },
     editBattery () {
       this.isAddPt = true;
+      this.editData = JSON.parse(JSON.stringify(this.userArr));
     },
     getSelf () {
       Indicator.open();
